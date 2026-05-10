@@ -16,13 +16,18 @@ export default function Settings() {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const { data, error } = await supabase.from('settings').select('*').eq('id', 'general').single();
-      if (!error && data) {
-        setTitle(data.title || '');
-        setDescription(data.description || '');
-        setLogoPreview(data.logo_url || '');
+      try {
+        const { data, error } = await supabase.from('settings').select('*').eq('id', 'general').single();
+        if (!error && data) {
+          setTitle(data.title || '');
+          setDescription(data.description || '');
+          setLogoPreview(data.logo_url || '');
+        }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching settings:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchSettings();

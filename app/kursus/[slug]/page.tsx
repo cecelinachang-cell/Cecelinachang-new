@@ -18,7 +18,7 @@ interface Course {
   students: number;
   duration: string;
   modules: number;
-  image: string;
+  imageUrl: string;
   video?: string;
   benefits: string[];
 }
@@ -117,7 +117,7 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
 
         <div className="relative aspect-video sm:aspect-auto sm:h-96 lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
           <Image
-            src={course.image}
+            src={course.imageUrl || 'https://picsum.photos/seed/placeholder/800/600'}
             alt={course.title}
             fill
             className="object-cover"

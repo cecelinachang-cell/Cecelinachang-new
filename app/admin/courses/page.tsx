@@ -106,22 +106,28 @@ export default function CoursesManager() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .order('createdAt', { ascending: true });
-        
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .order('createdAt', { ascending: true });
+          
+        if (error) {
+          if (error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else {
+             console.error('Error fetching courses:', error.message || error);
+          }
+          setCourses([]);
         } else {
-           console.error('Error fetching courses:', error.message || error);
+          setCourses(data as Course[]);
         }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching courses:', err);
         setCourses([]);
-      } else {
-        setCourses(data as Course[]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchCourses();
@@ -325,14 +331,7 @@ export default function CoursesManager() {
           title: course.title,
           description: course.description,
           price: course.price,
-          originalPrice: course.originalPrice || '',
-          students: course.students,
-          duration: course.duration,
-          modules: course.modules,
-          image: course.image,
-          video: course.video || '',
-          benefits: course.benefits,
-          isSignature: course.isSignature || false,
+          imageUrl: course.image,
           createdAt: new Date().toISOString()
         });
       }

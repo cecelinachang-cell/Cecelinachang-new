@@ -17,7 +17,7 @@ interface Course {
   students: number;
   duration: string;
   modules: number;
-  image: string;
+  imageUrl: string;
   video?: string;
   benefits: string[];
 }
@@ -29,40 +29,47 @@ export default function KursusPage() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      let finalCourses: Course[] = [];
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .order('createdAt', { ascending: false });
-        
-      if (error || !data || data.length === 0) {
-        if (error && error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
-        } else if (error) {
-           console.error('Error fetching courses:', error.message || error);
+      try {
+        let finalCourses: Course[] = [];
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .order('createdAt', { ascending: false });
+          
+        if (error || !data || data.length === 0) {
+          if (error && error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else if (error) {
+             console.error('Error fetching courses:', error.message || error);
+          }
+          // Fallback to mock data
+          const { courses: fallbackCourses } = await import('@/app/data/courses');
+          finalCourses = fallbackCourses as unknown as Course[];
+        } else {
+          finalCourses = data as Course[];
         }
-        // Fallback to mock data
-        const { courses: fallbackCourses } = await import('@/app/data/courses');
-        finalCourses = fallbackCourses as unknown as Course[];
-      } else {
-        finalCourses = data as Course[];
-      }
 
-      // Sort by createdAt descending, but pin Bakso Sapi Premium to the top
-      finalCourses.sort((a: any, b: any) => {
-        const isABakso = a.title?.toLowerCase().includes('bakso sapi premium');
-        const isBBakso = b.title?.toLowerCase().includes('bakso sapi premium');
+        // Sort by createdAt descending, but pin Bakso Sapi Premium to the top
+        finalCourses.sort((a: any, b: any) => {
+          const isABakso = a.title?.toLowerCase().includes('bakso sapi premium');
+          const isBBakso = b.title?.toLowerCase().includes('bakso sapi premium');
+          
+          if (isABakso && !isBBakso) return -1;
+          if (!isABakso && isBBakso) return 1;
+
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
         
-        if (isABakso && !isBBakso) return -1;
-        if (!isABakso && isBBakso) return 1;
-
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      });
-      
-      setCourses(finalCourses);
-      setLoading(false);
+        setCourses(finalCourses);
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching courses:', err);
+        const { courses: fallbackCourses } = await import('@/app/data/courses');
+        setCourses(fallbackCourses as unknown as Course[]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCourses();
@@ -137,7 +144,7 @@ export default function KursusPage() {
               ) : (
                 <>
                   <Image
-                    src={course.image}
+                    src={course.imageUrl || 'https://picsum.photos/seed/placeholder/800/600'}
                     alt={course.title}
                     fill
                     className="object-cover"

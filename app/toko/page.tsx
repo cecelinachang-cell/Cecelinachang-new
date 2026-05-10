@@ -25,22 +25,28 @@ export default function TokoPage() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .order('createdAt', { ascending: false });
-        
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('*')
+          .order('createdAt', { ascending: false });
+          
+        if (error) {
+          if (error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else {
+             console.error('Error fetching items:', error.message || error);
+          }
+          setProducts([]);
         } else {
-           console.error('Error fetching items:', error.message || error);
+          setProducts(data as Product[]);
         }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching products:', err);
         setProducts([]);
-      } else {
-        setProducts(data as Product[]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchItems();

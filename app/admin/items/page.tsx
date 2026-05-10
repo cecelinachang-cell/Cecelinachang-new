@@ -102,22 +102,28 @@ export default function ItemsManager() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .order('createdAt', { ascending: false });
-        
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('*')
+          .order('createdAt', { ascending: false });
+          
+        if (error) {
+          if (error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else {
+             console.error('Error fetching items:', error.message || error);
+          }
+          setItems([]);
         } else {
-           console.error('Error fetching items:', error.message || error);
+          setItems(data as Item[]);
         }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching items:', err);
         setItems([]);
-      } else {
-        setItems(data as Item[]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchItems();

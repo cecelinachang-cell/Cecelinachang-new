@@ -24,23 +24,29 @@ export default function Home() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .order('createdAt', { ascending: false })
-        .limit(4);
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('*')
+          .order('createdAt', { ascending: false })
+          .limit(4);
 
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
+        if (error) {
+          if (error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else {
+             console.error('Error fetching items', error.message || error);
+          }
+          setFeaturedProducts([]);
         } else {
-           console.error('Error fetching items', error.message || error);
+          setFeaturedProducts(data as Product[]);
         }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching products:', err);
         setFeaturedProducts([]);
-      } else {
-        setFeaturedProducts(data as Product[]);
+      } finally {
+        setLoadingProducts(false);
       }
-      setLoadingProducts(false);
     };
 
     fetchProducts();

@@ -30,22 +30,28 @@ export default function TestimonialsManager() {
 
   useEffect(() => {
     const fetchTestimonials = async () => {
-      const { data, error } = await supabase
-        .from('testimonials')
-        .select('*')
-        .order('createdAt', { ascending: false });
-        
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
+      try {
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .order('createdAt', { ascending: false });
+          
+        if (error) {
+          if (error.message && error.message.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else {
+             console.error('Error fetching testimonials:', error.message || error);
+          }
+          setTestimonials([]);
         } else {
-           console.error('Error fetching testimonials:', error.message || error);
+          setTestimonials(data as Testimonial[]);
         }
+      } catch (err: any) {
+        console.error('Network or unexpected error fetching testimonials:', err);
         setTestimonials([]);
-      } else {
-        setTestimonials(data as Testimonial[]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchTestimonials();
