@@ -1,0 +1,224 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - email: string (required)
+    //   - role: string (required, 'admin' or 'user')
+    //   - createdAt: string (optional)
+    //
+    // Collection: items
+    // Document ID: {itemId}
+    // Fields:
+    //   - name: string (required)
+    //   - description: string (required)
+    //   - price: string (required)
+    //   - originalPrice: string (optional)
+    //   - category: string (optional)
+    //   - imageUrl: string (required)
+    //   - updatedAt: string (optional)
+    //   - rating: number (optional)
+    //   - reviews: number (optional)
+    //   - isBundle: boolean (optional)
+    //   - createdAt: string (optional)
+    //
+    // Collection: products
+    // Document ID: {productId}
+    // Fields:
+    //   - name: string (required)
+    //   - price: number (required)
+    //   - description: string (required)
+    //   - imageUrl: string (required)
+    //   - createdAt: timestamp (optional)
+    //   - updatedAt: timestamp (optional)
+    //
+    // Collection: settings
+    // Document ID: {settingId}
+    // Fields:
+    //   - title: string (optional)
+    //   - description: string (optional)
+    //   - logoUrl: string (optional)
+    //   - updatedAt: string (optional)
+    //
+    // Collection: courses
+    // Document ID: {courseId}
+    // Fields:
+    //   - slug: string
+    //   - title: string
+    //   - description: string
+    //   - price: string
+    //   - originalPrice: string (optional)
+    //   - students: number
+    //   - duration: string
+    //   - modules: number
+    //   - image: string
+    //   - video: string (optional)
+    //   - benefits: list of strings
+    //   - isSignature: boolean
+    //   - createdAt: string (optional)
+    //   - updatedAt: string (optional)
+    //
+    // Collection: testimonials
+    // Document ID: {testimonialId}
+    // Fields:
+    //   - image: string
+    //   - createdAt: string (optional)
+    //   - updatedAt: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          ("email" in request.auth.token && (
+            request.auth.token.email.lower() == "signoratangerangclc@gmail.com" ||
+            request.auth.token.email.lower() == "cecelinachang@gmail.com"
+          ))
+        );
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser() {
+      let data = request.resource.data;
+      return hasRequiredFields(['email', 'role']) &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 100 &&
+             (data.role == 'admin' || data.role == 'user') &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    function isValidItem() {
+      return true;
+    }
+
+    function isValidProduct() {
+      let data = request.resource.data;
+      return hasRequiredFields(['name', 'price', 'description', 'imageUrl']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.price is number && data.price >= 0 &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.imageUrl is string && data.imageUrl.size() <= 1048487 &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidSetting() {
+      let data = request.resource.data;
+      return (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 2000)) &&
+             (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 1048487)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidCourse() {
+      let data = request.resource.data;
+      return hasRequiredFields(['slug', 'title', 'description', 'price', 'students', 'duration', 'modules', 'image', 'benefits', 'isSignature']) &&
+             data.slug is string && data.slug.size() > 0 && data.slug.size() <= 200 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.price is string && data.price.size() <= 100 &&
+             (!('originalPrice' in data) || (data.originalPrice is string && data.originalPrice.size() <= 100)) &&
+             data.students is number && data.students >= 0 &&
+             data.duration is string && data.duration.size() <= 100 &&
+             data.modules is number && data.modules >= 0 &&
+             data.image is string && data.image.size() <= 1048487 &&
+             (!('video' in data) || (data.video is string && data.video.size() <= 1048487)) &&
+             data.benefits is list && data.benefits.size() <= 100 &&
+             data.isSignature is bool &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidTestimonial() {
+      let data = request.resource.data;
+      return hasRequiredFields(['image']) &&
+             data.image is string && data.image.size() > 0 && data.image.size() <= 1048487 &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser() && (
+        isAdmin() || 
+        (isOwner(userId) && request.resource.data.role == 'user')
+      );
+      allow update: if isAuthenticated() && isValidUser() && isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /items/{itemId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidItem();
+      allow update: if isAdmin() && isValidItem();
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidProduct();
+      allow update: if isAdmin() && isValidProduct();
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidSetting();
+      allow update: if isAdmin() && isValidSetting();
+      allow delete: if isAdmin();
+    }
+
+    match /courses/{courseId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidCourse();
+      allow update: if isAdmin() && isValidCourse();
+      allow delete: if isAdmin();
+    }
+
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidTestimonial();
+      allow update: if isAdmin() && isValidTestimonial();
+      allow delete: if isAdmin();
+    }
+  }
+}

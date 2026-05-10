@@ -1,0 +1,150 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and role information",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"],
+          "description": "User's role for RBAC"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of user creation"
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "Item": {
+      "title": "Item",
+      "description": "Store items and products",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the item"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the item"
+        },
+        "price": {
+          "type": "string",
+          "description": "Price of the item"
+        },
+        "originalPrice": {
+          "type": "string",
+          "description": "Original price before discount"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the item"
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the item image"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of last update"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating of the item"
+        },
+        "reviews": {
+          "type": "number",
+          "description": "Number of reviews"
+        },
+        "isBundle": {
+          "type": "boolean",
+          "description": "Whether the item is a bundle"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of item creation"
+        }
+      },
+      "required": ["name", "description", "price", "imageUrl"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Legacy products collection",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "price", "description", "imageUrl"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "Global application settings",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "logoUrl": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "User profiles"
+    },
+    "/items/{itemId}": {
+      "schema": {
+        "$ref": "#/entities/Item"
+      },
+      "description": "Store items"
+    },
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Legacy products"
+    },
+    "/settings/{settingId}": {
+      "schema": {
+        "$ref": "#/entities/Setting"
+      },
+      "description": "Application settings"
+    }
+  }
+}

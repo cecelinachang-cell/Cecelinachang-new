@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        ((firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+         ("email" in request.auth.token && request.auth.token.email.lower() == 'bertrand.max.99@gmail.com') ||
+         ("email" in request.auth.token && request.auth.token.email.lower() == 'cecelinachang@gmail.com') ||
+         ("email" in request.auth.token && request.auth.token.email.lower() == 'cecelinachang2@gmail.com'));
+    }
+
+    match /{allPaths=**} {
+      // Anyone can read images
+      allow read: if true;
+      // Only admins can upload/delete images
+      allow write: if isAdmin();
+    }
+  }
+}
