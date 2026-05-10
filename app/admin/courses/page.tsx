@@ -32,8 +32,8 @@ const compressImageToBase64 = (file: File): Promise<string> => {
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 600;
-        const MAX_HEIGHT = 600;
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
         let width = img.width;
         let height = img.height;
 
@@ -61,7 +61,7 @@ const compressImageToBase64 = (file: File): Promise<string> => {
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         
-        const base64String = canvas.toDataURL('image/jpeg', 0.6);
+        const base64String = canvas.toDataURL('image/jpeg', 0.5);
         resolve(base64String);
       };
       img.onerror = () => reject(new Error('Failed to load image for compression'));
