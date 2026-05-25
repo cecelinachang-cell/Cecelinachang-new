@@ -217,7 +217,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
               Pembelian langsung via WhatsApp. Tidak perlu daftar akun.
             </p>
             <a
-              href={`https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20mau%20beli%20${encodeURIComponent(product.name)}`}
+              href={`https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20beli%20${encodeURIComponent(product.name)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"

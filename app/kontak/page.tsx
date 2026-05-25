@@ -17,7 +17,7 @@ export default function KontakPage() {
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-8">Cara Tercepat Menghubungi Kami</h2>
             
             <a
-              href="https://wa.me/6281234567890"
+              href="https://wa.me/6281284250718"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center w-full bg-green-500 hover:bg-green-600 text-white p-6 rounded-2xl transition-colors shadow-md mb-8 group"

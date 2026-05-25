@@ -39,7 +39,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li><Link href="/kontak" className="text-orange-200 hover:text-white transition-colors">Hubungi Saya</Link></li>
               <li><Link href="/kontak" className="text-orange-200 hover:text-white transition-colors">FAQ</Link></li>
-              <li><a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="text-orange-200 hover:text-white transition-colors">WhatsApp Admin</a></li>
+              <li><a href="https://wa.me/6281284250718" target="_blank" rel="noopener noreferrer" className="text-orange-200 hover:text-white transition-colors">WhatsApp Admin</a></li>
             </ul>
           </div>
         </div>

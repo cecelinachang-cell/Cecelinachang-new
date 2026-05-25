@@ -208,7 +208,7 @@ export default function TokoPage() {
               konsultasi alat baking yang paling cocok untuk kebutuhan Anda.
             </p>
             <a
-              href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20butuh%20rekomendasi%20alat%20baking"
+              href="https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20butuh%20rekomendasi%20alat%20baking"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-orange-900 bg-white hover:bg-orange-50 transition-colors"

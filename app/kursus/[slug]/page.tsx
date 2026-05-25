@@ -233,7 +233,7 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
             </ul>
 
             <a
-              href={`https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20mau%20daftar%20${encodeURIComponent(course.title)}`}
+              href={`https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20daftar%20${encodeURIComponent(course.title)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex justify-center items-center px-6 py-4 text-lg font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 transition-colors shadow-md mb-4"
