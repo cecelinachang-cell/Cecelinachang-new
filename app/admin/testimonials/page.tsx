@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { compressImage } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
@@ -13,6 +14,16 @@ interface Testimonial {
   text?: string;
   rating?: number;
 }
+
+const withTimeout = <T,>(promise: Promise<T> | PromiseLike<T>, ms: number, message: string): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (res) => { clearTimeout(timer); resolve(res); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+};
 
 export default function TestimonialsManager() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -66,61 +77,19 @@ export default function TestimonialsManager() {
     };
   }, []);
 
-  const compressImageToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new window.Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          
-          if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
-            resolve(dataUrl);
-          } else {
-            reject(new Error("Failed to get canvas context"));
-          }
-        };
-        img.onerror = (error) => reject(new Error("Failed to load image: " + String(error)));
-      };
-      reader.onerror = (error) => reject(new Error("Failed to read file: " + String(error)));
-    });
-  };
-
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setAlertMsg({ type: 'error', text: 'Ukuran gambar maksimal 5MB' });
+      if (file.size > 25 * 1024 * 1024) {
+        setAlertMsg({ type: 'error', text: 'Ukuran gambar maksimal 25MB' });
         return;
       }
       try {
-        const base64String = await compressImageToBase64(file);
+        const base64String = await withTimeout(
+          compressImage(file, 800),
+          300000,
+          'Pemrosesan gambar timeout. Mohon coba lagi.'
+        );
         setFormData(prev => ({ ...prev, image: base64String }));
       } catch (error: any) {
         console.error('Error processing image:', error.message || String(error));
@@ -176,14 +145,22 @@ export default function TestimonialsManager() {
       };
 
       if (editingTestimonial) {
-        const { error: updateErr } = await supabase.from('testimonials').update(testimonialData).eq('id', editingTestimonial.id);
+        const { error: updateErr } = await withTimeout<any>(
+          supabase.from('testimonials').update(testimonialData).eq('id', editingTestimonial.id),
+          300000,
+          'Update testimoni timeout. Hubungan stabil?'
+        );
         if (updateErr) throw updateErr;
         setAlertMsg({ type: 'success', text: 'Testimoni berhasil diperbarui!' });
       } else {
-        const { error: insertErr } = await supabase.from('testimonials').insert({
-          ...testimonialData,
-          createdAt: new Date().toISOString()
-        });
+        const { error: insertErr } = await withTimeout<any>(
+          supabase.from('testimonials').insert({
+            ...testimonialData,
+            createdAt: new Date().toISOString()
+          }),
+          300000,
+          'Input testimoni timeout. Coba kurangi ukuran file.'
+        );
         if (insertErr) throw insertErr;
         setAlertMsg({ type: 'success', text: 'Testimoni berhasil ditambahkan!' });
       }
@@ -258,7 +235,7 @@ export default function TestimonialsManager() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="h-20 w-20 relative rounded-lg overflow-hidden bg-stone-100 border border-stone-200">
                       {testimonial.imageUrl ? (
-                        <Image src={testimonial.imageUrl} alt="Testimoni" fill className="object-cover" />
+                        <Image src={testimonial.imageUrl} alt="Testimoni" fill className="object-cover" unoptimized />
                       ) : (
                         <ImageIcon className="w-6 h-6 text-stone-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                       )}
@@ -349,7 +326,7 @@ export default function TestimonialsManager() {
                   <div className="flex flex-col gap-4">
                     <div className="w-full aspect-square max-w-xs relative rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex-shrink-0">
                       {formData.image ? (
-                        <Image src={formData.image} alt="Preview" fill className="object-contain" />
+                        <Image src={formData.image} alt="Preview" fill className="object-contain" unoptimized />
                       ) : (
                         <ImageIcon className="w-12 h-12 text-stone-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                       )}
@@ -362,7 +339,7 @@ export default function TestimonialsManager() {
                         ref={fileInputRef}
                         className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                       />
-                      <p className="text-xs text-stone-500 mt-2">Format: JPG, PNG. Maksimal 5MB. Disarankan screenshot chat atau foto review.</p>
+                      <p className="text-xs text-stone-500 mt-2">Format: JPG, PNG. Maksimal 25MB. Disarankan screenshot chat atau foto review.</p>
                     </div>
                   </div>
                 </div>

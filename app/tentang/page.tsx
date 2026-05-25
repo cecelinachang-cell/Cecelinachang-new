@@ -1,10 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Heart, Users, Instagram } from 'lucide-react';
 import { motion } from 'motion/react';
+import { supabase } from '@/lib/supabase';
 
 export default function TentangPage() {
+  const [aboutImage, setAboutImage] = useState<string>('https://i.postimg.cc/tCXKbMWY/image.png');
+
+  useEffect(() => {
+    const fetchAsset = async () => {
+      try {
+        const { data, error } = await supabase.from('settings').select('logo_url').eq('id', 'about_image').single();
+        if (!error && data?.logo_url) {
+          setAboutImage(data.logo_url);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchAsset();
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -16,11 +34,12 @@ export default function TentangPage() {
           className="relative h-[500px] lg:h-[700px] rounded-[3rem] overflow-hidden shadow-2xl bg-orange-50 flex items-center justify-center group"
         >
           <Image
-            src="https://i.postimg.cc/tCXKbMWY/image.png"
+            src={aboutImage}
             alt="Cece Lina Chang"
             fill
             className="object-contain object-bottom p-4 group-hover:scale-105 transition-transform duration-700"
             referrerPolicy="no-referrer"
+            unoptimized
           />
           <div className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-2">Cece Lina Chang</h2>

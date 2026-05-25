@@ -151,7 +151,7 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
           <section className="bg-orange-50 rounded-3xl p-8 border border-orange-100">
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-6">Apa yang Akan Anda Pelajari?</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {course.benefits.map((item, i) => (
+              {(course.benefits || []).map((item, i) => (
                 <li key={i} className="flex items-start text-stone-700">
                   <CheckCircle2 className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" />
                   <span className="leading-relaxed">{item}</span>
@@ -164,7 +164,7 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
           <section>
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-6">Isi Materi Video</h2>
             <div className="space-y-4">
-              {[...Array(course.modules)].map((_, i) => (
+              {[...Array(course.modules || 0)].map((_, i) => (
                 <div key={i} className="flex items-center justify-between p-5 bg-white border border-stone-200 rounded-2xl hover:border-orange-300 transition-colors">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-800 font-bold mr-4 flex-shrink-0">

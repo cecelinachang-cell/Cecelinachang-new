@@ -5,6 +5,16 @@ import { supabase } from '@/lib/supabase';
 import { Save, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
+const withTimeout = <T,>(promise: Promise<T> | PromiseLike<T>, ms: number, message: string): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (res) => { clearTimeout(timer); resolve(res); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+};
+
 export default function Settings() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -69,13 +79,17 @@ export default function Settings() {
         });
       }
 
-      const { error } = await supabase.from('settings').upsert({
-        id: 'general',
-        title,
-        description,
-        logo_url: logoUrl,
-        updated_at: new Date().toISOString()
-      });
+      const { error } = await withTimeout<any>(
+        supabase.from('settings').upsert({
+          id: 'general',
+          title,
+          description,
+          logo_url: logoUrl,
+          updated_at: new Date().toISOString()
+        }),
+        300000,
+        'Simpan pengaturan memakan waktu terlalu lama (timeout 5 menit). Koneksi lambat?'
+      );
 
       if (error) throw error;
 

@@ -23,16 +23,32 @@ export default function AnalyticsTracker() {
 
     const recordPageView = async () => {
       try {
-        await supabase.from('page_views').insert({
+        console.log(`Tracking page view: ${pathname}`);
+        const { error } = await supabase.from('page_views').insert({
           path: pathname,
           session_id: sessionId
         });
+        if (error) {
+           console.warn('Could not record page view (possibly missing tables or RLS enabled):', error.message || error.code || 'Unknown error');
+        }
       } catch (err) {
-        // Silently fail if schema doesn't exist
+        console.warn('Unexpected error recording page view:', err);
       }
     };
 
     recordPageView();
+
+    // Active usage heartbeat
+    const interval = setInterval(async () => {
+       try {
+         await supabase.from('page_views').insert({
+           path: pathname,
+           session_id: sessionId
+         });
+       } catch (e) {}
+    }, 60000); // every minute
+
+    return () => clearInterval(interval);
   }, [pathname]);
 
   useEffect(() => {
@@ -45,15 +61,19 @@ export default function AnalyticsTracker() {
         const url = anchor.href;
         const linkText = anchor.innerText || anchor.textContent || '';
         
+        console.log(`Tracking click: ${linkText} -> ${url}`);
         try {
-          await supabase.from('clicks').insert({
+          const { error } = await supabase.from('clicks').insert({
             url: url,
             link_text: linkText.substring(0, 255),
             path: window.location.pathname,
             session_id: sessionId
           });
+          if (error) {
+            console.warn('Could not record click:', error.message || error.code || 'Unknown error');
+          }
         } catch (err) {
-          // Silently fail if schema doesn't exist
+          console.warn('Unexpected error recording click:', err);
         }
       }
     };

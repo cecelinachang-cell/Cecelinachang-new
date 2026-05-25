@@ -1,13 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'missing';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'missing';
-
-if (supabaseUrl === 'missing' || supabaseKey === 'missing') {
-  console.log('Skipping because missing env');
-  return;
-}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -16,6 +10,9 @@ async function main() {
   console.log('Error:', error);
   if (data && data.length > 0) {
     console.log('Keys:', Object.keys(data[0]));
+    console.log('Data:', data[0]);
+  } else {
+    console.log('No data');
   }
 }
 

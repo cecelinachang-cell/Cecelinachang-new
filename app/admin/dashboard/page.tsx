@@ -61,13 +61,23 @@ export default function Dashboard() {
 
     const fetchAnalytics = async () => {
       try {
-        const [{ count: clicksCount }, { count: viewsCount }] = await Promise.all([
-          supabase.from('clicks').select('id', { count: 'exact', head: true }),
-          supabase.from('page_views').select('id', { count: 'exact', head: true })
-        ]);
+        // Fetch all sessions to count unique ones for total visitors
+        // In a production app with millions of views, you'd use a postgres function or a summary table.
+        const { data: allSessions, error: sessionsErr } = await supabase
+          .from('page_views')
+          .select('session_id');
+
+        const { count: clicksCount } = await supabase
+          .from('clicks')
+          .select('id', { count: 'exact', head: true });
+
+        let uniqueVisitors = 0;
+        if (allSessions) {
+          const sessions = new Set(allSessions.map(s => s.session_id));
+          uniqueVisitors = sessions.size;
+        }
 
         let activeNow = 0;
-        let uniqueVisitors = viewsCount || 0; 
         let totalClicks = clicksCount || 0;
         let topPagesData: {path: string, views: number}[] = [];
         let clicksData: any[] = [];
@@ -77,11 +87,11 @@ export default function Dashboard() {
           const fiveMinsAgoMs = nowMs - 5 * 60000;
           const fiveMinsAgoIso = new Date(fiveMinsAgoMs).toISOString();
 
-          // Load active sessions softly without blocking main UI
+          // Load active sessions softly
           const [recentViewsResponse, recentClicksResponse, sampledViewsResponse] = await Promise.all([
-             supabase.from('page_views').select('session_id').gte('created_at', fiveMinsAgoIso).limit(500),
-             supabase.from('clicks').select('*').order('created_at', { ascending: false }).limit(5),
-             supabase.from('page_views').select('path').limit(1000) // Sample for top pages quickly
+             supabase.from('page_views').select('session_id').gte('created_at', fiveMinsAgoIso),
+             supabase.from('clicks').select('*').order('created_at', { ascending: false }).limit(10),
+             supabase.from('page_views').select('path').limit(2000)
           ]);
 
           if (recentViewsResponse.data) {

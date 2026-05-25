@@ -22,6 +22,17 @@ interface Product {
   description?: string;
 }
 
+const parseImageUrls = (url: string | undefined): string[] => {
+  if (!url) return [];
+  try {
+    const urls = JSON.parse(url);
+    if (Array.isArray(urls)) return urls;
+  } catch (e) {
+    //
+  }
+  return [url];
+};
+
 import DOMPurify from 'dompurify';
 
 export default function TokoDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -30,6 +41,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [sanitizedDescription, setSanitizedDescription] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<string>('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -42,6 +54,10 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
            setProduct(data as Product);
            if (data.description) {
              setSanitizedDescription(DOMPurify.sanitize(data.description));
+           }
+           const parsedImages = parseImageUrls(data.imageUrl);
+           if (parsedImages.length > 0) {
+             setSelectedImage(parsedImages[0]);
            }
         }
       } catch (err) {
@@ -111,7 +127,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
         >
           <div className="relative aspect-square sm:aspect-auto sm:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-orange-100 bg-white flex items-center justify-center group">
             <Image
-              src={product.imageUrl}
+              src={selectedImage || 'https://picsum.photos/seed/placeholder/800/800'}
               alt={product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -124,10 +140,14 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
             </div>
           </div>
           <div className="grid grid-cols-4 gap-2 sm:gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-orange-500 transition-colors bg-white flex items-center justify-center">
+            {parseImageUrls(product.imageUrl).map((imgObj, i) => (
+              <div 
+                key={i} 
+                onClick={() => setSelectedImage(imgObj)}
+                className={`relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 transition-colors bg-white flex items-center justify-center ${selectedImage === imgObj ? 'border-orange-500' : 'border-transparent hover:border-orange-300'}`}
+              >
                 <Image
-                  src={product.imageUrl}
+                  src={imgObj}
                   alt={`Thumbnail ${i}`}
                   fill
                   className="object-contain p-2"
