@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock, BookOpen, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { useState, useEffect, use } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface Course {
   id: string;
@@ -32,15 +32,52 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
   useEffect(() => {
     const fetchCourse = async () => {
       try {
+        if (!isSupabaseConfigured()) {
+          const { courses: fallbackCourses } = await import("@/app/data/courses");
+          const found = fallbackCourses.find((c: any) => c.slug === slug);
+          if (found) {
+            setCourse(found as unknown as Course);
+          } else {
+            setError(true);
+          }
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
         if (error) {
-           console.error("Error fetching course detail:", error.message || error);
-           setError(true);
+           const errMsg = error?.message || (error as any)?.toString() || '';
+           if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+             console.error("Error fetching course detail:", errMsg);
+           }
+           // Try to recover with fallback
+           const { courses: fallbackCourses } = await import("@/app/data/courses");
+           const found = fallbackCourses.find((c: any) => c.slug === slug);
+           if (found) {
+             setCourse(found as unknown as Course);
+           } else {
+             setError(true);
+           }
         } else if (data) {
            setCourse(data as Course);
         }
-      } catch (err) {
-        setError(true);
+      } catch (err: any) {
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+          console.error("Unexpected error fetching course detail:", err);
+        }
+        // Try fallback on catch as well
+        try {
+          const { courses: fallbackCourses } = await import("@/app/data/courses");
+          const found = fallbackCourses.find((c: any) => c.slug === slug);
+          if (found) {
+            setCourse(found as unknown as Course);
+          } else {
+            setError(true);
+          }
+        } catch (_) {
+          setError(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -238,7 +275,7 @@ export default function KursusDetailPage({ params }: { params: Promise<{ slug: s
               rel="noopener noreferrer"
               className="w-full flex justify-center items-center px-6 py-4 text-lg font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 transition-colors shadow-md mb-4"
             >
-              <MessageCircle className="w-5 h-5 mr-2" /> Daftar via WhatsApp
+              <MessageCircle className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
             </a>
             <p className="text-xs text-stone-500 text-center">
               Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.

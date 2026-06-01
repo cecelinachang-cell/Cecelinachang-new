@@ -49,10 +49,13 @@ export default function Dashboard() {
         fetchAnalytics();
 
       } catch (err: any) {
-        if (err.message && err.message.includes('schema cache')) {
+        const errMsg = err.message || err.toString();
+        if (errMsg.includes('schema cache')) {
            console.warn('Supabase schema not initialized yet.');
+        } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
+           console.warn('AdBlocker or database connection issue. Dashboard fell back to empty stats.');
         } else {
-           console.error('Error fetching stats:', err.message || err);
+           console.error('Error fetching stats:', errMsg);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -114,8 +117,11 @@ export default function Dashboard() {
               .slice(0, 5);
           }
 
-        } catch (e) {
-          console.error("Error fetching analytics details", e);
+        } catch (e: any) {
+          const errMsg = e.message || e.toString();
+          if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+            console.error("Error fetching analytics details", e);
+          }
         }
 
         if (!isMounted) return;
@@ -129,8 +135,11 @@ export default function Dashboard() {
         
         setTopPages(topPagesData);
         setRecentClicks(clicksData);
-      } catch (e) {
-        console.error("Error fetching analytics overall", e);
+      } catch (e: any) {
+        const errMsg = e.message || e.toString();
+        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+          console.error("Error fetching analytics overall", e);
+        }
       }
     };
 

@@ -6,7 +6,7 @@ import { use, useEffect, useState } from 'react';
 import { ArrowLeft, Star, ShoppingBag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 
 interface Product {
@@ -46,10 +46,46 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        if (!isSupabaseConfigured()) {
+          const { products: fallbackProducts } = await import("@/app/data/products");
+          const found = fallbackProducts.find((p: any) => p.id === slug);
+          if (found) {
+            setProduct(found as unknown as Product);
+            if (found.description) {
+              setSanitizedDescription(DOMPurify.sanitize(found.description));
+            }
+            const parsedImages = parseImageUrls(found.imageUrl);
+            if (parsedImages.length > 0) {
+              setSelectedImage(parsedImages[0]);
+            }
+          } else {
+            setError(true);
+          }
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.from('items').select('*').eq('id', slug).single();
         if (error) {
-           console.error("Error fetching product detail:", error.message || error);
-           setError(true);
+           const errMsg = error?.message || (error as any)?.toString() || '';
+           if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+             console.error("Error fetching product detail:", errMsg);
+           }
+           // Try to recover with fallback
+           const { products: fallbackProducts } = await import("@/app/data/products");
+           const found = fallbackProducts.find((p: any) => p.id === slug);
+           if (found) {
+             setProduct(found as unknown as Product);
+             if (found.description) {
+               setSanitizedDescription(DOMPurify.sanitize(found.description));
+             }
+             const parsedImages = parseImageUrls(found.imageUrl);
+             if (parsedImages.length > 0) {
+               setSelectedImage(parsedImages[0]);
+             }
+           } else {
+             setError(true);
+           }
         } else if (data) {
            setProduct(data as Product);
            if (data.description) {
@@ -60,8 +96,30 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
              setSelectedImage(parsedImages[0]);
            }
         }
-      } catch (err) {
-        setError(true);
+      } catch (err: any) {
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+          console.error("Unexpected error fetching product detail:", err);
+        }
+        // Try fallback on catch
+        try {
+          const { products: fallbackProducts } = await import("@/app/data/products");
+          const found = fallbackProducts.find((p: any) => p.id === slug);
+          if (found) {
+            setProduct(found as unknown as Product);
+            if (found.description) {
+              setSanitizedDescription(DOMPurify.sanitize(found.description));
+            }
+            const parsedImages = parseImageUrls(found.imageUrl);
+            if (parsedImages.length > 0) {
+              setSelectedImage(parsedImages[0]);
+            }
+          } else {
+            setError(true);
+          }
+        } catch (_) {
+          setError(true);
+        }
       } finally {
         setLoading(false);
       }

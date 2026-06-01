@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { products as fallbackProducts } from "@/app/data/products";
 import { motion, AnimatePresence } from "motion/react";
 
 import { ShoppingBag } from "lucide-react";
@@ -37,24 +38,36 @@ export default function TokoPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
+        if (!isSupabaseConfigured()) {
+          setProducts(fallbackProducts as unknown as Product[]);
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase
           .from("items")
           .select("*")
           .order("createdAt", { ascending: false });
 
         if (error) {
-          if (error.message && error.message.includes("schema cache")) {
+          const errMsg = error?.message || (error as any)?.toString() || '';
+          if (errMsg.includes("schema cache")) {
             console.warn("Supabase schema not initialized yet.");
-          } else {
-            console.error("Error fetching items:", error.message || error);
+          } else if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+            console.error("Error fetching items:", errMsg);
           }
-          setProducts([]);
+          setProducts(fallbackProducts as unknown as Product[]);
+        } else if (!data || data.length === 0) {
+          setProducts(fallbackProducts as unknown as Product[]);
         } else {
           setProducts(data as Product[]);
         }
       } catch (err: any) {
-        console.error("Network or unexpected error fetching products:", err);
-        setProducts([]);
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+          console.error("Network or unexpected error fetching products:", err);
+        }
+        setProducts(fallbackProducts as unknown as Product[]);
       } finally {
         setLoading(false);
       }

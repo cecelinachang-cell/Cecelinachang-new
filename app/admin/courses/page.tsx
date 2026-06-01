@@ -107,16 +107,17 @@ export default function CoursesManager() {
       const { data, error } = await supabase.from("courses").select("*");
 
       if (error) {
-        if (error.message && error.message.includes("schema cache")) {
+        const errMsg = error.message || (error as any).toString();
+        if (errMsg.includes("schema cache")) {
           console.warn("Supabase schema not initialized yet.");
+        } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
+          console.warn("AdBlocker or database connection issue. Courses fell back to empty.");
+          setAlertMsg({
+            type: "error",
+            text: "Koneksi ke database diblokir. Harap matikan AdBlocker/Brave Shields untuk situs ini.",
+          });
         } else {
-          console.error("Error fetching courses:", error.message || error);
-          if (error.message === "Failed to fetch") {
-            setAlertMsg({
-              type: "error",
-              text: "Koneksi ke database diblokir. Harap matikan AdBlocker/Brave Shields untuk situs ini.",
-            });
-          }
+          console.error("Error fetching courses:", errMsg);
         }
         setCourses([]);
       } else {

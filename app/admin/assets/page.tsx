@@ -57,8 +57,11 @@ export default function AssetsManager() {
         });
         setAssets(newAssets);
       }
-    } catch (err) {
-      console.error('Error fetching assets:', err);
+    } catch (err: any) {
+      const errMsg = err.message || err.toString();
+      if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+        console.error('Error fetching assets:', err);
+      }
     } finally {
       setLoading(false);
     }

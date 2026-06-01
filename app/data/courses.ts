@@ -44,10 +44,11 @@ export const courses = [
     modules: 6,
     image: 'https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png',
     benefits: [
-      'Teknik kulit pie renyah & flaky',
-      'Resep isian daging sapi gurih',
-      'Cara membuat saus demi-glace',
-      'Tips memanggang pie sempurna'
+      'Teknik membuat kulit pie shortcrust yang renyah, flaky, dan tidak remuk saat dipegang',
+      'Cara memasak isian daging sapi agar juicy, tidak alot, dan rasanya meresap sempurna',
+      'Teknik membuat saus demi-glace rumahan tanpa peralatan profesional — hasilnya seperti restoran',
+      'Cara merakit dan menutup pie agar tidak bocor dan bentuknya rapi saat dipanggang',
+      'Teknik memanggang dengan suhu dan waktu yang tepat agar hasilnya golden brown sempurna'
     ]
   },
   {
@@ -60,10 +61,11 @@ export const courses = [
     modules: 4,
     image: 'https://i.postimg.cc/YGnF2vsP/Chat-GPT-Image-Mar-17-2026-12-23-11-PM.png',
     benefits: [
-      'Teknik adonan selembut kapas',
-      'Resep varian Matcha otentik',
-      'Resep varian Cokelat pekat',
-      'Resep varian Durian harum'
+      'Teknik dasar membuat adonan ogura agar teksturnya ringan seperti kapas dan lumer di mulut',
+      'Cara menggabungkan rasa matcha, cokelat, dan durian ke dalam adonan tanpa merusak tekstur',
+      'Rahasia memanggang ogura agar bagian atas tidak retak dan bagian tengah tidak bantat',
+      'Cara mengukur bahan dengan tepat untuk ketiga varian agar hasilnya konsisten setiap kali',
+      'Teknik mengeluarkan ogura dari loyang tanpa rusak untuk tampilan yang cantik dan rapi'
     ]
   },
   {
@@ -76,10 +78,11 @@ export const courses = [
     modules: 5,
     image: 'https://i.postimg.cc/xqWkVnwy/Chat-GPT-Image-Mar-17-2026-04-54-28-PM.png',
     benefits: [
-      'Teknik sponge cake anti-bantat',
-      'Cara membuat pasta pandan asli',
-      'Resep varian aroma mocha klasik',
-      'Suhu oven yang tepat untuk sponge'
+      'Teknik mengocok telur dan gula hingga ribbon stage — rahasia sponge yang mengembang sempurna',
+      'Cara melipat tepung ke dalam adonan agar kue tidak turun (deflate) dan tetap fluffy',
+      'Rahasia mendapatkan warna dan aroma pandan asli yang kuat, natural, dan tidak artifisial',
+      'Teknik memanggang sponge anti-bantat menggunakan oven rumahan biasa tanpa oven profesional',
+      'Cara memadukan layer mocha dan pandan agar kedua rasa seimbang dan tidak saling mendominasi'
     ]
   },
   {
@@ -108,10 +111,11 @@ export const courses = [
     modules: 4,
     image: 'https://i.postimg.cc/RqSGMfNP/Chat-GPT-Image-Mar-17-2026-12-17-47-PM.png',
     benefits: [
-      'Resep racikan bumbu ngohiong',
-      'Teknik menggulung kulit renyah',
-      'Cara agar daging tetap juicy',
-      'Tips menggoreng krispi sempurna'
+      'Teknik meracik bumbu ngohiong otentik dengan takaran pas — tidak terlalu kuat, tidak kurang',
+      'Cara menguleni dan mencampur daging agar isian tetap juicy dan tidak kering setelah dimasak',
+      'Teknik menggulung rolade agar rapat, tidak mudah lepas, dan bentuk tetap cantik saat dipotong',
+      'Cara menggoreng go hiong agar kulitnya krispi merata tanpa terlalu berminyak',
+      'Tips menyimpan dan memanaskan kembali go hiong agar kulitnya tetap renyah'
     ]
   },
   {
@@ -124,10 +128,11 @@ export const courses = [
     modules: 4,
     image: 'https://i.postimg.cc/bGw4DMvm/Chat-GPT-Image-Mar-17-2026-12-14-11-PM.png',
     benefits: [
-      'Teknik adonan bakso ikan kenyal',
-      'Cara membungkus dengan kulit tahu',
-      'Resep kuah kaldu pendamping',
-      'Tips penyimpanan untuk ide jualan'
+      'Cara membuat adonan bakso ikan yang kenyal, padat, dan bebas bau amis',
+      'Teknik membungkus isian dengan kulit tahu agar tidak robek saat dikukus maupun digoreng',
+      'Cara memilih dan menyiapkan kulit tahu berkualitas yang menghasilkan tekstur terbaik',
+      'Teknik memasak fu kian — kukus dan goreng — agar tekstur kenyal sempurna dan tidak keras',
+      'Tips mengemas fu kian sebagai produk frozen untuk dijual dari rumah dengan harga yang menguntungkan'
     ]
   }
 ];

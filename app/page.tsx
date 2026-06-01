@@ -17,7 +17,8 @@ import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { products as fallbackProducts } from "@/app/data/products";
 
 interface Product {
   id: string;
@@ -65,8 +66,11 @@ export default function Home() {
           });
           setAssets(newAssets);
         }
-      } catch (err) {
-        console.error("Error fetching assets:", err);
+      } catch (err: any) {
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+          console.error("Error fetching assets:", err);
+        }
       }
     };
 
@@ -74,6 +78,12 @@ export default function Home() {
 
     const fetchProducts = async () => {
       try {
+        if (!isSupabaseConfigured()) {
+          setFeaturedProducts(fallbackProducts.slice(0, 4) as unknown as Product[]);
+          setLoadingProducts(false);
+          return;
+        }
+
         const { data, error } = await supabase
           .from("items")
           .select("*")
@@ -81,18 +91,24 @@ export default function Home() {
           .limit(4);
 
         if (error) {
-          if (error.message && error.message.includes("schema cache")) {
+          const errMsg = error?.message || (error as any)?.toString() || '';
+          if (errMsg.includes("schema cache")) {
             console.warn("Supabase schema not initialized yet.");
-          } else {
-            console.error("Error fetching items", error.message || error);
+          } else if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+            console.error("Error fetching items", errMsg);
           }
-          setFeaturedProducts([]);
+          setFeaturedProducts(fallbackProducts.slice(0, 4) as unknown as Product[]);
+        } else if (!data || data.length === 0) {
+          setFeaturedProducts(fallbackProducts.slice(0, 4) as unknown as Product[]);
         } else {
           setFeaturedProducts(data as Product[]);
         }
       } catch (err: any) {
-        console.error("Network or unexpected error fetching products:", err);
-        setFeaturedProducts([]);
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+          console.error("Network or unexpected error fetching products:", err);
+        }
+        setFeaturedProducts(fallbackProducts.slice(0, 4) as unknown as Product[]);
       } finally {
         setLoadingProducts(false);
       }
@@ -160,9 +176,7 @@ export default function Home() {
                 variants={fadeUpVariant}
                 className="text-lg sm:text-xl text-stone-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Bersama Cece Lina Chang, mari ciptakan kebahagiaan dari dapur
-                Anda sendiri. Resep teruji, teknik mudah dipahami, khusus untuk
-                pemula.
+                Sudah 10.000+ ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
 
               <motion.div

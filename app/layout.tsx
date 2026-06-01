@@ -36,8 +36,11 @@ export async function generateMetadata(): Promise<Metadata> {
     if (heroImage && heroImage.logo_url) {
       ogImage = heroImage.logo_url;
     }
-  } catch (error) {
-    console.error('Error fetching metadata settings:', error);
+  } catch (error: any) {
+    const errMsg = error?.message || error?.toString() || '';
+    if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+      console.error('Error fetching metadata settings:', error);
+    }
   }
 
   return {

@@ -78,10 +78,13 @@ export default function ItemsManager() {
       const { data, error } = await supabase.from("items").select("*");
 
       if (error) {
-        if (error.message && error.message.includes("schema cache")) {
+        const errMsg = error.message || (error as any).toString();
+        if (errMsg.includes("schema cache")) {
           console.warn("Supabase schema not initialized yet.");
+        } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
+          console.warn("AdBlocker or database connection issue. Items fell back to empty.");
         } else {
-          console.error("Error fetching items:", error.message || error);
+          console.error("Error fetching items:", errMsg);
         }
         setItems([]);
       } else {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -12,6 +12,25 @@ interface Testimonial {
   createdAt?: string;
 }
 
+const FALLBACK_TESTIMONIALS: Testimonial[] = [
+  {
+    id: 'default-1',
+    image: 'https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png'
+  },
+  {
+    id: 'default-2',
+    image: 'https://i.postimg.cc/t10xCGvR/image.png'
+  },
+  {
+    id: 'default-3',
+    image: 'https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png'
+  },
+  {
+    id: 'default-4',
+    image: 'https://i.postimg.cc/tnCGLZ9S/Chat-GPT-Image-Mar-17-2026-04-58-17-PM.png'
+  }
+];
+
 export function TestimonialCarousel() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,22 +38,50 @@ export function TestimonialCarousel() {
 
   useEffect(() => {
     const fetchTestimonials = async () => {
-      const { data, error } = await supabase
-        .from('testimonials')
-        .select('*')
-        .order('createdAt', { ascending: false });
-        
-      if (error) {
-        if (error.message && error.message.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
-        } else {
-           console.error('Error fetching testimonials:', error.message || error);
+      try {
+        if (!isSupabaseConfigured()) {
+          setTestimonials(FALLBACK_TESTIMONIALS);
+          setLoading(false);
+          return;
         }
-        setTestimonials([]);
-      } else {
-        setTestimonials(data as Testimonial[]);
+
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .order('createdAt', { ascending: false });
+          
+        if (error) {
+          const errMsg = error.message || (error as any).toString();
+          if (errMsg.includes('schema cache')) {
+             console.warn('Supabase schema not initialized yet.');
+          } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
+             console.warn('AdBlocker or database connection issue. Testimonial carousel fell back to offline slides.');
+          } else {
+             console.error('Error fetching testimonials:', errMsg);
+          }
+          setTestimonials(FALLBACK_TESTIMONIALS);
+        } else if (!data || data.length === 0) {
+          setTestimonials(FALLBACK_TESTIMONIALS);
+        } else {
+          // Map database field 'imageUrl' to component's 'image' property
+          const mapped = data.map((item: any) => ({
+            id: item.id,
+            image: item.imageUrl || item.image || '',
+            createdAt: item.createdAt || item.created_at
+          })).filter(item => item.image !== '');
+
+          setTestimonials(mapped.length > 0 ? mapped : FALLBACK_TESTIMONIALS);
+        }
+      } catch (err: any) {
+        if (err.message === 'Failed to fetch' || err.toString().includes('Failed to fetch')) {
+          console.warn('AdBlocker or database connection issue. Testimonial carousel fell back to offline slides.');
+        } else {
+          console.error('Network or unexpected error fetching testimonials:', err);
+        }
+        setTestimonials(FALLBACK_TESTIMONIALS);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchTestimonials();
