@@ -2,6 +2,8 @@ import { BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
 
+export const revalidate = 60; // Cache the page for 60 seconds
+
 interface Course {
   id: string;
   slug: string;

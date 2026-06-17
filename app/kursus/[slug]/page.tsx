@@ -1,11 +1,10 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock, BookOpen, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
+export const revalidate = 60;
 
 interface Course {
   id: string;
@@ -23,102 +22,48 @@ interface Course {
   benefits: string[];
 }
 
-export default function KursusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+export default async function KursusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  let course: Course | null = null;
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        if (!isSupabaseConfigured()) {
-          const { courses: fallbackCourses } = await import("@/app/data/courses");
-          const found = fallbackCourses.find((c: any) => c.slug === slug);
-          if (found) {
-            setCourse(found as unknown as Course);
-          } else {
-            setError(true);
-          }
-          setLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
-        if (error) {
-           const errMsg = error?.message || (error as any)?.toString() || '';
-           if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-             console.error("Error fetching course detail:", errMsg);
-           }
-           // Try to recover with fallback
-           const { courses: fallbackCourses } = await import("@/app/data/courses");
-           const found = fallbackCourses.find((c: any) => c.slug === slug);
-           if (found) {
-             setCourse(found as unknown as Course);
-           } else {
-             setError(true);
-           }
-        } else if (data) {
-           setCourse(data as Course);
-        }
-      } catch (err: any) {
-        const errMsg = err?.message || err?.toString() || '';
-        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-          console.error("Unexpected error fetching course detail:", err);
-        }
-        // Try fallback on catch as well
-        try {
-          const { courses: fallbackCourses } = await import("@/app/data/courses");
-          const found = fallbackCourses.find((c: any) => c.slug === slug);
-          if (found) {
-            setCourse(found as unknown as Course);
-          } else {
-            setError(true);
-          }
-        } catch (_) {
-          setError(true);
-        }
-      } finally {
-        setLoading(false);
+  try {
+    if (!isSupabaseConfigured()) {
+      const { courses: fallbackCourses } = await import("@/app/data/courses");
+      const found = fallbackCourses.find((c: any) => c.slug === slug);
+      if (found) {
+        course = found as unknown as Course;
       }
-    };
-
-    fetchCourse();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
-        <div className="w-48 h-6 bg-stone-200 rounded mb-8"></div>
-        <div className="mb-16">
-          <div className="w-32 h-8 bg-stone-200 rounded-full mb-4"></div>
-          <div className="w-3/4 h-12 bg-stone-200 rounded-lg mb-6"></div>
-          <div className="flex gap-6 mb-8">
-            <div className="w-32 h-6 bg-stone-200 rounded"></div>
-            <div className="w-32 h-6 bg-stone-200 rounded"></div>
-            <div className="w-32 h-6 bg-stone-200 rounded"></div>
-          </div>
-          <div className="h-64 sm:h-96 lg:h-[500px] bg-stone-200 rounded-3xl"></div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <div className="lg:col-span-2 space-y-12">
-            <div className="space-y-4">
-              <div className="w-48 h-8 bg-stone-200 rounded"></div>
-              <div className="w-full h-4 bg-stone-200 rounded"></div>
-              <div className="w-full h-4 bg-stone-200 rounded"></div>
-              <div className="w-3/4 h-4 bg-stone-200 rounded"></div>
-            </div>
-            <div className="h-64 bg-stone-200 rounded-3xl"></div>
-          </div>
-          <div className="lg:col-span-1">
-            <div className="h-96 bg-stone-200 rounded-3xl sticky top-24"></div>
-          </div>
-        </div>
-      </div>
-    );
+    } else {
+      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
+      if (error) {
+        const errMsg = error?.message || (error as any)?.toString() || '';
+        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+          console.error("Error fetching course detail:", errMsg);
+        }
+        const { courses: fallbackCourses } = await import("@/app/data/courses");
+        const found = fallbackCourses.find((c: any) => c.slug === slug);
+        if (found) {
+          course = found as unknown as Course;
+        }
+      } else if (data) {
+        course = data as Course;
+      }
+    }
+  } catch (err: any) {
+    const errMsg = err?.message || err?.toString() || '';
+    if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
+      console.error("Unexpected error fetching course detail:", err);
+    }
+    try {
+      const { courses: fallbackCourses } = await import("@/app/data/courses");
+      const found = fallbackCourses.find((c: any) => c.slug === slug);
+      if (found) {
+        course = found as unknown as Course;
+      }
+    } catch (_) {}
   }
 
-  if (error || !course) {
+  if (!course) {
     notFound();
   }
 
