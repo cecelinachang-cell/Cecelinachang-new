@@ -206,9 +206,11 @@ export default function CoursesManager() {
     try {
       const { error } = await supabase.from("courses").delete().eq("id", id);
       if (error) throw error;
+      setCourses(prev => prev.filter(c => c.id !== id));
       setAlertMsg({ type: "success", text: "Kelas berhasil dihapus." });
     } catch (error: any) {
       console.error("delete error", error);
+      setAlertMsg({ type: "error", text: `Gagal menghapus: ${error.message}` });
     }
   };
 

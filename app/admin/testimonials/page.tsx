@@ -187,6 +187,7 @@ export default function TestimonialsManager() {
     try {
       const { error: deleteErr } = await supabase.from('testimonials').delete().eq('id', id);
       if (deleteErr) throw deleteErr;
+      setTestimonials(prev => prev.filter(t => t.id !== id));
       setAlertMsg({ type: 'success', text: 'Testimoni berhasil dihapus!' });
     } catch (error: any) {
       console.error(error);
