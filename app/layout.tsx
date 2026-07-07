@@ -63,6 +63,10 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: 'id_ID',
       type: 'website',
     },
+    icons: {
+      icon: '/icon.png',
+      apple: '/icon.png',
+    },
     twitter: {
       card: 'summary_large_image',
       title,
