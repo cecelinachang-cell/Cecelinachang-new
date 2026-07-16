@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 import {
   PlayCircle,
   CheckCircle2,
@@ -78,9 +79,11 @@ export default function CourseCard({ course }: { course: Course }) {
       {/* Course Details */}
       <div className="p-8 lg:p-10 w-full lg:w-3/5 flex flex-col justify-between">
         <div>
-          <h2 className="font-serif text-2xl lg:text-3xl font-bold text-orange-900 mb-4">
-            {course.title}
-          </h2>
+          <Link href={`/kursus/${course.slug}`}>
+            <h2 className="font-serif text-2xl lg:text-3xl font-bold text-orange-900 mb-4 hover:text-orange-700 transition-colors">
+              {course.title}
+            </h2>
+          </Link>
           <p className="text-stone-600 text-lg mb-6 leading-relaxed">
             {course.description}
           </p>
@@ -137,6 +140,12 @@ export default function CourseCard({ course }: { course: Course }) {
             </svg>
             Chat Cece, Daftar Kelas
           </a>
+          <Link
+            href={`/kursus/${course.slug}`}
+            className="w-full sm:w-auto text-center sm:text-left text-orange-700 font-medium text-sm mt-3 hover:text-orange-900 transition-colors underline underline-offset-2"
+          >
+            Lihat detail & kurikulum lengkap
+          </Link>
         </div>
       </div>
     </div>
