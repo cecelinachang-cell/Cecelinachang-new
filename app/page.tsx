@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
+import { Marginalia } from "@/components/Marginalia";
 
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -139,11 +140,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16 pb-16">
       {/* Hero Section */}
-      <section className="relative bg-[#FFFBF5] overflow-hidden">
-        {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 hidden md:block animate-blob"></div>
-        <div className="absolute top-0 left-0 translate-y-1/3 -translate-x-1/3 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 hidden md:block animate-blob animation-delay-2000"></div>
-
+      <section className="relative bg-cream overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-32 lg:pb-32 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -152,29 +149,23 @@ export default function Home() {
               initial="hidden"
               animate="visible"
             >
-              <motion.div
-                variants={fadeUpVariant}
-                className="inline-flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full w-fit mx-auto lg:mx-0 mb-6"
-              >
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-sm font-medium">
-                  Lebih dari 10.000+ Murid Bergabung
-                </span>
+              <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
+                <Marginalia rotate={-3}>sudah 10.000+ murid, makasih ya!</Marginalia>
               </motion.div>
 
               <motion.h1
                 variants={fadeUpVariant}
-                className="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-stone-900 leading-[1.1] mb-6"
+                className="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-charcoal-brown leading-[1.1] mb-6"
               >
                 Belajar Baking <br />
-                <span className="text-orange-600 italic font-normal">
+                <span className="text-terracotta italic font-normal">
                   Anti Gagal
                 </span>
               </motion.h1>
 
               <motion.p
                 variants={fadeUpVariant}
-                className="text-lg sm:text-xl text-stone-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+                className="text-lg sm:text-xl text-charcoal-brown/80 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
                 Sudah 10.000+ ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
@@ -185,13 +176,13 @@ export default function Home() {
               >
                 <Link
                   href="#kelas"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-orange-600 hover:bg-orange-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
+                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink hover:scale-105 active:scale-95 transition-all shadow-lg shadow-terracotta/20"
                 >
                   Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
                 <Link
                   href="/toko"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-stone-700 bg-white border border-stone-200 hover:border-orange-300 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all shadow-sm"
+                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-charcoal-brown bg-white border border-butter/40 hover:border-terracotta/50 hover:bg-butter/10 hover:scale-105 active:scale-95 transition-all shadow-sm"
                 >
                   Lihat Alat Masak <ShoppingBag className="ml-2 w-5 h-5" />
                 </Link>
@@ -225,7 +216,7 @@ export default function Home() {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
               className="relative block mt-12 lg:mt-0"
             >
-              <div className="relative w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white">
+              <div className="relative w-full aspect-[4/5] rounded-[2.5rem_1rem_2.5rem_1rem] overflow-hidden shadow-2xl border-8 border-white">
                 <Image
                   src={
                     assets["hero_image"] ||
