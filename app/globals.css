@@ -1,2 +1,13 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+@theme {
+  --color-cream: #FBF6EE;
+  --color-terracotta: #C4622D;
+  --color-rust-ink: #7A3B1E;
+  --color-butter: #E8B86D;
+  --color-charcoal-brown: #3A2E27;
+  --color-pencil-blue: #34424A;
+
+  --font-hand: var(--font-caveat);
+}
