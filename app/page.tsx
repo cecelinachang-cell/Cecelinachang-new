@@ -312,18 +312,18 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeUpVariant}
-          className="bg-orange-100 rounded-3xl overflow-hidden"
+          className="bg-butter/25 rounded-3xl overflow-hidden"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="p-8 lg:p-16 flex flex-col justify-center">
-              <div className="inline-flex items-center space-x-2 bg-orange-200 text-orange-800 px-4 py-2 rounded-full w-fit mb-6">
+              <div className="inline-flex items-center space-x-2 bg-butter/50 text-rust-ink px-4 py-2 rounded-full w-fit mb-6">
                 <BookOpen className="w-5 h-5" />
                 <span className="font-medium">Kelas Online</span>
               </div>
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-orange-900 mb-4">
+              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-rust-ink mb-4">
                 Belajar Lebih Dalam Bersama Saya
               </h2>
-              <p className="text-stone-700 text-lg mb-8">
+              <p className="text-charcoal-brown/80 text-lg mb-8">
                 Ikuti kelas online eksklusif di mana saya akan membimbing Anda
                 langkah demi langkah. Mulai dari pengenalan bahan hingga teknik
                 dekorasi profesional, semua dijelaskan dengan bahasa yang mudah
@@ -335,7 +335,7 @@ export default function Home() {
                   "Materi yang mudah dipahami pemula",
                   "Konsultasi langsung dengan cece lina chang",
                 ].map((benefit, i) => (
-                  <li key={i} className="flex items-center text-stone-700">
+                  <li key={i} className="flex items-center text-charcoal-brown/80">
                     <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 flex-shrink-0">
                       ✓
                     </div>
@@ -345,7 +345,7 @@ export default function Home() {
               </ul>
               <Link
                 href="/kursus"
-                className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-orange-800 hover:bg-orange-900 transition-all hover:scale-105 active:scale-95 shadow-md w-fit"
+                className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink transition-all hover:scale-105 active:scale-95 shadow-md w-fit"
               >
                 Lihat Daftar Kelas
               </Link>
@@ -398,7 +398,7 @@ export default function Home() {
                       transition: { duration: 0.8, ease: "easeOut" as const },
                     },
                   }}
-                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm group bg-orange-200 ${img.margin}`}
+                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm group bg-butter/40 ${img.margin}`}
                 >
                   <motion.div
                     initial={{ scale: 1.2 }}
@@ -431,10 +431,10 @@ export default function Home() {
           variants={fadeUpVariant}
           className="text-center mb-12"
         >
-          <h2 className="font-serif text-3xl font-bold text-orange-900 mb-4">
+          <h2 className="font-serif text-3xl font-bold text-rust-ink mb-4">
             Produk Pilihan
           </h2>
-          <p className="text-stone-600">
+          <p className="text-charcoal-brown/70">
             Alat masak berkualitas yang saya gunakan sehari-hari.
           </p>
         </motion.div>
@@ -465,7 +465,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden hover:shadow-md transition-all group flex flex-col"
+                className="bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-all group flex flex-col"
               >
                 <Link
                   href={`/toko/${product.id}`}
@@ -485,21 +485,21 @@ export default function Home() {
                 </Link>
                 <div className="p-4 sm:p-6 flex flex-col flex-grow">
                   {product.category && (
-                    <div className="text-[10px] sm:text-xs font-bold text-orange-500 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] sm:text-xs font-bold text-terracotta uppercase tracking-wider mb-1">
                       {product.category}
                     </div>
                   )}
                   <Link href={`/toko/${product.id}`}>
-                    <h3 className="font-serif text-sm sm:text-lg font-bold text-stone-900 mb-1 sm:mb-2 group-hover:text-orange-600 transition-colors line-clamp-2 sm:line-clamp-1">
+                    <h3 className="font-serif text-sm sm:text-lg font-bold text-charcoal-brown mb-1 sm:mb-2 group-hover:text-terracotta transition-colors line-clamp-2 sm:line-clamp-1">
                       {product.name}
                     </h3>
                   </Link>
-                  <div className="text-orange-600 font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-auto">
+                  <div className="text-terracotta font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-auto">
                     {product.price}
                   </div>
                   <Link
                     href={`/toko/${product.id}`}
-                    className="block w-full text-center py-2 px-2 sm:px-4 bg-orange-50 text-orange-700 font-medium rounded-xl hover:bg-orange-100 transition-colors text-xs sm:text-sm"
+                    className="block w-full text-center py-2 px-2 sm:px-4 bg-butter/20 text-rust-ink font-medium rounded-xl hover:bg-butter/35 transition-colors text-xs sm:text-sm"
                   >
                     Detail Produk
                   </Link>
@@ -508,11 +508,11 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-stone-50 rounded-3xl border border-stone-100">
-            <h3 className="text-xl font-bold text-stone-700 mb-2">
+          <div className="text-center py-16 bg-butter/10 rounded-3xl border border-butter/30">
+            <h3 className="text-xl font-bold text-charcoal-brown mb-2">
               Belum Ada Produk
             </h3>
-            <p className="text-stone-500">
+            <p className="text-charcoal-brown/60">
               Produk pilihan sedang dalam proses pembaruan.
             </p>
           </div>
@@ -521,7 +521,7 @@ export default function Home() {
         <div className="mt-12 text-center">
           <Link
             href="/toko"
-            className="inline-flex items-center text-orange-600 font-bold hover:text-orange-800 transition-colors group"
+            className="inline-flex items-center text-terracotta font-bold hover:text-rust-ink transition-colors group"
           >
             Lihat Semua Produk{" "}
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -533,7 +533,7 @@ export default function Home() {
       <TestimonialCarousel />
 
       {/* Social Media */}
-      <section className="bg-orange-50 py-16">
+      <section className="bg-butter/15 py-16">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -543,13 +543,13 @@ export default function Home() {
         >
           <motion.h2
             variants={fadeUpVariant}
-            className="font-serif text-3xl font-bold text-orange-900 mb-4"
+            className="font-serif text-3xl font-bold text-rust-ink mb-4"
           >
             Mari Berteman
           </motion.h2>
           <motion.p
             variants={fadeUpVariant}
-            className="text-stone-600 mb-8 max-w-2xl mx-auto"
+            className="text-charcoal-brown/70 mb-8 max-w-2xl mx-auto"
           >
             Ikuti keseharian saya, tips baking singkat, dan update resep terbaru
             di sosial media.
@@ -562,7 +562,7 @@ export default function Home() {
               href="https://instagram.com/cecelinachang"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-6 py-3 bg-white text-stone-800 rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
+              className="flex items-center px-6 py-3 bg-white text-charcoal-brown rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
             >
               <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white rounded-full mr-3">
                 <svg
@@ -585,7 +585,7 @@ export default function Home() {
               href="https://tiktok.com/@lina_chang2"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-6 py-3 bg-white text-stone-800 rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
+              className="flex items-center px-6 py-3 bg-white text-charcoal-brown rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
             >
               <span className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full mr-3">
                 <svg
