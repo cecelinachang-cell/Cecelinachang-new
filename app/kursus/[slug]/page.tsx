@@ -241,8 +241,13 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
               )}
               <div className="font-serif text-4xl text-orange-800 font-bold mb-2">{course.price}</div>
               {course.originalPrice && (
-                <div className="inline-block bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">PROMO TERBATAS</div>
+                <div className="inline-block bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded mb-1">
+                  Hemat {Math.round((1 - Number(course.price.replace(/\D/g, '')) / Number(course.originalPrice.replace(/\D/g, ''))) * 100)}%
+                </div>
               )}
+              <div className="text-stone-500 text-xs">
+                Sudah {course.students.toLocaleString('id-ID')} murid bergabung
+              </div>
             </div>
 
             <ul className="space-y-4 mb-8">
@@ -263,6 +268,11 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
                 Sertifikat digital
               </li>
             </ul>
+
+            <div className="flex items-start bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-sm text-green-800">
+              <CheckCircle2 className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+              <span>Bingung setelah beli? Konsultasi langsung dengan Cece Lina Chang termasuk dalam kelas — bukan ekstra biaya.</span>
+            </div>
 
             <a
               href={`https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20daftar%20${encodeURIComponent(course.title)}`}
