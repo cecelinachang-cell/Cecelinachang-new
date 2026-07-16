@@ -2,17 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Star,
-  ShoppingBag,
-  BookOpen,
-  Quote,
-  CheckCircle2,
-  Award,
-  Heart,
-  PlayCircle,
-} from "lucide-react";
+import { ArrowRight, Star, ShoppingBag, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 import { Marginalia } from "@/components/Marginalia";
@@ -257,19 +247,25 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              icon: <Award className="w-8 h-8" />,
+              image: assets["home_course_2"] || "https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png",
+              alt: "Lapis legit buatan Cece Lina Chang",
               title: "Resep Teruji",
               desc: "Setiap resep telah diuji coba berkali-kali untuk memastikan anti gagal.",
+              note: "ini lapis legit favoritku!",
             },
             {
-              icon: <PlayCircle className="w-8 h-8" />,
+              image: assets["home_course_1"] || "https://i.postimg.cc/t10xCGvR/image.png",
+              alt: "Video tutorial baking",
               title: "Video Detail",
               desc: "Panduan video langkah demi langkah yang sangat jelas dan mudah diikuti.",
+              note: "nonton bareng aku, ya",
             },
             {
-              icon: <Heart className="w-8 h-8" />,
+              image: assets["home_course_3"] || "https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png",
+              alt: "Komunitas murid baking",
               title: "Dukungan Penuh",
               desc: "Grup komunitas dan konsultasi langsung untuk menjawab pertanyaan Anda.",
+              note: "tanya apa aja, aku jawab",
             },
           ].map((feature, i) => (
             <motion.div
@@ -278,15 +274,29 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 hover:shadow-md transition-shadow text-center group"
+              className="bg-white rounded-2xl shadow-sm border border-butter/30 hover:shadow-md transition-shadow overflow-hidden group"
             >
-              <div className="w-16 h-16 mx-auto bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                {feature.icon}
+              <div className="relative w-full aspect-[4/3] overflow-hidden">
+                <Image
+                  src={feature.image}
+                  alt={feature.alt}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <Marginalia
+                  rotate={i % 2 === 0 ? -4 : 4}
+                  className="absolute bottom-3 right-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+                >
+                  {feature.note}
+                </Marginalia>
               </div>
-              <h3 className="font-bold text-xl text-stone-900 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-stone-600 leading-relaxed">{feature.desc}</p>
+              <div className="p-6 text-center">
+                <h3 className="font-bold text-xl text-charcoal-brown mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-charcoal-brown/70 leading-relaxed">{feature.desc}</p>
+              </div>
             </motion.div>
           ))}
         </div>
