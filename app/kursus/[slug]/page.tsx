@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock, BookOpen, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import type { Metadata } from 'next';
 
 export const revalidate = 60;
 
@@ -20,6 +21,55 @@ interface Course {
   imageUrl: string;
   video?: string;
   benefits: string[];
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  let course: Course | null = null;
+
+  try {
+    if (!isSupabaseConfigured()) {
+      const { courses: fallbackCourses } = await import('@/app/data/courses');
+      course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+    } else {
+      const { data } = await supabase.from('courses').select('*').eq('slug', slug).single();
+      if (data) course = data as Course;
+      else {
+        const { courses: fallbackCourses } = await import('@/app/data/courses');
+        course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+      }
+    }
+  } catch {
+    const { courses: fallbackCourses } = await import('@/app/data/courses');
+    course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+  }
+
+  if (!course) {
+    return { title: 'Kelas Tidak Ditemukan | Cece Lina Chang' };
+  }
+
+  const title = `${course.title} | Cece Lina Chang`;
+  const description = course.description.slice(0, 155);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://cecelinachang.com/kursus/${course.slug}`,
+      siteName: 'Cece Lina Chang',
+      images: [{ url: course.imageUrl, width: 1200, height: 630, alt: course.title }],
+      locale: 'id_ID',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [course.imageUrl],
+    },
+  };
 }
 
 export default async function KursusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
