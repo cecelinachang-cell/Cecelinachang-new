@@ -171,7 +171,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
       transition={{ duration: 0.6 }}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     >
-      <Link href="/toko" className="inline-flex items-center text-orange-600 hover:text-orange-800 font-medium mb-8 hover:translate-x-[-4px] transition-transform">
+      <Link href="/toko" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-8 hover:translate-x-[-4px] transition-transform">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Toko
       </Link>
 
@@ -183,7 +183,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <div className="relative aspect-square sm:aspect-auto sm:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-orange-100 bg-white flex items-center justify-center group">
+          <div className="relative aspect-square sm:aspect-auto sm:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-butter/30 bg-white flex items-center justify-center group">
             <Image
               src={selectedImage || 'https://picsum.photos/seed/placeholder/800/800'}
               alt={product.name}
@@ -192,7 +192,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
               className="object-contain p-8 group-hover:scale-110 transition-transform duration-500"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-orange-800 shadow-sm flex items-center">
+            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-rust-ink shadow-sm flex items-center">
               <Star className="w-4 h-4 text-yellow-500 fill-current mr-2" />
               Dipakai di video saya
             </div>
@@ -202,7 +202,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
               <div 
                 key={i} 
                 onClick={() => setSelectedImage(imgObj)}
-                className={`relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 transition-colors bg-white flex items-center justify-center ${selectedImage === imgObj ? 'border-orange-500' : 'border-transparent hover:border-orange-300'}`}
+                className={`relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 transition-colors bg-white flex items-center justify-center ${selectedImage === imgObj ? 'border-terracotta' : 'border-transparent hover:border-butter'}`}
               >
                 <Image
                   src={imgObj}
@@ -224,7 +224,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
           className="flex flex-col"
         >
           <div className="mb-6">
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-orange-900 mb-4 leading-tight">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-rust-ink mb-4 leading-tight">
               {product.name}
             </h1>
             <div className="flex items-center gap-4 text-stone-600 mb-4">
@@ -237,7 +237,7 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
               <div className="text-green-600 font-medium">Stok Tersedia</div>
             </div>
             <div className="flex items-center gap-4 mb-6">
-              <div className="font-serif text-4xl text-orange-800 font-bold">
+              <div className="font-serif text-4xl text-rust-ink font-bold">
                 {product.price}
               </div>
               {product.originalPrice && (
@@ -249,9 +249,9 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
           </div>
 
           {/* Description */}
-          <div className="bg-orange-50 rounded-2xl p-6 sm:p-8 border border-orange-100 mb-8 text-stone-700 space-y-4">
+          <div className="bg-butter/15 rounded-2xl p-6 sm:p-8 border border-butter/30 mb-8 text-stone-700 space-y-4">
             {sanitizedDescription ? (
-              <div dangerouslySetInnerHTML={{ __html: sanitizedDescription }} className="prose prose-orange max-w-none" />
+              <div dangerouslySetInnerHTML={{ __html: sanitizedDescription }} className="prose prose-stone max-w-none" />
             ) : (
               <p>Deskripsi produk belum tersedia.</p>
             )}
@@ -260,11 +260,11 @@ export default function TokoDetailPage({ params }: { params: Promise<{ slug: str
           {/* Trust Badges */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="flex items-center p-4 bg-white border border-stone-200 rounded-xl">
-              <ShieldCheck className="w-8 h-8 text-orange-600 mr-3" />
+              <ShieldCheck className="w-8 h-8 text-terracotta mr-3" />
               <div className="text-sm font-medium text-stone-700">Garansi Original</div>
             </div>
             <div className="flex items-center p-4 bg-white border border-stone-200 rounded-xl">
-              <Truck className="w-8 h-8 text-orange-600 mr-3" />
+              <Truck className="w-8 h-8 text-terracotta mr-3" />
               <div className="text-sm font-medium text-stone-700">Pengiriman Aman</div>
             </div>
           </div>
