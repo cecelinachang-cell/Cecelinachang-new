@@ -24,7 +24,7 @@ async function seed() {
       title: course.title,
       description: course.description,
       price: course.price,
-      "imageUrl": course.image,
+      "imageUrl": course.imageUrl,
       "createdAt": new Date().toISOString()
     });
     if (error) {
