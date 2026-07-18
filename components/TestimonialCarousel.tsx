@@ -5,6 +5,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Marginalia } from '@/components/Marginalia';
 
 interface Testimonial {
   id: string;
@@ -130,11 +131,11 @@ export function TestimonialCarousel() {
       className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative"
     >
       <div className="text-center mb-12">
-        <h2 className="font-serif text-3xl font-bold text-orange-900 mb-4">Apa Kata Mereka?</h2>
-        <div className="w-24 h-1 bg-orange-200 mx-auto rounded-full"></div>
+        <h2 className="font-serif text-3xl font-bold text-rust-ink mb-2">Apa Kata Mereka?</h2>
+        <Marginalia rotate={-3} className="text-lg">setiap pesan ini aku baca sendiri :&#39;)</Marginalia>
       </div>
 
-      <div className="relative bg-white rounded-3xl shadow-xl p-4 md:p-8 border border-orange-50 overflow-hidden">
+      <div className="relative bg-white rounded-[1.75rem] shadow-xl p-4 md:p-8 border border-butter/30 overflow-hidden">
         <div className="relative z-10 flex flex-col items-center justify-center">
           <div className="w-full max-w-lg aspect-[4/5] sm:aspect-square relative rounded-2xl overflow-hidden shadow-sm bg-stone-50 border border-stone-100">
             <AnimatePresence mode="wait">
@@ -177,14 +178,14 @@ export function TestimonialCarousel() {
           <>
             <button 
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-orange-600 hover:bg-orange-50 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
               aria-label="Previous testimonial"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button 
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-orange-600 hover:bg-orange-50 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
               aria-label="Next testimonial"
             >
               <ChevronRight className="w-6 h-6" />
@@ -201,7 +202,7 @@ export function TestimonialCarousel() {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex ? 'bg-orange-600 scale-125' : 'bg-orange-200 hover:bg-orange-400'
+                index === currentIndex ? 'bg-terracotta scale-125' : 'bg-butter/60 hover:bg-butter'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
             />

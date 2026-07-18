@@ -2,19 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Star,
-  ShoppingBag,
-  BookOpen,
-  Quote,
-  CheckCircle2,
-  Award,
-  Heart,
-  PlayCircle,
-} from "lucide-react";
+import { ArrowRight, Star, ShoppingBag, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
+import { Marginalia } from "@/components/Marginalia";
 
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -139,11 +130,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16 pb-16">
       {/* Hero Section */}
-      <section className="relative bg-[#FFFBF5] overflow-hidden">
-        {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 hidden md:block animate-blob"></div>
-        <div className="absolute top-0 left-0 translate-y-1/3 -translate-x-1/3 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 hidden md:block animate-blob animation-delay-2000"></div>
-
+      <section className="relative bg-cream overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-32 lg:pb-32 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -152,29 +139,23 @@ export default function Home() {
               initial="hidden"
               animate="visible"
             >
-              <motion.div
-                variants={fadeUpVariant}
-                className="inline-flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full w-fit mx-auto lg:mx-0 mb-6"
-              >
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-sm font-medium">
-                  Lebih dari 10.000+ Murid Bergabung
-                </span>
+              <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
+                <Marginalia rotate={-3}>sudah 10.000+ murid, makasih ya!</Marginalia>
               </motion.div>
 
               <motion.h1
                 variants={fadeUpVariant}
-                className="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-stone-900 leading-[1.1] mb-6"
+                className="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-charcoal-brown leading-[1.1] mb-6"
               >
                 Belajar Baking <br />
-                <span className="text-orange-600 italic font-normal">
+                <span className="text-terracotta italic font-normal">
                   Anti Gagal
                 </span>
               </motion.h1>
 
               <motion.p
                 variants={fadeUpVariant}
-                className="text-lg sm:text-xl text-stone-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+                className="text-lg sm:text-xl text-charcoal-brown/80 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
                 Sudah 10.000+ ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
@@ -185,13 +166,13 @@ export default function Home() {
               >
                 <Link
                   href="#kelas"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-orange-600 hover:bg-orange-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
+                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink hover:scale-105 active:scale-95 transition-all shadow-lg shadow-terracotta/20"
                 >
                   Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
                 <Link
                   href="/toko"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-stone-700 bg-white border border-stone-200 hover:border-orange-300 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all shadow-sm"
+                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-charcoal-brown bg-white border border-butter/40 hover:border-terracotta/50 hover:bg-butter/10 hover:scale-105 active:scale-95 transition-all shadow-sm"
                 >
                   Lihat Alat Masak <ShoppingBag className="ml-2 w-5 h-5" />
                 </Link>
@@ -225,7 +206,7 @@ export default function Home() {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
               className="relative block mt-12 lg:mt-0"
             >
-              <div className="relative w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white">
+              <div className="relative w-full aspect-[4/5] rounded-[2.5rem_1rem_2.5rem_1rem] overflow-hidden shadow-2xl border-8 border-white">
                 <Image
                   src={
                     assets["hero_image"] ||
@@ -266,19 +247,25 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              icon: <Award className="w-8 h-8" />,
+              image: assets["home_course_2"] || "https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png",
+              alt: "Lapis legit buatan Cece Lina Chang",
               title: "Resep Teruji",
               desc: "Setiap resep telah diuji coba berkali-kali untuk memastikan anti gagal.",
+              note: "ini lapis legit favoritku!",
             },
             {
-              icon: <PlayCircle className="w-8 h-8" />,
+              image: assets["home_course_1"] || "https://i.postimg.cc/t10xCGvR/image.png",
+              alt: "Video tutorial baking",
               title: "Video Detail",
               desc: "Panduan video langkah demi langkah yang sangat jelas dan mudah diikuti.",
+              note: "nonton bareng aku, ya",
             },
             {
-              icon: <Heart className="w-8 h-8" />,
+              image: assets["home_course_3"] || "https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png",
+              alt: "Komunitas murid baking",
               title: "Dukungan Penuh",
               desc: "Grup komunitas dan konsultasi langsung untuk menjawab pertanyaan Anda.",
+              note: "tanya apa aja, aku jawab",
             },
           ].map((feature, i) => (
             <motion.div
@@ -287,15 +274,29 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 hover:shadow-md transition-shadow text-center group"
+              className="bg-white rounded-2xl shadow-sm border border-butter/30 hover:shadow-md transition-shadow overflow-hidden group"
             >
-              <div className="w-16 h-16 mx-auto bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                {feature.icon}
+              <div className="relative w-full aspect-[4/3] overflow-hidden">
+                <Image
+                  src={feature.image}
+                  alt={feature.alt}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <Marginalia
+                  rotate={i % 2 === 0 ? -4 : 4}
+                  className="absolute bottom-3 right-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+                >
+                  {feature.note}
+                </Marginalia>
               </div>
-              <h3 className="font-bold text-xl text-stone-900 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-stone-600 leading-relaxed">{feature.desc}</p>
+              <div className="p-6 text-center">
+                <h3 className="font-bold text-xl text-charcoal-brown mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-charcoal-brown/70 leading-relaxed">{feature.desc}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -311,18 +312,18 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeUpVariant}
-          className="bg-orange-100 rounded-3xl overflow-hidden"
+          className="bg-butter/25 rounded-3xl overflow-hidden"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="p-8 lg:p-16 flex flex-col justify-center">
-              <div className="inline-flex items-center space-x-2 bg-orange-200 text-orange-800 px-4 py-2 rounded-full w-fit mb-6">
+              <div className="inline-flex items-center space-x-2 bg-butter/50 text-rust-ink px-4 py-2 rounded-full w-fit mb-6">
                 <BookOpen className="w-5 h-5" />
                 <span className="font-medium">Kelas Online</span>
               </div>
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-orange-900 mb-4">
+              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-rust-ink mb-4">
                 Belajar Lebih Dalam Bersama Saya
               </h2>
-              <p className="text-stone-700 text-lg mb-8">
+              <p className="text-charcoal-brown/80 text-lg mb-8">
                 Ikuti kelas online eksklusif di mana saya akan membimbing Anda
                 langkah demi langkah. Mulai dari pengenalan bahan hingga teknik
                 dekorasi profesional, semua dijelaskan dengan bahasa yang mudah
@@ -334,7 +335,7 @@ export default function Home() {
                   "Materi yang mudah dipahami pemula",
                   "Konsultasi langsung dengan cece lina chang",
                 ].map((benefit, i) => (
-                  <li key={i} className="flex items-center text-stone-700">
+                  <li key={i} className="flex items-center text-charcoal-brown/80">
                     <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 flex-shrink-0">
                       ✓
                     </div>
@@ -344,7 +345,7 @@ export default function Home() {
               </ul>
               <Link
                 href="/kursus"
-                className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-orange-800 hover:bg-orange-900 transition-all hover:scale-105 active:scale-95 shadow-md w-fit"
+                className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink transition-all hover:scale-105 active:scale-95 shadow-md w-fit"
               >
                 Lihat Daftar Kelas
               </Link>
@@ -397,7 +398,7 @@ export default function Home() {
                       transition: { duration: 0.8, ease: "easeOut" as const },
                     },
                   }}
-                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm group bg-orange-200 ${img.margin}`}
+                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm group bg-butter/40 ${img.margin}`}
                 >
                   <motion.div
                     initial={{ scale: 1.2 }}
@@ -430,10 +431,10 @@ export default function Home() {
           variants={fadeUpVariant}
           className="text-center mb-12"
         >
-          <h2 className="font-serif text-3xl font-bold text-orange-900 mb-4">
+          <h2 className="font-serif text-3xl font-bold text-rust-ink mb-4">
             Produk Pilihan
           </h2>
-          <p className="text-stone-600">
+          <p className="text-charcoal-brown/70">
             Alat masak berkualitas yang saya gunakan sehari-hari.
           </p>
         </motion.div>
@@ -464,7 +465,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden hover:shadow-md transition-all group flex flex-col"
+                className="bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-all group flex flex-col"
               >
                 <Link
                   href={`/toko/${product.id}`}
@@ -484,21 +485,21 @@ export default function Home() {
                 </Link>
                 <div className="p-4 sm:p-6 flex flex-col flex-grow">
                   {product.category && (
-                    <div className="text-[10px] sm:text-xs font-bold text-orange-500 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] sm:text-xs font-bold text-terracotta uppercase tracking-wider mb-1">
                       {product.category}
                     </div>
                   )}
                   <Link href={`/toko/${product.id}`}>
-                    <h3 className="font-serif text-sm sm:text-lg font-bold text-stone-900 mb-1 sm:mb-2 group-hover:text-orange-600 transition-colors line-clamp-2 sm:line-clamp-1">
+                    <h3 className="font-serif text-sm sm:text-lg font-bold text-charcoal-brown mb-1 sm:mb-2 group-hover:text-terracotta transition-colors line-clamp-2 sm:line-clamp-1">
                       {product.name}
                     </h3>
                   </Link>
-                  <div className="text-orange-600 font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-auto">
+                  <div className="text-terracotta font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-auto">
                     {product.price}
                   </div>
                   <Link
                     href={`/toko/${product.id}`}
-                    className="block w-full text-center py-2 px-2 sm:px-4 bg-orange-50 text-orange-700 font-medium rounded-xl hover:bg-orange-100 transition-colors text-xs sm:text-sm"
+                    className="block w-full text-center py-2 px-2 sm:px-4 bg-butter/20 text-rust-ink font-medium rounded-xl hover:bg-butter/35 transition-colors text-xs sm:text-sm"
                   >
                     Detail Produk
                   </Link>
@@ -507,11 +508,11 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-stone-50 rounded-3xl border border-stone-100">
-            <h3 className="text-xl font-bold text-stone-700 mb-2">
+          <div className="text-center py-16 bg-butter/10 rounded-3xl border border-butter/30">
+            <h3 className="text-xl font-bold text-charcoal-brown mb-2">
               Belum Ada Produk
             </h3>
-            <p className="text-stone-500">
+            <p className="text-charcoal-brown/60">
               Produk pilihan sedang dalam proses pembaruan.
             </p>
           </div>
@@ -520,7 +521,7 @@ export default function Home() {
         <div className="mt-12 text-center">
           <Link
             href="/toko"
-            className="inline-flex items-center text-orange-600 font-bold hover:text-orange-800 transition-colors group"
+            className="inline-flex items-center text-terracotta font-bold hover:text-rust-ink transition-colors group"
           >
             Lihat Semua Produk{" "}
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -532,7 +533,7 @@ export default function Home() {
       <TestimonialCarousel />
 
       {/* Social Media */}
-      <section className="bg-orange-50 py-16">
+      <section className="bg-butter/15 py-16">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -542,13 +543,13 @@ export default function Home() {
         >
           <motion.h2
             variants={fadeUpVariant}
-            className="font-serif text-3xl font-bold text-orange-900 mb-4"
+            className="font-serif text-3xl font-bold text-rust-ink mb-4"
           >
             Mari Berteman
           </motion.h2>
           <motion.p
             variants={fadeUpVariant}
-            className="text-stone-600 mb-8 max-w-2xl mx-auto"
+            className="text-charcoal-brown/70 mb-8 max-w-2xl mx-auto"
           >
             Ikuti keseharian saya, tips baking singkat, dan update resep terbaru
             di sosial media.
@@ -561,7 +562,7 @@ export default function Home() {
               href="https://instagram.com/cecelinachang"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-6 py-3 bg-white text-stone-800 rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
+              className="flex items-center px-6 py-3 bg-white text-charcoal-brown rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
             >
               <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white rounded-full mr-3">
                 <svg
@@ -584,7 +585,7 @@ export default function Home() {
               href="https://tiktok.com/@lina_chang2"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-6 py-3 bg-white text-stone-800 rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
+              className="flex items-center px-6 py-3 bg-white text-charcoal-brown rounded-full shadow-sm hover:shadow-md transition-all hover:-translate-y-1 font-medium"
             >
               <span className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full mr-3">
                 <svg

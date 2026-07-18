@@ -1,6 +1,7 @@
 import { BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
+import { Marginalia } from "@/components/Marginalia";
 
 export const revalidate = 60; // Cache the page for 60 seconds
 
@@ -71,13 +72,16 @@ export default async function KursusPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-16">
-        <div className="inline-flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+        <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-6">
           <BookOpen className="w-5 h-5" /> Belajar Bersama Cece Lina
         </div>
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-orange-900 mb-6">
+        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-4">
           Kursus Online
         </h1>
-        <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+        <Marginalia rotate={-2} className="block mb-4">
+          kenapa aku bikin kelas ini? biar kamu nggak perlu gagal berkali-kali kayak aku dulu.
+        </Marginalia>
+        <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Belajar langsung dari ahlinya melalui video tutorial yang jelas,
           detail, dan mudah diikuti. Akses seumur hidup dan konsultasi langsung
           dengan cece lina chang.
@@ -90,14 +94,14 @@ export default async function KursusPage() {
             <CourseCard key={course.id} course={course} />
           ))
         ) : (
-          <div className="text-center py-24 bg-stone-50 rounded-3xl border border-stone-100">
+          <div className="text-center py-24 bg-butter/10 rounded-3xl border border-butter/30">
             <div className="w-24 h-24 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="w-10 h-10 text-stone-400" />
             </div>
-            <h2 className="text-2xl font-bold text-stone-700 mb-2">
+            <h2 className="text-2xl font-bold text-charcoal-brown mb-2">
               Belum Ada Kursus
             </h2>
-            <p className="text-stone-500 max-w-md mx-auto">
+            <p className="text-charcoal-brown/60 max-w-md mx-auto">
               Kursus online sedang dalam proses pembuatan. Silakan kembali lagi
               nanti untuk melihat kelas terbaru.
             </p>
@@ -107,7 +111,7 @@ export default async function KursusPage() {
 
       {/* FAQ Singkat */}
       <div className="mt-24 max-w-3xl mx-auto">
-        <h2 className="font-serif text-3xl font-bold text-orange-900 mb-8 text-center">
+        <h2 className="font-serif text-3xl font-bold text-rust-ink mb-8 text-center">
           Pertanyaan Sering Diajukan
         </h2>
         <div className="space-y-6">
@@ -131,10 +135,10 @@ export default async function KursusPage() {
           ].map((faq, i) => (
             <div
               key={i}
-              className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100"
+              className="bg-white p-6 rounded-2xl shadow-sm border border-butter/30"
             >
-              <h3 className="font-bold text-lg text-stone-800 mb-2">{faq.q}</h3>
-              <p className="text-stone-600 leading-relaxed">{faq.a}</p>
+              <h3 className="font-bold text-lg text-charcoal-brown mb-2">{faq.q}</h3>
+              <p className="text-charcoal-brown/70 leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>

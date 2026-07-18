@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
@@ -13,9 +13,17 @@ const inter = Inter({
   variable: '--font-sans',
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-serif',
+  weight: ['500', '600', '700'],
+  style: ['normal', 'italic'],
+});
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  variable: '--font-caveat',
+  weight: ['500', '600', '700'],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -90,14 +98,14 @@ const jsonLd = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="id" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="id" className={`${inter.variable} ${fraunces.variable} ${caveat.variable}`}>
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans bg-[#FFFBF5] text-stone-800 min-h-screen flex flex-col" suppressHydrationWarning>
+      <body className="font-sans bg-cream text-charcoal-brown min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <AnalyticsTracker />
           <Navbar />

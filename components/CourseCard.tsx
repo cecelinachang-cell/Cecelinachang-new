@@ -32,10 +32,10 @@ export default function CourseCard({ course }: { course: Course }) {
 
   return (
     <div
-      className={`bg-white rounded-3xl overflow-hidden shadow-lg border flex flex-col lg:flex-row relative ${course.isSignature ? "border-orange-400 ring-4 ring-orange-100" : "border-orange-100"}`}
+      className={`bg-white rounded-[2rem_0.75rem_2rem_0.75rem] overflow-hidden shadow-lg border flex flex-col lg:flex-row relative ${course.isSignature ? "border-terracotta ring-4 ring-butter/30" : "border-butter/30"}`}
     >
       {course.isSignature && (
-        <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md flex items-center">
+        <div className="absolute top-4 left-4 z-10 bg-terracotta text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md flex items-center">
           <Star className="w-3 h-3 mr-1.5 fill-current" /> SIGNATURE
           CLASS
         </div>
@@ -68,7 +68,7 @@ export default function CourseCard({ course }: { course: Course }) {
                 onClick={() => setPlayingVideo(true)}
               >
                 <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <PlayCircle className="w-8 h-8 text-orange-600" />
+                  <PlayCircle className="w-8 h-8 text-terracotta" />
                 </div>
               </div>
             )}
@@ -80,32 +80,32 @@ export default function CourseCard({ course }: { course: Course }) {
       <div className="p-8 lg:p-10 w-full lg:w-3/5 flex flex-col justify-between">
         <div>
           <Link href={`/kursus/${course.slug}`}>
-            <h2 className="font-serif text-2xl lg:text-3xl font-bold text-orange-900 mb-4 hover:text-orange-700 transition-colors">
+            <h2 className="font-serif text-2xl lg:text-3xl font-bold text-rust-ink mb-4 hover:text-terracotta transition-colors">
               {course.title}
             </h2>
           </Link>
-          <p className="text-stone-600 text-lg mb-6 leading-relaxed">
+          <p className="text-charcoal-brown/75 text-lg mb-6 leading-relaxed">
             {course.description}
           </p>
 
-          <div className="flex flex-wrap gap-4 text-sm text-stone-500 mb-8">
-            <div className="flex items-center bg-orange-50 px-3 py-1.5 rounded-full">
-              <Users className="w-4 h-4 mr-2 text-orange-600" />
+          <div className="flex flex-wrap gap-4 text-sm text-charcoal-brown/60 mb-8">
+            <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
+              <Users className="w-4 h-4 mr-2 text-terracotta" />
               {course.students} Murid
             </div>
-            <div className="flex items-center bg-orange-50 px-3 py-1.5 rounded-full">
-              <Clock className="w-4 h-4 mr-2 text-orange-600" />
+            <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
+              <Clock className="w-4 h-4 mr-2 text-terracotta" />
               {course.duration}
             </div>
           </div>
 
           <div className="mb-8">
-            <h3 className="font-bold text-stone-800 mb-4">
+            <h3 className="font-bold text-charcoal-brown mb-4">
               Apa yang akan Anda pelajari:
             </h3>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(course.benefits || []).map((benefit, i) => (
-                <li key={i} className="flex items-start text-stone-700">
+                <li key={i} className="flex items-start text-charcoal-brown/80">
                   <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
                   <span>{benefit}</span>
                 </li>
@@ -114,14 +114,14 @@ export default function CourseCard({ course }: { course: Course }) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-orange-100">
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-butter/30">
           <div className="flex flex-col mb-4 sm:mb-0">
             {course.originalPrice && (
-              <span className="text-stone-400 line-through text-sm font-medium mb-1">
+              <span className="text-charcoal-brown/40 line-through text-sm font-medium mb-1">
                 {course.originalPrice}
               </span>
             )}
-            <span className="font-serif text-3xl text-orange-800 font-bold">
+            <span className="font-serif text-3xl text-rust-ink font-bold">
               {course.price}
             </span>
           </div>
