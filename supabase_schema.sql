@@ -74,3 +74,19 @@ CREATE TABLE IF NOT EXISTS public.clicks (
 
 ALTER TABLE public.page_views DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.clicks DISABLE ROW LEVEL SECURITY;
+
+-- Customer-service follow-ups submitted through the AI chatbot.
+CREATE TABLE IF NOT EXISTS public.customer_inquiries (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name TEXT,
+  whatsapp TEXT,
+  email TEXT,
+  topic TEXT,
+  message TEXT NOT NULL,
+  page_path TEXT,
+  chat_summary TEXT,
+  status TEXT NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.customer_inquiries DISABLE ROW LEVEL SECURITY;
