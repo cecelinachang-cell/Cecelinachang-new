@@ -76,6 +76,9 @@ export default function TentangPage() {
             <p>
               Dari situ, saya mulai membagikan resep dan tips baking di sosial media. Ternyata, banyak ibu-ibu di luar sana yang mengalami kesulitan yang sama dengan saya dulu: takut gagal, bingung memilih alat, atau merasa resep di internet terlalu rumit.
             </p>
+            <p>
+              Selain baking, saya juga memiliki pengalaman lebih dari 28 tahun mengelola pabrik bakso sejak 1998 — pengalaman industri makanan inilah yang saya bawa ke dalam setiap resep dan kelas yang saya ajarkan, agar hasilnya benar-benar teruji, bukan sekadar coba-coba.
+            </p>
             <p className="font-bold text-orange-900 text-xl mt-8 mb-4">
               Misi Saya
             </p>

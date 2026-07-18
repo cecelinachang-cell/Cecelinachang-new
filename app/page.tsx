@@ -158,7 +158,17 @@ export default function Home() {
               >
                 <Star className="w-4 h-4 fill-current" />
                 <span className="text-sm font-medium">
-                  Lebih dari 10.000+ Murid Bergabung
+                  10.000+ Komunitas Cece Lina Chang
+                </span>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUpVariant}
+                className="inline-flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full w-fit mx-auto lg:mx-0 mb-6"
+              >
+                <Star className="w-4 h-4 fill-current" />
+                <span className="text-sm font-medium">
+                  28 Tahun Pengalaman di Industri Bakso
                 </span>
               </motion.div>
 
@@ -176,7 +186,7 @@ export default function Home() {
                 variants={fadeUpVariant}
                 className="text-lg sm:text-xl text-stone-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Sudah 10.000+ ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
+                Sudah ribuan ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
 
               <motion.div
