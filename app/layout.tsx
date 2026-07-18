@@ -3,7 +3,7 @@ import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { WhatsAppButton } from '@/components/whatsapp-button';
+import { ChatbotWidget } from '@/components/chatbot-widget';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { supabase } from '@/lib/supabase';
@@ -113,7 +113,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             {children}
           </main>
           <Footer />
-          <WhatsAppButton />
+          <ChatbotWidget />
         </AuthProvider>
       </body>
     </html>
