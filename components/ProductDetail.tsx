@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { notFound } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
+import { POLICIES } from '@/lib/policies';
 
 interface Product {
   id: string;
@@ -260,7 +261,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="flex items-center p-4 bg-white border border-stone-200 rounded-xl">
               <ShieldCheck className="w-8 h-8 text-terracotta mr-3" />
-              <div className="text-sm font-medium text-stone-700">Garansi Original</div>
+              <div className="text-sm font-medium text-stone-700">{POLICIES.PRODUCT_WARRANTY_SHORT}</div>
             </div>
             <div className="flex items-center p-4 bg-white border border-stone-200 rounded-xl">
               <Truck className="w-8 h-8 text-terracotta mr-3" />
@@ -272,6 +273,9 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div className="mt-auto">
             <p className="text-sm text-stone-500 mb-4 text-center">
               Pembelian langsung via WhatsApp. Tidak perlu daftar akun.
+            </p>
+            <p className="text-xs text-stone-500 mb-4 text-center">
+              {POLICIES.PRODUCT_RETURN_SHORT}
             </p>
             <a
               href={`https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20beli%20${encodeURIComponent(product.name)}`}

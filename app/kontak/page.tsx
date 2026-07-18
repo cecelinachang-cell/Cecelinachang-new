@@ -1,4 +1,5 @@
 import { MessageCircle, Mail, MapPin, Send } from 'lucide-react';
+import Faq from '@/components/Faq';
 
 export default function KontakPage() {
   return (
@@ -98,23 +99,7 @@ export default function KontakPage() {
         </div>
       </div>
 
-      {/* FAQ */}
-      <div className="mt-24 max-w-4xl mx-auto">
-        <h2 className="font-serif text-3xl font-bold text-rust-ink mb-12 text-center">Pertanyaan yang Sering Diajukan (FAQ)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { q: 'Bagaimana cara membeli alat masak?', a: 'Sangat mudah! Anda tinggal klik tombol "Beli Sekarang" di halaman produk, lalu Anda akan langsung diarahkan ke WhatsApp admin kami untuk proses pemesanan tanpa perlu membuat akun.' },
-            { q: 'Apakah pengiriman aman ke luar kota?', a: 'Tentu saja. Kami menggunakan bubble wrap tebal dan kardus khusus untuk memastikan loyang dan alat masak lainnya sampai dengan aman tanpa penyok.' },
-            { q: 'Bagaimana cara ikut kelas online?', a: 'Pilih kelas yang Anda inginkan di halaman Kursus, klik "Daftar", dan admin kami akan membantu proses pendaftaran via WhatsApp. Setelah itu Anda akan mendapat link akses video.' },
-            { q: 'Apakah resep di website ini gratis?', a: 'Ya, semua resep yang ada di halaman Resep bisa Anda akses secara gratis kapan saja.' }
-          ].map((faq, i) => (
-            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-butter/30">
-              <h3 className="font-bold text-lg text-charcoal-brown mb-3">{faq.q}</h3>
-              <p className="text-charcoal-brown/70 leading-relaxed">{faq.a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Faq categories={['general', 'shipping', 'course', 'refund']} />
     </div>
   );
 }

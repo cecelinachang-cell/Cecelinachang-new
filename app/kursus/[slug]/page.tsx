@@ -4,6 +4,7 @@ import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock, BookOpen, Mess
 import { notFound } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
+import { POLICIES } from '@/lib/policies';
 
 export const revalidate = 60;
 
@@ -264,6 +265,9 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             </a>
             <p className="text-xs text-stone-500 text-center">
               Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.
+            </p>
+            <p className="text-xs text-stone-500 text-center mt-2">
+              {POLICIES.COURSE_REFUND_SHORT}
             </p>
           </div>
         </div>

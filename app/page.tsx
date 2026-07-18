@@ -140,7 +140,11 @@ export default function Home() {
               animate="visible"
             >
               <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
-                <Marginalia rotate={-3}>sudah 10.000+ murid, makasih ya!</Marginalia>
+                <Marginalia rotate={-3}>sudah 10.000+ orang gabung di komunitas ini, makasih ya!</Marginalia>
+              </motion.div>
+
+              <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
+                <Marginalia rotate={2}>28 tahun pengalaman aku di industri bakso lho</Marginalia>
               </motion.div>
 
               <motion.h1
@@ -157,7 +161,7 @@ export default function Home() {
                 variants={fadeUpVariant}
                 className="text-lg sm:text-xl text-charcoal-brown/80 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Sudah 10.000+ ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
+                Sudah ribuan ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
 
               <motion.div
