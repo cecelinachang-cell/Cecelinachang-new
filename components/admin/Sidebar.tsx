@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Settings, LogOut, BookOpen, MessageSquareQuote, Image } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, BookOpen, MessageSquareQuote, Image, BrainCircuit } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -22,6 +22,7 @@ export function Sidebar() {
     { name: 'Items', href: '/admin/items', icon: Package },
     { name: 'Courses', href: '/admin/courses', icon: BookOpen },
     { name: 'Testimonials', href: '/admin/testimonials', icon: MessageSquareQuote },
+    { name: 'Chatbot Knowledge', href: '/admin/chatbot-knowledge', icon: BrainCircuit },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

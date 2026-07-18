@@ -15,6 +15,12 @@ type CatalogProduct = {
   category?: string | null;
 };
 
+type KnowledgeEntry = {
+  title: string;
+  content: string;
+  category: string | null;
+};
+
 const supportFacts = `
 Brand: Cece Lina Chang menyediakan kursus memasak/baking online, resep gratis, dan peralatan baking.
 Kontak: WhatsApp admin +62 812-8425-0718, email halo@cecelinachang.com.
@@ -40,6 +46,14 @@ function formatProducts(products: CatalogProduct[]) {
     .join('\n');
 }
 
+function formatKnowledge(entries: KnowledgeEntry[]) {
+  if (!entries.length) return '';
+  return entries
+    .slice(0, 50)
+    .map((entry) => `- [${entry.category || 'Umum'}] ${entry.title}: ${entry.content}`)
+    .join('\n');
+}
+
 export async function getSiteKnowledge() {
   const fallbackCourseKnowledge = formatCourses(
     fallbackCourses.map((course) => ({
@@ -55,18 +69,20 @@ export async function getSiteKnowledge() {
   }
 
   try {
-    const [{ data: courses }, { data: products }, { data: settings }] = await Promise.all([
+    const [{ data: courses }, { data: products }, { data: settings }, { data: knowledge }] = await Promise.all([
       supabase.from('courses').select('title, description, price').order('createdAt', { ascending: false }).limit(30),
       supabase.from('items').select('name, description, price, category').order('createdAt', { ascending: false }).limit(30),
       supabase.from('settings').select('id, title, description').in('id', ['general']),
+      supabase.from('chatbot_knowledge').select('title, content, category').eq('is_published', true).order('updated_at', { ascending: false }).limit(50),
     ]);
 
     const general = settings?.find((setting) => setting.id === 'general');
     const siteDescription = general?.description ? `Informasi situs tambahan: ${general.description}\n` : '';
     const courseKnowledge = courses?.length ? formatCourses(courses) : fallbackCourseKnowledge;
     const productKnowledge = products?.length ? formatProducts(products) : fallbackProductKnowledge;
+    const adminKnowledge = knowledge?.length ? `\nINFO TAMBAHAN YANG DISETUJUI ADMIN:\n${formatKnowledge(knowledge)}` : '';
 
-    return `${supportFacts}\n${siteDescription}\nKURSUS SAAT INI:\n${courseKnowledge}\n\nPRODUK SAAT INI:\n${productKnowledge}`;
+    return `${supportFacts}\n${siteDescription}\nKURSUS SAAT INI:\n${courseKnowledge}\n\nPRODUK SAAT INI:\n${productKnowledge}${adminKnowledge}`;
   } catch (error) {
     console.error('Unable to load chatbot knowledge:', error);
     return `${supportFacts}\nKURSUS SAAT INI:\n${fallbackCourseKnowledge}\n\nPRODUK SAAT INI:\n${fallbackProductKnowledge}`;

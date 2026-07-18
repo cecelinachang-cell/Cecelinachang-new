@@ -90,3 +90,16 @@ CREATE TABLE IF NOT EXISTS public.customer_inquiries (
 );
 
 ALTER TABLE public.customer_inquiries DISABLE ROW LEVEL SECURITY;
+
+-- Approved information supplied by admins for the customer-service chatbot.
+CREATE TABLE IF NOT EXISTS public.chatbot_knowledge (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Umum',
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.chatbot_knowledge DISABLE ROW LEVEL SECURITY;
