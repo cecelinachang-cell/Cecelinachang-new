@@ -1,6 +1,7 @@
 import { BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
+import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
 
 export const revalidate = 60; // Cache the page for 60 seconds
@@ -21,6 +22,13 @@ interface Course {
   benefits: string[];
   orderIndex?: number;
   createdAt?: string;
+}
+
+const SWEET_KEYWORDS = ["legit", "ogura", "sponge", "cake", "manis"];
+
+function isSweet(course: Course): boolean {
+  const title = course.title.toLowerCase();
+  return SWEET_KEYWORDS.some((kw) => title.includes(kw));
 }
 
 export default async function KursusPage() {
@@ -69,6 +77,11 @@ export default async function KursusPage() {
     finalCourses = fallbackCourses as unknown as Course[];
   }
 
+  const heroCourse = finalCourses.find((c) => c.isSignature) || finalCourses[0];
+  const restCourses = finalCourses.filter((c) => c.id !== heroCourse?.id);
+  const savoryCourses = restCourses.filter((c) => !isSweet(c));
+  const sweetCourses = restCourses.filter((c) => isSweet(c));
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-16">
@@ -88,26 +101,54 @@ export default async function KursusPage() {
         </p>
       </div>
 
-      <div className="space-y-12">
-        {finalCourses.length > 0 ? (
-          finalCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))
-        ) : (
-          <div className="text-center py-24 bg-butter/10 rounded-3xl border border-butter/30">
-            <div className="w-24 h-24 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="w-10 h-10 text-stone-400" />
+      {finalCourses.length > 0 ? (
+        <>
+          {heroCourse && (
+            <div className="mb-20">
+              <CourseCard course={heroCourse} />
             </div>
-            <h2 className="text-2xl font-bold text-charcoal-brown mb-2">
-              Belum Ada Kursus
-            </h2>
-            <p className="text-charcoal-brown/60 max-w-md mx-auto">
-              Kursus online sedang dalam proses pembuatan. Silakan kembali lagi
-              nanti untuk melihat kelas terbaru.
-            </p>
+          )}
+
+          {savoryCourses.length > 0 && (
+            <div className="mb-16">
+              <Marginalia rotate={-2} className="text-3xl block mb-6">
+                Kelas Gurih
+              </Marginalia>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {savoryCourses.map((course) => (
+                  <CourseCardCompact key={course.id} course={course} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sweetCourses.length > 0 && (
+            <div className="mb-16">
+              <Marginalia rotate={2} className="text-3xl block mb-6">
+                Kelas Manis
+              </Marginalia>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {sweetCourses.map((course) => (
+                  <CourseCardCompact key={course.id} course={course} />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-24 bg-butter/10 rounded-3xl border border-butter/30">
+          <div className="w-24 h-24 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BookOpen className="w-10 h-10 text-stone-400" />
           </div>
-        )}
-      </div>
+          <h2 className="text-2xl font-bold text-charcoal-brown mb-2">
+            Belum Ada Kursus
+          </h2>
+          <p className="text-charcoal-brown/60 max-w-md mx-auto">
+            Kursus online sedang dalam proses pembuatan. Silakan kembali lagi
+            nanti untuk melihat kelas terbaru.
+          </p>
+        </div>
+      )}
 
       {/* FAQ Singkat */}
       <div className="mt-24 max-w-3xl mx-auto">
