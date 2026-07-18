@@ -15,19 +15,19 @@ interface Testimonial {
 const FALLBACK_TESTIMONIALS: Testimonial[] = [
   {
     id: 'default-1',
-    image: 'https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png'
+    image: '/images/lapis-legit.png'
   },
   {
     id: 'default-2',
-    image: 'https://i.postimg.cc/t10xCGvR/image.png'
+    image: '/images/bakso-sapi-premium.png'
   },
   {
     id: 'default-3',
-    image: 'https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png'
+    image: '/images/meat-pie.png'
   },
   {
     id: 'default-4',
-    image: 'https://i.postimg.cc/tnCGLZ9S/Chat-GPT-Image-Mar-17-2026-04-58-17-PM.png'
+    image: '/images/ogura-softcake.png'
   }
 ];
 
@@ -158,12 +158,13 @@ export function TestimonialCarousel() {
                     }
                   }}
                 >
-                  <Image 
-                    src={testimonials[currentIndex].image} 
-                    alt={`Testimonial ${currentIndex + 1}`} 
-                    fill 
+                  <Image
+                    src={testimonials[currentIndex].image}
+                    alt={`Testimonial ${currentIndex + 1}`}
+                    fill
                     className="object-contain"
                     referrerPolicy="no-referrer"
+                    priority
                   />
                 </motion.div>
               )}

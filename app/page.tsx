@@ -229,7 +229,7 @@ export default function Home() {
                 <Image
                   src={
                     assets["hero_image"] ||
-                    "https://i.postimg.cc/tCXKbMWY/image.png"
+                    "/images/meat-pie.png"
                   }
                   alt="Cece Lina Chang Baking"
                   fill
@@ -360,28 +360,28 @@ export default function Home() {
                 {
                   src:
                     assets["home_course_1"] ||
-                    "https://i.postimg.cc/t10xCGvR/image.png",
+                    "/images/bakso-sapi-premium.png",
                   alt: "Bakso Sapi Premium",
                   margin: "",
                 },
                 {
                   src:
                     assets["home_course_2"] ||
-                    "https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png",
+                    "/images/lapis-legit.png",
                   alt: "Lapis Legit",
                   margin: "mt-4 lg:mt-8",
                 },
                 {
                   src:
                     assets["home_course_3"] ||
-                    "https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png",
+                    "/images/meat-pie.png",
                   alt: "Meat Pie",
                   margin: "-mt-4 lg:-mt-8",
                 },
                 {
                   src:
                     assets["home_course_4"] ||
-                    "https://i.postimg.cc/YGnF2vsP/Chat-GPT-Image-Mar-17-2026-12-23-11-PM.png",
+                    "/images/ogura-softcake.png",
                   alt: "Ogura Softcake",
                   margin: "",
                 },
