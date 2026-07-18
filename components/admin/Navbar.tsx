@@ -1,15 +1,29 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { UserCircle, LogOut } from 'lucide-react';
+import { UserCircle, LogOut, Menu } from 'lucide-react';
 
-export function Navbar() {
+interface NavbarProps {
+  onToggleSidebar: () => void;
+}
+
+export function Navbar({ onToggleSidebar }: NavbarProps) {
   const { user, logout } = useAuth();
 
   return (
     <nav className="bg-white border-b border-stone-200 h-16 flex items-center justify-between px-6">
-      <div className="font-medium text-stone-600">
-        Welcome back, Admin
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Toggle navigation menu"
+          onClick={onToggleSidebar}
+          className="md:hidden p-2 -ml-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="font-medium text-stone-600">
+          Welcome back, Admin
+        </div>
       </div>
       <div className="flex items-center space-x-4">
         <div className="text-sm text-stone-500">

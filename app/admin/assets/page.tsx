@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { compressImage } from '@/lib/utils';
+import { compressImage, uploadToStorage } from '@/lib/utils';
+import { withTimeout } from '@/lib/withTimeout';
 import { Save, Image as ImageIcon, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
@@ -15,22 +16,14 @@ const ASSET_KEYS = [
   { id: 'about_image', label: 'Tentang Kami: Profile Photo', width: 800, height: 1000 },
 ];
 
-const withTimeout = <T,>(promise: Promise<T> | PromiseLike<T>, ms: number, message: string): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (res) => { clearTimeout(timer); resolve(res); },
-      (err) => { clearTimeout(timer); reject(err); }
-    );
-  });
-};
-
 export default function AssetsManager() {
   const [assets, setAssets] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [savingKeys, setSavingKeys] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showRlsError, setShowRlsError] = useState(false);
+  const [urlInputFor, setUrlInputFor] = useState<string | null>(null);
+  const [urlValue, setUrlValue] = useState('');
 
   useEffect(() => {
     fetchAssets();
@@ -101,11 +94,11 @@ export default function AssetsManager() {
     }
   };
 
-  const handlePasteUrl = (assetId: string) => {
-    const url = window.prompt("Masukkan URL gambar dari Image Bin (contoh: https://i.postimg.cc/.../image.png):");
-    if (url && url.trim() !== '') {
-      saveUrlToDb(assetId, url.trim());
-    }
+  const submitUrl = () => {
+    const trimmed = urlValue.trim();
+    if (trimmed && urlInputFor) saveUrlToDb(urlInputFor, trimmed);
+    setUrlValue('');
+    setUrlInputFor(null);
   };
 
   const handleImageChange = async (assetId: string, file: File) => {
@@ -118,9 +111,10 @@ export default function AssetsManager() {
     setMessage({ type: 'info', text: 'Memampatkan gambar...' });
 
     try {
-      // Compress image instead of storing raw base64
-      const compressedBase64 = await compressImage(file, ASSET_KEYS.find(a => a.id === assetId)?.width || 1000);
-      await saveUrlToDb(assetId, compressedBase64);
+      const blob = await compressImage(file, ASSET_KEYS.find(a => a.id === assetId)?.width || 1000);
+      const path = `assets/${assetId}/${Date.now()}.webp`;
+      const publicUrl = await uploadToStorage(supabase, blob, path);
+      await saveUrlToDb(assetId, publicUrl);
     } catch (err: any) {
       setMessage({ type: 'error', text: `Gagal memproses gambar: ${err.message}` });
       setSavingKeys(prev => ({ ...prev, [assetId]: false }));
@@ -146,18 +140,9 @@ export default function AssetsManager() {
           <div className="flex items-start">
             <AlertCircle className="w-6 h-6 mr-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-bold text-lg mb-1">Akses Database Ditolak (Row-Level Security)</h3>
-              <p className="mb-3">
-                Supabase memblokir penyimpanan karena <strong>Row-Level Security (RLS)</strong> diaktifkan untuk tabel <code>settings</code>. Untuk memperbaikinya, jalankan kode SQL berikut di <strong>SQL Editor Supabase</strong> Anda:
-              </p>
-              <pre className="bg-red-900/10 text-red-900 p-3 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap select-all">
-{`ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.courses DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.items DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;`}
-              </pre>
-              <p className="mt-3 text-sm">
-                *Atau matikan RLS pada tabel-tabel tersebut langsung melalui menu <strong>Table Editor</strong> -&gt; <strong>Settings</strong> di dashboard Supabase.
+              <h3 className="font-bold text-lg mb-1">Akses Database Ditolak</h3>
+              <p>
+                Penyimpanan ditolak oleh database karena izin tidak mencukupi. Hubungi administrator situs untuk memperbaiki hak akses akun Anda.
               </p>
             </div>
           </div>
@@ -190,25 +175,25 @@ ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;`}
                 </div>
               )}
               
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
                 <label className="cursor-pointer bg-white text-stone-900 font-medium px-4 py-2 rounded-lg text-sm hover:bg-stone-100 transition-colors shadow-sm flex items-center gap-2">
                   <ImageIcon className="w-4 h-4" />
                   {savingKeys[asset.id] ? 'Memproses...' : 'Upload dari Komputer'}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
                     disabled={savingKeys[asset.id]}
                     onChange={(e) => {
                       if (e.target.files?.[0]) handleImageChange(asset.id, e.target.files[0]);
                     }}
                   />
                 </label>
-                
+
                 <button
                   type="button"
                   disabled={savingKeys[asset.id]}
-                  onClick={() => handlePasteUrl(asset.id)}
+                  onClick={() => setUrlInputFor(asset.id)}
                   className="bg-orange-600 text-white font-medium px-4 py-2 rounded-lg text-sm hover:bg-orange-700 transition-colors shadow-sm flex items-center gap-2"
                 >
                   <LinkIcon className="w-4 h-4" />
@@ -216,6 +201,51 @@ ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;`}
                 </button>
               </div>
             </div>
+
+            {urlInputFor === asset.id && (
+              <div className="flex gap-2">
+                <label htmlFor={`url-input-${asset.id}`} className="sr-only">
+                  Image URL for {asset.label}
+                </label>
+                <input
+                  id={`url-input-${asset.id}`}
+                  type="url"
+                  autoFocus
+                  value={urlValue}
+                  onChange={(e) => setUrlValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitUrl();
+                    }
+                    if (e.key === 'Escape') {
+                      setUrlInputFor(null);
+                      setUrlValue('');
+                    }
+                  }}
+                  placeholder="https://i.postimg.cc/.../image.png"
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={submitUrl}
+                  className="px-3 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Simpan
+                </button>
+                <button
+                  type="button"
+                  aria-label="Cancel URL input"
+                  onClick={() => {
+                    setUrlInputFor(null);
+                    setUrlValue('');
+                  }}
+                  className="px-3 py-2 text-sm text-stone-500 hover:bg-stone-100 rounded-lg"
+                >
+                  Batal
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

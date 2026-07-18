@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import ProductDetail from '@/components/ProductDetail';
+import { stripHtml } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const title = `${product.name} | Cece Lina Chang`;
-  const description = product.description ? product.description.slice(0, 155) : undefined;
+  const description = product.description ? stripHtml(product.description).slice(0, 155) : undefined;
   const images = parseImageUrls(product.imageUrl);
 
   return {

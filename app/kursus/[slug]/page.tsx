@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { POLICIES } from '@/lib/policies';
+import { stripHtml } from '@/lib/utils';
+import { SanitizedHtml } from '@/components/SanitizedHtml';
 
 export const revalidate = 60;
 
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const title = `${course.title} | Cece Lina Chang`;
-  const description = course.description.slice(0, 155);
+  const description = stripHtml(course.description).slice(0, 155);
 
   return {
     title,
@@ -175,9 +177,10 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
           {/* Deskripsi */}
           <section>
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-4">Tentang Kelas Ini</h2>
-            <p className="text-lg text-stone-700 leading-relaxed">
-              {course.description}
-            </p>
+            <SanitizedHtml
+              html={course.description}
+              className="prose prose-stone max-w-none text-lg text-stone-700 leading-relaxed"
+            />
           </section>
 
           {/* Apa yang dipelajari */}

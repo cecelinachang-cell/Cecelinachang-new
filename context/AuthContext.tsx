@@ -27,11 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAdminStatus = async (currentUser: User) => {
     try {
-      if (currentUser.email?.toLowerCase() === 'signoratangerangclc@gmail.com' ||
-          currentUser.email?.toLowerCase() === 'cecelinachang@gmail.com') {
-        setIsAdmin(true);
-        return;
-      }
       const { data, error } = await supabase
         .from('users')
         .select('role')
@@ -49,16 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Check local bypass first
-    const bypassString = typeof window !== 'undefined' ? localStorage.getItem('admin_bypass_user') : null;
-    if (bypassString) {
-      const bypassUser = JSON.parse(bypassString);
-      setUser(bypassUser);
-      setIsAdmin(true);
-      setLoading(false);
-      return;
-    }
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       const currentUser = session?.user || null;

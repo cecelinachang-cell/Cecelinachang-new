@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { compressImage } from "@/lib/utils";
+import { compressImage, uploadToStorage, removeFromStorage, matchesSearchTerm } from "@/lib/utils";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Modal } from "@/components/admin/Modal";
+import { withTimeout } from "@/lib/withTimeout";
 import {
   Plus,
   Edit2,
@@ -41,28 +44,9 @@ interface Course {
   orderIndex?: number;
 }
 
-const withTimeout = <T,>(
-  promise: Promise<T> | PromiseLike<T>,
-  ms: number,
-  message: string,
-): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (res) => {
-        clearTimeout(timer);
-        resolve(res);
-      },
-      (err) => {
-        clearTimeout(timer);
-        reject(err);
-      },
-    );
-  });
-};
-
 export default function CoursesManager() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -89,6 +73,7 @@ export default function CoursesManager() {
   const [deleteConfirm, setDeleteConfirm] = useState<{
     id: string;
     title: string;
+    imageUrl?: string;
   } | null>(null);
   const [alertMsg, setAlertMsg] = useState<{
     type: "success" | "error";
@@ -202,10 +187,11 @@ export default function CoursesManager() {
     setIsModalOpen(true);
   };
 
-  const executeDelete = async (id: string) => {
+  const executeDelete = async (id: string, imageUrl?: string) => {
     try {
       const { error } = await supabase.from("courses").delete().eq("id", id);
       if (error) throw error;
+      if (imageUrl) await removeFromStorage(supabase, imageUrl);
       setCourses(prev => prev.filter(c => c.id !== id));
       setAlertMsg({ type: "success", text: "Kelas berhasil dihapus." });
     } catch (error: any) {
@@ -220,6 +206,8 @@ export default function CoursesManager() {
 
     if (source.index === destination.index) return;
 
+    const previousCourses = courses;
+
     const newCourses = Array.from(courses);
     const [removed] = newCourses.splice(source.index, 1);
     newCourses.splice(destination.index, 0, removed);
@@ -232,7 +220,7 @@ export default function CoursesManager() {
     setCourses(updatedCourses);
 
     try {
-      await Promise.all(
+      const results = await Promise.all(
         updatedCourses.map((course) =>
           supabase
             .from("courses")
@@ -240,11 +228,14 @@ export default function CoursesManager() {
             .eq("id", course.id),
         ),
       );
+      const failed = results.find((r) => r.error);
+      if (failed) throw failed.error;
     } catch (err: any) {
       console.error("Failed to update order", err);
+      setCourses(previousCourses);
       setAlertMsg({
         type: "error",
-        text: "Gagal memperbarui urutan kelas di database.",
+        text: "Gagal memperbarui urutan kelas di database. Urutan dikembalikan.",
       });
     }
   };
@@ -342,16 +333,21 @@ export default function CoursesManager() {
         try {
           setAlertMsg({
             type: "success",
-            text: "Tahap 1/2: Memproses gambar...",
+            text: "Tahap 1/2: Mengunggah gambar...",
           });
           setUploadProgress(20);
-          const base64String = await withTimeout(
+          const blob = await withTimeout(
             compressImage(imageFile, 800),
             300000,
             "Pemrosesan gambar memakan waktu terlalu lama (timeout setelah 5 menit).",
           );
           setUploadProgress(60);
-          imageUrl = base64String;
+          const path = `courses/${editingCourse?.id || "new"}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+          imageUrl = await withTimeout(
+            uploadToStorage(supabase, blob, path),
+            300000,
+            "Unggah gambar memakan waktu terlalu lama. Periksa koneksi internet.",
+          );
         } catch (uploadError: any) {
           console.error(
             "Image processing error:",
@@ -446,7 +442,7 @@ export default function CoursesManager() {
       if (errorMsgDetails.includes("row-level security policy")) {
         setAlertMsg({
           type: "error",
-          text: `Database Error: Row Level Security is enabled. Please jalankan: ALTER TABLE public.courses DISABLE ROW LEVEL SECURITY;`,
+          text: "Permission denied while saving. Please contact the site administrator.",
         });
       } else if (errorMsgDetails === "Failed to fetch") {
         setAlertMsg({
@@ -460,7 +456,7 @@ export default function CoursesManager() {
       ) {
         setAlertMsg({
           type: "error",
-          text: `GAGAL MENYIMPAN: Kolom database belum lengkap. Buka SQL Editor di Supabase, hapus semua teks, paste kode ini dan RUN:\n\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "orderIndex" NUMERIC DEFAULT 0;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "originalPrice" TEXT;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "students" NUMERIC DEFAULT 0;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "duration" TEXT;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "modules" NUMERIC DEFAULT 0;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "video" TEXT;\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "benefits" TEXT[];\nALTER TABLE public.courses ADD COLUMN IF NOT EXISTS "isSignature" BOOLEAN DEFAULT false;`,
+          text: "Gagal menyimpan: skema database belum lengkap. Hubungi administrator situs.",
         });
       } else {
         setAlertMsg({
@@ -471,6 +467,11 @@ export default function CoursesManager() {
       setSaving(false);
     }
   };
+
+  const filteredCourses = useMemo(
+    () => courses.filter((course: any) => matchesSearchTerm(searchTerm, [course.title])),
+    [courses, searchTerm]
+  );
 
   if (loading) {
     return (
@@ -522,6 +523,23 @@ export default function CoursesManager() {
         </div>
       </div>
 
+      <div className="max-w-sm">
+        <label htmlFor="course-search" className="sr-only">Cari kelas</label>
+        <input
+          id="course-search"
+          type="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Cari berdasarkan judul..."
+          className="w-full px-4 py-2 rounded-xl border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        />
+        {searchTerm.trim() !== "" && (
+          <p className="text-xs text-stone-500 mt-1">
+            Urutan drag-and-drop dinonaktifkan saat pencarian aktif.
+          </p>
+        )}
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
         <DragDropContext onDragEnd={onDragEnd}>
           <table className="min-w-full divide-y divide-stone-200">
@@ -547,7 +565,7 @@ export default function CoursesManager() {
             </thead>
             <Droppable
               droppableId="courses-list"
-              isDropDisabled={false}
+              isDropDisabled={searchTerm.trim() !== ""}
               isCombineEnabled={false}
               ignoreContainerClipping={false}
             >
@@ -557,18 +575,19 @@ export default function CoursesManager() {
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  {courses.length === 0 ? (
+                  {filteredCourses.length === 0 ? (
                     <tr>
                       <td
                         colSpan={6}
                         className="px-6 py-12 text-center text-stone-500"
                       >
-                        Belum ada kelas. Klik &quot;Tambah Kelas&quot; untuk
-                        mulai.
+                        {courses.length === 0
+                          ? 'Belum ada kelas. Klik "Tambah Kelas" untuk mulai.'
+                          : "Tidak ada kelas yang cocok dengan pencarian."}
                       </td>
                     </tr>
                   ) : (
-                    courses.map((course: any, index: number) => (
+                    filteredCourses.map((course: any, index: number) => (
                       <Draggable
                         key={course.id}
                         draggableId={course.id}
@@ -638,6 +657,7 @@ export default function CoursesManager() {
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                               <button
                                 onClick={() => handleOpenModal(course)}
+                                aria-label={`Edit ${course.title}`}
                                 className="text-blue-600 hover:text-blue-900 mr-4"
                               >
                                 <Edit2 className="w-5 h-5" />
@@ -647,8 +667,10 @@ export default function CoursesManager() {
                                   setDeleteConfirm({
                                     id: course.id,
                                     title: course.title,
+                                    imageUrl: course.imageUrl,
                                   })
                                 }
+                                aria-label={`Delete ${course.title}`}
                                 className="text-red-600 hover:text-red-900"
                               >
                                 <Trash2 className="w-5 h-5" />
@@ -669,16 +691,13 @@ export default function CoursesManager() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
-            <h3 className="text-lg font-bold text-stone-900 mb-2">
-              Hapus Kelas?
-            </h3>
-            <p className="text-stone-500 mb-6">
-              Apakah Anda yakin ingin menghapus kelas &quot;
-              {deleteConfirm.title}&quot;? Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <div className="flex justify-end gap-3">
+        <Modal
+          open={!!deleteConfirm}
+          onClose={() => setDeleteConfirm(null)}
+          title="Hapus Kelas?"
+          maxWidthClassName="max-w-sm"
+          footer={
+            <>
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
@@ -687,16 +706,21 @@ export default function CoursesManager() {
               </button>
               <button
                 onClick={() => {
-                  executeDelete(deleteConfirm.id);
+                  executeDelete(deleteConfirm.id, deleteConfirm.imageUrl);
                   setDeleteConfirm(null);
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Hapus
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <p className="text-stone-500">
+            Apakah Anda yakin ingin menghapus kelas &quot;
+            {deleteConfirm.title}&quot;? Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </Modal>
       )}
 
       {/* Add/Edit Modal */}
@@ -709,6 +733,7 @@ export default function CoursesManager() {
               </h2>
               <button
                 onClick={handleCloseModal}
+                aria-label="Close dialog"
                 className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-6 h-6" />
@@ -919,12 +944,9 @@ export default function CoursesManager() {
                     <label className="block text-sm font-medium text-stone-700 mb-1">
                       Deskripsi *
                     </label>
-                    <textarea
-                      required
-                      rows={4}
+                    <RichTextEditor
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all resize-none"
+                      onChange={setDescription}
                       placeholder="Deskripsi kelas..."
                     />
                   </div>

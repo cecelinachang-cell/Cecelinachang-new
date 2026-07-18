@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { compressImage } from "@/lib/utils";
+import { compressImage, uploadToStorage, removeFromStorage, stripHtml, matchesSearchTerm } from "@/lib/utils";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Modal } from "@/components/admin/Modal";
+import { withTimeout } from "@/lib/withTimeout";
 import { Plus, Edit2, Trash2, X, Image as ImageIcon, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
@@ -29,28 +32,9 @@ interface Item {
   createdAt?: string;
 }
 
-const withTimeout = <T,>(
-  promise: Promise<T> | PromiseLike<T>,
-  ms: number,
-  message: string,
-): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (res) => {
-        clearTimeout(timer);
-        resolve(res);
-      },
-      (err) => {
-        clearTimeout(timer);
-        reject(err);
-      },
-    );
-  });
-};
-
 export default function ItemsManager() {
   const [items, setItems] = useState<Item[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -72,6 +56,11 @@ export default function ItemsManager() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  const filteredItems = useMemo(
+    () => items.filter((item) => matchesSearchTerm(searchTerm, [item.name, item.category])),
+    [items, searchTerm]
+  );
 
   const fetchItems = useCallback(async () => {
     try {
@@ -153,6 +142,9 @@ export default function ItemsManager() {
     try {
       const { error } = await supabase.from("items").delete().eq("id", id);
       if (error) throw error;
+      await Promise.all(
+        parseImageUrls(imageUrl).map((url) => removeFromStorage(supabase, url))
+      );
       setAlertMsg({ type: "success", text: "Item berhasil dihapus." });
       fetchItems();
     } catch (error: any) {
@@ -219,21 +211,29 @@ export default function ItemsManager() {
       const existingUrls = imagePreviews.filter((url) => !url.startsWith("blob:"));
       finalImages = [...existingUrls];
 
-      // Compress and convert image to Base64 if selected
+      // Compress and upload each new image to Supabase Storage
       if (imageFiles.length > 0) {
         try {
           setAlertMsg({
             type: "success",
-            text: `Tahap 1/2: Memproses ${imageFiles.length} gambar...`,
+            text: `Tahap 1/2: Mengunggah ${imageFiles.length} gambar...`,
           });
-          for (const file of imageFiles) {
-            const base64String = await withTimeout(
-              compressImage(file, 800),
-              300000,
-              "Pemrosesan gambar memakan waktu terlalu lama (timeout setelah 5 menit). Hubungan terputus.",
-            );
-            finalImages.push(base64String);
-          }
+          const uploadedUrls = await Promise.all(
+            imageFiles.map(async (file) => {
+              const blob = await withTimeout(
+                compressImage(file, 800),
+                300000,
+                "Pemrosesan gambar memakan waktu terlalu lama (timeout setelah 5 menit). Hubungan terputus.",
+              );
+              const path = `items/${editingItem?.id || "new"}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+              return withTimeout(
+                uploadToStorage(supabase, blob, path),
+                300000,
+                "Unggah gambar memakan waktu terlalu lama. Periksa koneksi internet.",
+              );
+            }),
+          );
+          finalImages.push(...uploadedUrls);
         } catch (uploadError: any) {
           console.error(
             "Image processing error:",
@@ -305,7 +305,7 @@ export default function ItemsManager() {
       ) {
         setAlertMsg({
           type: "error",
-          text: `Database Error: Row Level Security is enabled. Please go to your Supabase SQL Editor and run: "ALTER TABLE public.items DISABLE ROW LEVEL SECURITY;"`,
+          text: "Permission denied while saving. Please contact the site administrator.",
         });
       } else {
         setAlertMsg({
@@ -340,66 +340,24 @@ export default function ItemsManager() {
         </div>
         <div className="flex space-x-4">
           <button
-            onClick={async () => {
-              try {
-                setAlertMsg({
-                  type: "success",
-                  text: "Testing permissions...",
-                });
-                const { error: insertErr } = await supabase
-                  .from("items")
-                  .insert({
-                    name: "Test Item",
-                    description: "Test",
-                    price: "0",
-                    category: "Test",
-                    imageUrl: "",
-                    createdAt: new Date().toISOString(),
-                  });
-                if (insertErr) throw insertErr;
-
-                // wait, cleaning up requires knowing the ID, our fake item can just stay for test or not do this.
-                // It's safer to just fetch limits.
-                const { error: selectErr } = await supabase
-                  .from("items")
-                  .select("id")
-                  .limit(1);
-                if (selectErr) throw selectErr;
-
-                setAlertMsg({
-                  type: "success",
-                  text: "Permissions OK! You can save items.",
-                });
-              } catch (e: any) {
-                const errMsg =
-                  e?.message ||
-                  (typeof e === "object" ? JSON.stringify(e) : String(e));
-                console.error("Test failed:", errMsg);
-
-                if (errMsg.includes("row-level security policy")) {
-                  setAlertMsg({
-                    type: "error",
-                    text: `Database Error: Row Level Security is enabled. Please go to your Supabase SQL Editor and run: "ALTER TABLE public.items DISABLE ROW LEVEL SECURITY;"`,
-                  });
-                } else {
-                  setAlertMsg({
-                    type: "error",
-                    text: `Permission Denied: ${errMsg}`,
-                  });
-                }
-              }
-            }}
-            className="flex items-center px-4 py-2 bg-stone-200 text-stone-700 rounded-lg hover:bg-stone-300 transition-colors"
-          >
-            Test Permissions
-          </button>
-          <button
             onClick={() => handleOpenModal()}
             className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
           >
             <Plus className="w-5 h-5 mr-2" /> Add New Item
           </button>
         </div>
+      </div>
+
+      <div className="max-w-sm">
+        <label htmlFor="item-search" className="sr-only">Search items</label>
+        <input
+          id="item-search"
+          type="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by name or category..."
+          className="w-full px-4 py-2 rounded-xl border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
@@ -427,7 +385,7 @@ export default function ItemsManager() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-stone-200">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <tr key={item.id} className="hover:bg-stone-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="h-16 w-16 relative rounded-lg overflow-hidden bg-stone-100 border border-stone-200">
@@ -461,7 +419,7 @@ export default function ItemsManager() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-stone-500 line-clamp-2 max-w-xs">
-                    {item.description}
+                    {stripHtml(item.description)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -472,6 +430,7 @@ export default function ItemsManager() {
                     }}
                     className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-colors mr-2"
                     title="Edit Item"
+                    aria-label={`Edit ${item.name}`}
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
@@ -482,19 +441,22 @@ export default function ItemsManager() {
                     }}
                     className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete Item"
+                    aria-label={`Delete ${item.name}`}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
               </tr>
             ))}
-            {items.length === 0 && (
+            {filteredItems.length === 0 && (
               <tr>
                 <td
                   colSpan={6}
                   className="px-6 py-12 text-center text-stone-500"
                 >
-                  No items found. Click &quot;Add New Item&quot; to create one.
+                  {items.length === 0
+                    ? 'No items found. Click "Add New Item" to create one.'
+                    : "No items match your search."}
                 </td>
               </tr>
             )}
@@ -512,6 +474,7 @@ export default function ItemsManager() {
               </h2>
               <button
                 onClick={handleCloseModal}
+                aria-label="Close dialog"
                 className="text-stone-400 hover:text-stone-600"
               >
                 <X className="w-6 h-6" />
@@ -585,11 +548,9 @@ export default function ItemsManager() {
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Description
                   </label>
-                  <textarea
-                    rows={4}
+                  <RichTextEditor
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                    onChange={setDescription}
                     placeholder="Enter product description..."
                   />
                 </div>
@@ -633,6 +594,7 @@ export default function ItemsManager() {
                           <button
                             type="button"
                             onClick={() => removeImage(idx)}
+                            aria-label={`Remove image ${idx + 1}`}
                             className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
                           >
                             <X className="w-4 h-4" />
@@ -676,18 +638,13 @@ export default function ItemsManager() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-stone-900 mb-2">
-                Confirm Delete
-              </h3>
-              <p className="text-stone-500">
-                Are you sure you want to delete this item? This action cannot be
-                undone.
-              </p>
-            </div>
-            <div className="p-6 border-t border-stone-100 bg-stone-50 flex justify-end space-x-3">
+        <Modal
+          open={!!deleteConfirm}
+          onClose={() => setDeleteConfirm(null)}
+          title="Confirm Delete"
+          maxWidthClassName="max-w-md"
+          footer={
+            <>
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 rounded-lg font-medium text-stone-700 hover:bg-stone-200 transition-colors"
@@ -704,11 +661,15 @@ export default function ItemsManager() {
               >
                 Delete
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <p className="text-stone-500">
+            Are you sure you want to delete this item? This action cannot be
+            undone.
+          </p>
+        </Modal>
       )}
-
       {/* Toast Notification */}
       {alertMsg && (
         <div

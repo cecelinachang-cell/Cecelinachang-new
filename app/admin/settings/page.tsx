@@ -2,18 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { compressImage, uploadToStorage } from '@/lib/utils';
+import { withTimeout } from '@/lib/withTimeout';
 import { Save, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
-
-const withTimeout = <T,>(promise: Promise<T> | PromiseLike<T>, ms: number, message: string): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (res) => { clearTimeout(timer); resolve(res); },
-      (err) => { clearTimeout(timer); reject(err); }
-    );
-  });
-};
 
 export default function Settings() {
   const [title, setTitle] = useState('');
@@ -56,6 +48,10 @@ export default function Settings() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (file.size > 25 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'Ukuran logo maksimal 25MB' });
+        return;
+      }
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
     }
@@ -70,13 +66,12 @@ export default function Settings() {
       let logoUrl = logoPreview;
 
       if (logoFile) {
-        // Convert to base64
-        const reader = new FileReader();
-        logoUrl = await new Promise((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(logoFile);
-        });
+        const blob = await compressImage(logoFile, 512);
+        logoUrl = await withTimeout(
+          uploadToStorage(supabase, blob, `settings/logo-${Date.now()}.webp`),
+          300000,
+          'Unggah logo memakan waktu terlalu lama (timeout 5 menit). Koneksi lambat?'
+        );
       }
 
       const { error } = await withTimeout<any>(

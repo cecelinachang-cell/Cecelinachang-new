@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { compressImage } from '@/lib/utils';
+import { compressImage, uploadToStorage, removeFromStorage } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
+import { Modal } from '@/components/admin/Modal';
+import { withTimeout } from '@/lib/withTimeout';
 import Image from 'next/image';
 
 interface Testimonial {
@@ -15,29 +17,20 @@ interface Testimonial {
   rating?: number;
 }
 
-const withTimeout = <T,>(promise: Promise<T> | PromiseLike<T>, ms: number, message: string): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (res) => { clearTimeout(timer); resolve(res); },
-      (err) => { clearTimeout(timer); reject(err); }
-    );
-  });
-};
-
 export default function TestimonialsManager() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [saving, setSaving] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<{id: string} | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{id: string; imageUrl?: string} | null>(null);
   const [alertMsg, setAlertMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    image: '',
+    image: '', // preview URL: existing Storage URL, or a blob: object URL for a pending file
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -80,24 +73,15 @@ export default function TestimonialsManager() {
     };
   }, []);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 25 * 1024 * 1024) {
         setAlertMsg({ type: 'error', text: 'Ukuran gambar maksimal 25MB' });
         return;
       }
-      try {
-        const base64String = await withTimeout(
-          compressImage(file, 800),
-          300000,
-          'Pemrosesan gambar timeout. Mohon coba lagi.'
-        );
-        setFormData(prev => ({ ...prev, image: base64String }));
-      } catch (error: any) {
-        console.error('Error processing image:', error.message || String(error));
-        setAlertMsg({ type: 'error', text: 'Gagal memproses gambar. Silakan coba lagi.' });
-      }
+      setImageFile(file);
+      setFormData(prev => ({ ...prev, image: URL.createObjectURL(file) }));
     }
   };
 
@@ -113,6 +97,7 @@ export default function TestimonialsManager() {
         image: '',
       });
     }
+    setImageFile(null);
     setAlertMsg(null);
     setIsModalOpen(true);
   };
@@ -123,6 +108,7 @@ export default function TestimonialsManager() {
     setFormData({
       image: '',
     });
+    setImageFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -140,8 +126,24 @@ export default function TestimonialsManager() {
     setAlertMsg(null);
 
     try {
+      let imageUrl = formData.image;
+
+      if (imageFile) {
+        const blob = await withTimeout(
+          compressImage(imageFile, 800),
+          300000,
+          'Pemrosesan gambar timeout. Mohon coba lagi.'
+        );
+        const path = `testimonials/${editingTestimonial?.id || 'new'}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+        imageUrl = await withTimeout(
+          uploadToStorage(supabase, blob, path),
+          300000,
+          'Unggah gambar timeout. Periksa koneksi internet.'
+        );
+      }
+
       const testimonialData = {
-        imageUrl: formData.image,
+        imageUrl,
         name: 'Customer',
         text: 'Photo review',
         rating: 5,
@@ -174,7 +176,7 @@ export default function TestimonialsManager() {
     } catch (error: any) {
       console.error(error);
       if (error && error.message && error.message.includes('row-level security policy')) {
-         setAlertMsg({ type: 'error', text: `Database Error: Row Level Security is enabled. Please go to your Supabase SQL Editor and run: "ALTER TABLE public.testimonials DISABLE ROW LEVEL SECURITY;"` });
+         setAlertMsg({ type: 'error', text: 'Permission denied while saving. Please contact the site administrator.' });
       } else {
          setAlertMsg({ type: 'error', text: `Gagal menyimpan testimoni: ${error.message}` });
       }
@@ -183,10 +185,11 @@ export default function TestimonialsManager() {
     }
   };
 
-  const executeDelete = async (id: string) => {
+  const executeDelete = async (id: string, imageUrl?: string) => {
     try {
       const { error: deleteErr } = await supabase.from('testimonials').delete().eq('id', id);
       if (deleteErr) throw deleteErr;
+      if (imageUrl) await removeFromStorage(supabase, imageUrl);
       setTestimonials(prev => prev.filter(t => t.id !== id));
       setAlertMsg({ type: 'success', text: 'Testimoni berhasil dihapus!' });
     } catch (error: any) {
@@ -257,12 +260,14 @@ export default function TestimonialsManager() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleOpenModal(testimonial)}
+                      aria-label="Edit testimonial"
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setDeleteConfirm({id: testimonial.id})}
+                      onClick={() => setDeleteConfirm({id: testimonial.id, imageUrl: testimonial.imageUrl})}
+                      aria-label="Delete testimonial"
                       className="text-red-600 hover:text-red-900"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -277,13 +282,13 @@ export default function TestimonialsManager() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
-            <h3 className="text-lg font-bold text-stone-900 mb-2">Hapus Testimoni?</h3>
-            <p className="text-stone-500 mb-6">
-              Apakah Anda yakin ingin menghapus foto testimoni ini? Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <div className="flex justify-end gap-3">
+        <Modal
+          open={!!deleteConfirm}
+          onClose={() => setDeleteConfirm(null)}
+          title="Hapus Testimoni?"
+          maxWidthClassName="max-w-sm"
+          footer={
+            <>
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
@@ -292,16 +297,20 @@ export default function TestimonialsManager() {
               </button>
               <button
                 onClick={() => {
-                  executeDelete(deleteConfirm.id);
+                  executeDelete(deleteConfirm.id, deleteConfirm.imageUrl);
                   setDeleteConfirm(null);
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Hapus
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <p className="text-stone-500">
+            Apakah Anda yakin ingin menghapus foto testimoni ini? Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </Modal>
       )}
 
       {/* Add/Edit Modal */}
@@ -312,7 +321,7 @@ export default function TestimonialsManager() {
               <h2 className="text-xl font-bold text-stone-900">
                 {editingTestimonial ? 'Edit Testimoni' : 'Tambah Testimoni Baru'}
               </h2>
-              <button onClick={handleCloseModal} className="text-stone-400 hover:text-stone-600">
+              <button onClick={handleCloseModal} aria-label="Close dialog" className="text-stone-400 hover:text-stone-600">
                 <X className="w-6 h-6" />
               </button>
             </div>

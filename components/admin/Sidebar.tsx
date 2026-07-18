@@ -6,7 +6,12 @@ import { LayoutDashboard, Package, Settings, LogOut, BookOpen, MessageSquareQuot
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-export function Sidebar() {
+interface SidebarProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -26,40 +31,54 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-stone-900 text-stone-300 min-h-screen flex flex-col">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-white">Admin Panel</h2>
-      </div>
-      
-      <nav className="flex-1 px-4 space-y-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                isActive 
-                  ? 'bg-orange-600 text-white' 
-                  : 'hover:bg-stone-800 hover:text-white'
-              }`}
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      <div
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-300 min-h-screen flex flex-col transform transition-transform duration-200 ease-in-out ${
+          open ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 md:static`}
+      >
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-white">Admin Panel</h2>
+        </div>
 
-      <div className="p-4">
-        <button
-          onClick={handleLogout}
-          className="flex items-center w-full px-4 py-3 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg transition-colors"
-        >
-          <LogOut className="w-5 h-5 mr-3" />
-          Logout
-        </button>
+        <nav className="flex-1 px-4 space-y-2">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onClose}
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-orange-600 text-white'
+                    : 'hover:bg-stone-800 hover:text-white'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-3 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-3" />
+            Logout
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

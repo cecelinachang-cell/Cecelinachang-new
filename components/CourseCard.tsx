@@ -10,6 +10,7 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import { stripHtml } from "@/lib/utils";
 
 interface Course {
   id: string;
@@ -85,7 +86,7 @@ export default function CourseCard({ course }: { course: Course }) {
             </h2>
           </Link>
           <p className="text-charcoal-brown/75 text-lg mb-6 leading-relaxed">
-            {course.description}
+            {stripHtml(course.description)}
           </p>
 
           <div className="flex flex-wrap gap-4 text-sm text-charcoal-brown/60 mb-8">

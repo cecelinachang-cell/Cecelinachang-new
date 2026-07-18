@@ -7,7 +7,7 @@ import { Lock, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('signoratangerangclc@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,89 +25,19 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Local Bypass for dev/testing when rate limits are hit
-      if (
-        (email === 'signoratangerangclc@gmail.com' || email === 'cecelinachang@gmail.com') && 
-        password === 'HL121073'
-      ) {
-        const mockUser = {
-          id: 'mock-admin-id-1234',
-          email: email,
-          role: 'admin',
-        };
-        localStorage.setItem('admin_bypass_user', JSON.stringify(mockUser));
-        window.location.href = '/admin/dashboard';
-        return;
-      }
-
       const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      let session = signInData?.session;
+      if (signInErr) throw signInErr;
 
-      if (signInErr) {
-        if (
-          (email === 'signoratangerangclc@gmail.com' || email === 'cecelinachang@gmail.com') &&
-          signInErr.message.includes('Invalid login credentials')
-        ) {
-          // Attempt to register
-          const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-            email,
-            password,
-          });
-          if (signUpErr) {
-            if (signUpErr.message.toLowerCase().includes('rate limit')) {
-              throw new Error('Email rate limit exceeded. Please wait a bit or adjust rate limits in your Supabase Auth settings.');
-            }
-            throw signUpErr;
-          }
-          
-          if (signUpData.user) {
-            session = signUpData.session;
-            
-            // If session is null (needs confirmation), try to sign in again just in case
-            if (!session) {
-              const { data: retryData } = await supabase.auth.signInWithPassword({ email, password });
-              if (retryData?.session) session = retryData.session;
-            }
+      const currentUser = signInData?.session?.user;
+      if (!currentUser) throw new Error('No user session found. Please check your credentials.');
 
-             const { error: insertErr } = await supabase.from('users').upsert({
-               id: signUpData.user.id,
-               email: email,
-               role: 'admin',
-               created_at: new Date().toISOString()
-             });
-             if (insertErr) {
-               if (insertErr.message && (insertErr.message.includes('schema cache') || insertErr.message.includes('row-level security policy'))) {
-                 console.warn('Supabase schema not initialized yet or RLS prevents creation, skipping admin user record creation.');
-               } else {
-                 console.error('Error creating admin user record', insertErr.message || insertErr);
-               }
-             }
-          }
-        } else {
-          throw signInErr;
-        }
-      }
+      const { data: userDoc } = await supabase.from('users').select('role').eq('id', currentUser.id).single();
 
-      if (!session) {
-        const { data: sessionData } = await supabase.auth.getSession();
-        session = sessionData.session;
-      }
-
-      const currentUser = session?.user;
-
-      if (!currentUser) throw new Error("No user session found. Please check your credentials or verify your email.");
-
-      let isAdminUser = email === 'signoratangerangclc@gmail.com' || email === 'cecelinachang@gmail.com';
-      if (!isAdminUser) {
-        const { data: userDoc, error: userDocErr } = await supabase.from('users').select('role').eq('id', currentUser.id).single();
-        if (userDoc?.role === 'admin') isAdminUser = true;
-      }
-
-      if (isAdminUser) {
+      if (userDoc?.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
         await supabase.auth.signOut();
@@ -135,7 +65,7 @@ export default function AdminLogin() {
         )}
 
         <form onSubmit={handleLogin} className="space-y-6">
-          <div className="hidden">
+          <div>
             <label className="block text-sm font-medium text-stone-700 mb-2">Email Address</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

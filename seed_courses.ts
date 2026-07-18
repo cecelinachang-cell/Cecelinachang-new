@@ -1,22 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import { config } from 'dotenv';
 import { courses } from './app/data/courses';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+config({ path: '.env.local' });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !serviceRoleKey) {
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+}
+
+// Uses the service-role key (server-side only, bypasses RLS) instead of
+// signing in as a real admin account, so no credentials are hardcoded here.
+const supabase = createClient(supabaseUrl, serviceRoleKey);
 
 async function seed() {
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: 'signoratangerangclc@gmail.com',
-    password: 'HL121073'
-  });
-
-  if (authError) {
-    console.warn('Could not authenticate, proceeding as anonymous:', authError.message);
-  } else {
-    console.log('Authenticated as', authData.user?.email);
-  }
-
   for (const course of courses) {
     console.log('Inserting', course.title);
     const { error } = await supabase.from('courses').insert({
@@ -34,4 +33,3 @@ async function seed() {
   console.log('Seed done');
 }
 seed();
-
