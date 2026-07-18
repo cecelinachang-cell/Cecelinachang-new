@@ -192,26 +192,6 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             </ul>
           </section>
 
-          {/* Isi Materi (Kurikulum) */}
-          <section>
-            <h2 className="font-serif text-2xl font-bold text-orange-900 mb-6">Isi Materi Video</h2>
-            <div className="space-y-4">
-              {[...Array(course.modules || 0)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-5 bg-white border border-stone-200 rounded-2xl hover:border-orange-300 transition-colors">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-800 font-bold mr-4 flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    <span className="font-bold text-stone-800">Modul {i + 1}</span>
-                  </div>
-                  <div className="text-stone-500 text-sm flex items-center">
-                    <PlayCircle className="w-4 h-4 mr-1" /> Video
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
           {/* Testimoni */}
           <section>
             <h2 className="font-serif text-2xl font-bold text-orange-900 mb-6">Kata Murid yang Sudah Lulus</h2>
