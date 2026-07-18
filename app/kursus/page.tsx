@@ -1,6 +1,7 @@
 import { BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
+import Faq from "@/components/Faq";
 
 export const revalidate = 60; // Cache the page for 60 seconds
 
@@ -105,40 +106,7 @@ export default async function KursusPage() {
         )}
       </div>
 
-      {/* FAQ Singkat */}
-      <div className="mt-24 max-w-3xl mx-auto">
-        <h2 className="font-serif text-3xl font-bold text-orange-900 mb-8 text-center">
-          Pertanyaan Sering Diajukan
-        </h2>
-        <div className="space-y-6">
-          {[
-            {
-              q: "Apakah kelas ini cocok untuk pemula yang belum pernah baking?",
-              a: "Sangat cocok! Semua materi dijelaskan dari nol, mulai dari pengenalan alat dan bahan hingga teknik dasar.",
-            },
-            {
-              q: "Bagaimana cara mengakses video kelasnya?",
-              a: "Setelah pembayaran, Anda akan diberikan link khusus dan password untuk menonton video kapan saja melalui HP atau laptop.",
-            },
-            {
-              q: "Apakah ada batas waktu untuk menonton video?",
-              a: "Tidak ada. Akses video berlaku seumur hidup. Anda bisa menonton ulang berkali-kali.",
-            },
-            {
-              q: "Kalau ada yang bingung, apakah bisa bertanya?",
-              a: "Tentu saja! Anda akan mendapatkan akses konsultasi langsung dengan cece lina chang untuk tanya jawab.",
-            },
-          ].map((faq, i) => (
-            <div
-              key={i}
-              className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100"
-            >
-              <h3 className="font-bold text-lg text-stone-800 mb-2">{faq.q}</h3>
-              <p className="text-stone-600 leading-relaxed">{faq.a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Faq categories={["course", "refund"]} title="Pertanyaan Sering Diajukan" />
     </div>
   );
 }

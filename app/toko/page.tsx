@@ -8,6 +8,7 @@ import { products as fallbackProducts } from "@/app/data/products";
 import { motion, AnimatePresence } from "motion/react";
 
 import { ShoppingBag } from "lucide-react";
+import Faq from "@/components/Faq";
 
 interface Product {
   id: string;
@@ -240,6 +241,8 @@ export default function TokoPage() {
           </div>
         </div>
       </div>
+
+      <Faq categories={["shipping", "refund"]} />
     </div>
   );
 }
