@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star, ShoppingBag, BookOpen } from "lucide-react";
+import { ArrowRight, ShoppingBag, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 import { Marginalia } from "@/components/Marginalia";
@@ -140,11 +140,12 @@ export default function Home() {
               animate="visible"
             >
               <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
-                <Marginalia rotate={-3}>sudah 10.000+ orang gabung di komunitas ini, makasih ya!</Marginalia>
+                <p className="text-sm text-charcoal-brown/60 mb-1">Yang paling sering ditanya ke aku:</p>
+                <Marginalia rotate={-3}>&quot;Kenapa harus belajar dari Cece?&quot;</Marginalia>
               </motion.div>
 
               <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
-                <Marginalia rotate={2}>28 tahun pengalaman aku di industri bakso lho</Marginalia>
+                <Marginalia rotate={2}>Karena aku udah 28 tahun ngurus pabrik bakso sapi sendiri, sejak 1998.</Marginalia>
               </motion.div>
 
               <motion.h1
@@ -184,23 +185,11 @@ export default function Home() {
 
               <motion.div
                 variants={fadeUpVariant}
-                className="mt-10 flex items-center justify-center lg:justify-start gap-4 text-sm text-stone-500 font-medium"
+                className="mt-10 flex items-center justify-center lg:justify-start"
               >
-                <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-orange-200 flex items-center justify-center text-orange-700 font-bold">
-                    A
-                  </div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-yellow-200 flex items-center justify-center text-yellow-700 font-bold">
-                    B
-                  </div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-green-200 flex items-center justify-center text-green-700 font-bold">
-                    C
-                  </div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center text-stone-600 text-xs">
-                    +2k
-                  </div>
-                </div>
-                <p>Dipercaya oleh ribuan ibu rumah tangga</p>
+                <Marginalia rotate={-2} className="text-lg sm:text-xl">
+                  — Cece Lina Chang, yang bakal temenin kamu belajar
+                </Marginalia>
               </motion.div>
             </motion.div>
 
@@ -225,18 +214,8 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 <div className="absolute bottom-8 left-8 right-8 text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-sm font-medium">5.0 Rating</span>
-                  </div>
-                  <p className="font-serif text-xl font-medium italic">
-                    &quot;Resepnya mudah diikuti, hasilnya selalu
-                    sempurna!&quot;
-                  </p>
+                  <p className="font-serif text-xl font-semibold">Cece Lina Chang</p>
+                  <p className="text-sm text-white/80">Pembuat kelas ini</p>
                 </div>
               </div>
 
