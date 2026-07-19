@@ -1,251 +1,358 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Package, Tags, Zap, PlusCircle, ExternalLink, BookOpen, Users, MousePointer2, Activity } from 'lucide-react';
+import {
+  Package,
+  Tags,
+  Zap,
+  PlusCircle,
+  ExternalLink,
+  BookOpen,
+  Users,
+  MousePointer2,
+  Activity,
+  RefreshCw,
+  Inbox,
+  AlertCircle,
+} from 'lucide-react';
 import Link from 'next/link';
+import TrendChart from '@/components/admin/TrendChart';
+import { percentChange, type SeriesPoint } from '@/lib/forecast';
+
+const RANGES = [
+  { label: '7 days', days: 7 },
+  { label: '30 days', days: 30 },
+  { label: '90 days', days: 90 },
+];
+
+type Summary = {
+  sessions: number;
+  clicks: number;
+  leads: number;
+  prev_sessions: number;
+  prev_clicks: number;
+  prev_leads: number;
+  active_now: number;
+};
+
+const EMPTY_SUMMARY: Summary = {
+  sessions: 0,
+  clicks: 0,
+  leads: 0,
+  prev_sessions: 0,
+  prev_clicks: 0,
+  prev_leads: 0,
+  active_now: 0,
+};
+
+type TopPage = { path: string; views: number; sessions: number };
+
+/**
+ * The analytics rollups live in Postgres (see
+ * supabase/migrations/20260719_analytics_rollups.sql). If they haven't been
+ * applied yet the RPC 404s, so surface that instead of rendering zeros.
+ */
+const MISSING_RPC_HINT =
+  'Analytics functions not found. Apply supabase/migrations/20260719_analytics_rollups.sql.';
+
+function describeError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes('schema cache') || msg.includes('does not exist') || msg.includes('404')) {
+    return MISSING_RPC_HINT;
+  }
+  if (msg.includes('Failed to fetch')) {
+    return 'Could not reach the database. An ad blocker or network issue may be blocking Supabase.';
+  }
+  return msg;
+}
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalItems: 0,
-    totalCategories: 0,
-    totalCourses: 0,
-    uniqueVisitors: 0,
-    activeNow: 0,
-    totalClicks: 0
-  });
+  const [days, setDays] = useState(30);
 
-  const [topPages, setTopPages] = useState<{path: string, views: number}[]>([]);
-  const [recentClicks, setRecentClicks] = useState<any[]>([]);
+  const [content, setContent] = useState({ totalItems: 0, totalCategories: 0, totalCourses: 0 });
+  const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
+  const [sessionSeries, setSessionSeries] = useState<SeriesPoint[]>([]);
+  const [clickSeries, setClickSeries] = useState<SeriesPoint[]>([]);
+  const [leadSeries, setLeadSeries] = useState<SeriesPoint[]>([]);
+  const [topPages, setTopPages] = useState<TopPage[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchBasicStats = async () => {
-      try {
-        const [{ count: itemsCount, data: itemsData }, { count: coursesCount }] = await Promise.all([
-          supabase.from('items').select('category', { count: 'exact' }),
-          supabase.from('courses').select('id', { count: 'exact', head: true }),
-        ]);
+  const fetchContentStats = useCallback(async () => {
+    try {
+      const [{ count: itemsCount, data: itemsData }, { count: coursesCount }] = await Promise.all([
+        supabase.from('items').select('category', { count: 'exact' }),
+        supabase.from('courses').select('id', { count: 'exact', head: true }),
+      ]);
 
-        if (!isMounted) return;
+      const categories = new Set<string>();
+      itemsData?.forEach((row) => {
+        if (row.category && row.category !== 'Semua Produk') categories.add(row.category);
+      });
 
-        const categories = new Set();
-        itemsData?.forEach(data => {
-          if (data.category && data.category !== 'Semua Produk') {
-            categories.add(data.category);
-          }
-        });
-
-        setStats(prev => ({
-          ...prev,
-          totalItems: itemsCount || 0,
-          totalCategories: categories.size,
-          totalCourses: coursesCount || 0,
-        }));
-        
-        // Continue fetching analytics data
-        fetchAnalytics();
-
-      } catch (err: any) {
-        const errMsg = err.message || err.toString();
-        if (errMsg.includes('schema cache')) {
-           console.warn('Supabase schema not initialized yet.');
-        } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
-           console.warn('AdBlocker or database connection issue. Dashboard fell back to empty stats.');
-        } else {
-           console.error('Error fetching stats:', errMsg);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    const fetchAnalytics = async () => {
-      try {
-        // Fetch all sessions to count unique ones for total visitors
-        // In a production app with millions of views, you'd use a postgres function or a summary table.
-        const { data: allSessions, error: sessionsErr } = await supabase
-          .from('page_views')
-          .select('session_id');
-
-        const { count: clicksCount } = await supabase
-          .from('clicks')
-          .select('id', { count: 'exact', head: true });
-
-        let uniqueVisitors = 0;
-        if (allSessions) {
-          const sessions = new Set(allSessions.map(s => s.session_id));
-          uniqueVisitors = sessions.size;
-        }
-
-        let activeNow = 0;
-        let totalClicks = clicksCount || 0;
-        let topPagesData: {path: string, views: number}[] = [];
-        let clicksData: any[] = [];
-        
-        try {
-          const nowMs = Date.now();
-          const fiveMinsAgoMs = nowMs - 5 * 60000;
-          const fiveMinsAgoIso = new Date(fiveMinsAgoMs).toISOString();
-
-          // Load active sessions softly
-          const [recentViewsResponse, recentClicksResponse, sampledViewsResponse] = await Promise.all([
-             supabase.from('page_views').select('session_id').gte('created_at', fiveMinsAgoIso),
-             supabase.from('clicks').select('*').order('created_at', { ascending: false }).limit(10),
-             supabase.from('page_views').select('path').limit(2000)
-          ]);
-
-          if (recentViewsResponse.data) {
-             const activeSessions = new Set(recentViewsResponse.data.map(v => v.session_id));
-             activeNow = activeSessions.size;
-          }
-
-          if (recentClicksResponse.data) {
-             clicksData = recentClicksResponse.data;
-          }
-
-          if (sampledViewsResponse.data) {
-            const pageCounts: Record<string, number> = {};
-            sampledViewsResponse.data.forEach(v => {
-              if (v.path) pageCounts[v.path] = (pageCounts[v.path] || 0) + 1;
-            });
-            topPagesData = Object.entries(pageCounts)
-              .map(([path, views]) => ({ path, views }))
-              .sort((a, b) => b.views - a.views)
-              .slice(0, 5);
-          }
-
-        } catch (e: any) {
-          const errMsg = e.message || e.toString();
-          if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-            console.error("Error fetching analytics details", e);
-          }
-        }
-
-        if (!isMounted) return;
-
-        setStats(prev => ({
-          ...prev,
-          uniqueVisitors,
-          activeNow,
-          totalClicks
-        }));
-        
-        setTopPages(topPagesData);
-        setRecentClicks(clicksData);
-      } catch (e: any) {
-        const errMsg = e.message || e.toString();
-        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-          console.error("Error fetching analytics overall", e);
-        }
-      }
-    };
-
-    fetchBasicStats();
-    
-    // Subscribe to updates for product changes only
-    const channel = supabase
-      .channel('dashboard_stats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
-         fetchBasicStats();
-      })
-      .subscribe();
-
-    return () => {
-      isMounted = false;
-      supabase.removeChannel(channel);
-    };
+      setContent({
+        totalItems: itemsCount || 0,
+        totalCategories: categories.size,
+        totalCourses: coursesCount || 0,
+      });
+    } catch (err) {
+      console.error('Error fetching content stats:', describeError(err));
+    }
   }, []);
 
-  // If loading, we could render the exact same UI but with skeletons instead of hiding the whole UI
-  // But for now, we will just render the empty state / 0 stats directly to feel instant.
+  /**
+   * Switching range fires a new set of RPCs before the old ones settle. Only
+   * the newest request may write state, or a slow 90-day response can land on
+   * top of a fresh 7-day one.
+   */
+  const reqIdRef = useRef(0);
+
+  const fetchAnalytics = useCallback(async (range: number) => {
+    const reqId = ++reqIdRef.current;
+    const isStale = () => reqId !== reqIdRef.current;
+
+    setAnalyticsError(null);
+    try {
+      const [summaryRes, sessionsRes, clicksRes, leadsRes, pagesRes] = await Promise.all([
+        supabase.rpc('analytics_summary', { days: range }),
+        supabase.rpc('analytics_daily_sessions', { days: range }),
+        supabase.rpc('analytics_daily_clicks', { days: range }),
+        supabase.rpc('analytics_daily_leads', { days: range }),
+        supabase.rpc('analytics_top_pages', { days: range, lim: 8 }),
+      ]);
+
+      if (isStale()) return;
+
+      const firstError = [summaryRes, sessionsRes, clicksRes, leadsRes, pagesRes].find(
+        (r) => r.error,
+      )?.error;
+      if (firstError) throw firstError;
+
+      // analytics_summary returns a single row via a set-returning function.
+      const row = Array.isArray(summaryRes.data) ? summaryRes.data[0] : summaryRes.data;
+      setSummary(row ? { ...EMPTY_SUMMARY, ...row } : EMPTY_SUMMARY);
+
+      setSessionSeries(
+        (sessionsRes.data ?? []).map((d: { day: string; sessions: number }) => ({
+          day: d.day,
+          value: Number(d.sessions),
+        })),
+      );
+      setClickSeries(
+        (clicksRes.data ?? []).map((d: { day: string; clicks: number }) => ({
+          day: d.day,
+          value: Number(d.clicks),
+        })),
+      );
+      setLeadSeries(
+        (leadsRes.data ?? []).map((d: { day: string; leads: number }) => ({
+          day: d.day,
+          value: Number(d.leads),
+        })),
+      );
+      setTopPages(
+        (pagesRes.data ?? []).map((p: { path: string; views: number; sessions: number }) => ({
+          path: p.path,
+          views: Number(p.views),
+          sessions: Number(p.sessions),
+        })),
+      );
+      setLastUpdated(new Date());
+    } catch (err) {
+      if (isStale()) return;
+      setAnalyticsError(describeError(err));
+    }
+  }, []);
+
+  const refresh = useCallback(
+    async (range: number) => {
+      setLoading(true);
+      await Promise.all([fetchContentStats(), fetchAnalytics(range)]);
+      setLoading(false);
+    },
+    [fetchContentStats, fetchAnalytics],
+  );
+
+  useEffect(() => {
+    refresh(days);
+  }, [days, refresh]);
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-stone-900">Dashboard Overview</h1>
-        <p className="text-stone-500 mt-2">Welcome to your admin control panel. Analytics are real-time.</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-stone-900">Dashboard Overview</h1>
+          <p className="text-stone-500 mt-2">
+            Traffic and conversion trends, with a 7-day projection.
+            {lastUpdated && (
+              <span className="text-stone-400">
+                {' '}
+                Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex bg-stone-100 rounded-full p-1">
+            {RANGES.map((r) => (
+              <button
+                key={r.days}
+                onClick={() => setDays(r.days)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                  days === r.days
+                    ? 'bg-white text-stone-900 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-700'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => refresh(days)}
+            disabled={loading}
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:text-orange-600 hover:border-orange-200 transition-colors disabled:opacity-50"
+            title="Refresh analytics"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
-      {/* Analytics Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-            <Activity className="w-6 h-6" />
-          </div>
+      {analyticsError && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 rounded-2xl p-4 text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-stone-500 font-medium text-sm">Active Visitors (Last 5m)</h3>
-            <div className="text-3xl font-bold text-stone-900 flex items-baseline gap-2">
-              {stats.activeNow}
-              {stats.activeNow > 0 && (
-                <span className="text-xs text-green-500 font-medium animate-pulse flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500 block"></span> Live
-                </span>
-              )}
-            </div>
+            <p className="font-medium">Analytics could not be loaded.</p>
+            <p className="text-red-600/80 mt-0.5">{analyticsError}</p>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-            <Users className="w-6 h-6" />
+      )}
+
+      {/* Headline analytics, each compared against the previous equal window. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <StatCard
+          label="Active Now (5m)"
+          value={summary.active_now}
+          icon={<Activity className="w-6 h-6" />}
+          tone="red"
+          live={summary.active_now > 0}
+        />
+        <StatCard
+          label={`Sessions (${days}d)`}
+          value={summary.sessions}
+          delta={percentChange(summary.sessions, summary.prev_sessions)}
+          icon={<Users className="w-6 h-6" />}
+          tone="blue"
+          hint="Browser tab sessions, not unique people — the session id resets per tab."
+        />
+        <StatCard
+          label={`Link Clicks (${days}d)`}
+          value={summary.clicks}
+          delta={percentChange(summary.clicks, summary.prev_clicks)}
+          icon={<MousePointer2 className="w-6 h-6" />}
+          tone="indigo"
+        />
+        <StatCard
+          label={`Leads (${days}d)`}
+          value={summary.leads}
+          delta={percentChange(summary.leads, summary.prev_leads)}
+          icon={<Inbox className="w-6 h-6" />}
+          tone="green"
+          hint="Course sign-ups plus chatbot follow-up requests."
+        />
+      </div>
+
+      {/* Trends + projection */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <TrendChart
+          title="Sessions"
+          subtitle={`${summary.sessions.toLocaleString()} sessions in the last ${days} days`}
+          series={sessionSeries}
+          color="#3b82f6"
+          loading={loading}
+          error={analyticsError}
+        />
+        <TrendChart
+          title="Leads"
+          subtitle={`${summary.leads.toLocaleString()} leads in the last ${days} days`}
+          series={leadSeries}
+          color="#16a34a"
+          loading={loading}
+          error={analyticsError}
+        />
+        <TrendChart
+          title="Link Clicks"
+          subtitle={`${summary.clicks.toLocaleString()} clicks in the last ${days} days`}
+          series={clickSeries}
+          color="#6366f1"
+          loading={loading}
+          error={analyticsError}
+        />
+
+        {/* Top Pages */}
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+          <div className="p-6 border-b border-stone-100">
+            <h3 className="font-semibold text-stone-900">Top Visited Pages</h3>
+            <p className="text-sm text-stone-500 mt-1">Last {days} days</p>
           </div>
-          <div>
-            <h3 className="text-stone-500 font-medium text-sm">Unique Visitors</h3>
-            <div className="text-3xl font-bold text-stone-900">{stats.uniqueVisitors}</div>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-            <MousePointer2 className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-stone-500 font-medium text-sm">Tracked Link Clicks</h3>
-            <div className="text-3xl font-bold text-stone-900">{stats.totalClicks}</div>
-          </div>
+          {topPages.length > 0 ? (
+            <table className="w-full text-sm table-fixed">
+              <thead className="bg-stone-50 border-b border-stone-100">
+                <tr>
+                  <th className="px-6 py-3 text-left font-medium text-stone-500 w-1/2">Page Path</th>
+                  <th className="px-6 py-3 text-right font-medium text-stone-500 w-1/4">Sessions</th>
+                  <th className="px-6 py-3 text-right font-medium text-stone-500 w-1/4">Views</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {topPages.map((page) => (
+                  <tr key={page.path} className="hover:bg-stone-50 transition-colors">
+                    <td
+                      className="px-6 py-3 font-medium text-stone-900 truncate"
+                      title={page.path || '/'}
+                    >
+                      {page.path || '/'}
+                    </td>
+                    <td className="px-6 py-3 text-right text-stone-900">{page.sessions}</td>
+                    <td className="px-6 py-3 text-right text-stone-500">{page.views}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-6 text-center text-stone-500 text-sm">No page views recorded yet.</div>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Total Items</h3>
-            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-              <Package className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-stone-900">{stats.totalItems}</div>
-          <div className="text-sm text-stone-500 mt-2 flex items-center">
-            Published products in store
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Product Categories</h3>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-              <Tags className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-stone-900">{stats.totalCategories}</div>
-          <div className="text-sm text-stone-500 mt-2 flex items-center">
-            Active categories
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Total Courses</h3>
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
-              <BookOpen className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-stone-900">{stats.totalCourses}</div>
-          <div className="text-sm text-stone-500 mt-2 flex items-center">
-            Published online courses
-          </div>
-        </div>
+      {/* Content inventory */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-12">
+        <ContentCard
+          label="Total Items"
+          value={content.totalItems}
+          caption="Published products in store"
+          icon={<Package className="w-5 h-5" />}
+          tone="orange"
+        />
+        <ContentCard
+          label="Product Categories"
+          value={content.totalCategories}
+          caption="Active categories"
+          icon={<Tags className="w-5 h-5" />}
+          tone="blue"
+        />
+        <ContentCard
+          label="Total Courses"
+          value={content.totalCourses}
+          caption="Published online courses"
+          icon={<BookOpen className="w-5 h-5" />}
+          tone="purple"
+        />
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
           <div className="flex items-center justify-between mb-4">
@@ -255,85 +362,119 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex flex-col gap-2 mt-2">
-            <Link href="/admin/items" className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2">
+            <Link
+              href="/admin/leads"
+              className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2"
+            >
+              <Inbox className="w-4 h-4 mr-2" /> View Leads
+            </Link>
+            <Link
+              href="/admin/items"
+              className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2"
+            >
               <PlusCircle className="w-4 h-4 mr-2" /> Add New Product
             </Link>
-            <Link href="/admin/courses" className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2">
-              <PlusCircle className="w-4 h-4 mr-2" /> Add New Course
-            </Link>
-            <Link href="/toko" target="_blank" className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2">
+            <Link
+              href="/toko"
+              target="_blank"
+              className="flex items-center text-sm font-medium text-stone-700 hover:text-orange-600 transition-colors p-2 hover:bg-orange-50 rounded-lg -mx-2"
+            >
               <ExternalLink className="w-4 h-4 mr-2" /> View Storefront
             </Link>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-        {/* Top Pages */}
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
-          <div className="p-6 border-b border-stone-100">
-            <h3 className="font-semibold text-stone-900">Top Visited Pages</h3>
-          </div>
-          <div className="p-0">
-            {topPages.length > 0 ? (
-              <table className="w-full text-sm table-fixed">
-                <thead className="bg-stone-50 border-b border-stone-100">
-                  <tr>
-                    <th className="px-6 py-3 text-left font-medium text-stone-500 w-2/3">Page Path</th>
-                    <th className="px-6 py-3 text-right font-medium text-stone-500 w-1/3">Total Views</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100">
-                  {topPages.map((page, idx) => (
-                    <tr key={idx} className="hover:bg-stone-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-stone-900 truncate" title={page.path || '/'}>{page.path || '/'}</td>
-                      <td className="px-6 py-4 text-right text-stone-600">{page.views}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="p-6 text-center text-stone-500 text-sm">No page views recorded yet.</div>
-            )}
-          </div>
+const TONES: Record<string, string> = {
+  red: 'bg-red-100 text-red-600',
+  blue: 'bg-blue-100 text-blue-600',
+  indigo: 'bg-indigo-100 text-indigo-600',
+  green: 'bg-green-100 text-green-600',
+  orange: 'bg-orange-100 text-orange-600',
+  purple: 'bg-purple-100 text-purple-600',
+};
+
+function StatCard({
+  label,
+  value,
+  delta,
+  icon,
+  tone,
+  live,
+  hint,
+}: {
+  label: string;
+  value: number;
+  delta?: number | null;
+  icon: React.ReactNode;
+  tone: string;
+  live?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4">
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${TONES[tone]}`}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <h3 className="text-stone-500 font-medium text-sm truncate" title={hint}>
+          {label}
+        </h3>
+        <div className="text-3xl font-bold text-stone-900 flex items-baseline gap-2">
+          {value.toLocaleString()}
+          {live && (
+            <span className="text-xs text-green-500 font-medium animate-pulse flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-green-500 block" /> Live
+            </span>
+          )}
         </div>
-
-        {/* Recent Clicks */}
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
-          <div className="p-6 border-b border-stone-100">
-            <h3 className="font-semibold text-stone-900">Recent Outbound/Link Clicks</h3>
-          </div>
-          <div className="p-0">
-            {recentClicks.length > 0 ? (
-              <table className="w-full text-sm table-fixed">
-                <thead className="bg-stone-50 border-b border-stone-100">
-                  <tr>
-                    <th className="px-6 py-3 text-left font-medium text-stone-500 w-1/3">Link Text</th>
-                    <th className="px-6 py-3 text-left font-medium text-stone-500 w-1/3">Target URL</th>
-                    <th className="px-6 py-3 text-right font-medium text-stone-500 w-1/3">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100">
-                  {recentClicks.map((click, idx) => (
-                    <tr key={idx} className="hover:bg-stone-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-stone-900 truncate" title={click.link_text}>{click.link_text || '(Empty)'}</td>
-                      <td className="px-6 py-4 text-stone-600 truncate" title={click.url}>
-                        <a href={click.url} target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 hover:underline">{click.url}</a>
-                      </td>
-                      <td className="px-6 py-4 text-right text-stone-500 text-xs">
-                        {new Date(click.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {delta !== undefined && (
+          <p className="text-xs mt-1">
+            {delta === null ? (
+              <span className="text-stone-400">No prior period to compare</span>
             ) : (
-              <div className="p-6 text-center text-stone-500 text-sm">No clicks tracked yet.</div>
+              <span
+                className={
+                  delta > 0 ? 'text-green-600' : delta < 0 ? 'text-red-600' : 'text-stone-400'
+                }
+              >
+                {delta > 0 ? '+' : ''}
+                {delta.toFixed(0)}% vs previous period
+              </span>
             )}
-          </div>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ContentCard({
+  label,
+  value,
+  caption,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: number;
+  caption: string;
+  icon: React.ReactNode;
+  tone: string;
+}) {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-stone-500 font-medium">{label}</h3>
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${TONES[tone]}`}>
+          {icon}
         </div>
       </div>
+      <div className="text-3xl font-bold text-stone-900">{value}</div>
+      <div className="text-sm text-stone-500 mt-2">{caption}</div>
     </div>
   );
 }
