@@ -24,8 +24,8 @@ This spec replaces that manual flow with an online payment (Midtrans) that, on s
 ## Buyer flow
 
 1. Visitor lands on `/kursus/[slug]`, sees pricing card with a "Beli Sekarang" (Buy Now) button (replaces WhatsApp CTA).
-2. Clicking it prompts for email (simple inline field, no full signup).
-3. Server creates a Midtrans Snap transaction for that course + email, returns a Snap token; client opens the Midtrans Snap popup.
+2. Clicking it opens a short checkout form: **nama, umur, kota asal, akun Instagram, email** (all required).
+3. Server creates a Midtrans Snap transaction for that course + form data, returns a Snap token; client opens the Midtrans Snap popup. Form data is saved immediately (with the `purchases` row, status `pending`) — captured even if the buyer abandons payment.
 4. Buyer completes payment in the popup (QRIS/VA/e-wallet/card).
 5. Midtrans calls our server-to-server webhook on payment settlement. Webhook verifies signature, marks the order `paid`, creates/links a `purchases` row (email + course_id).
 6. Server emails the buyer a Supabase magic link (passwordless login).
@@ -39,7 +39,7 @@ Returning buyers: they can revisit `/kursus/[slug]` any time, log in via magic l
 
 New tables:
 
-- **`purchases`**: `id, email, course_id, order_id (midtrans), status (pending/paid/failed), amount, created_at, paid_at`. RLS: a user can only read their own rows (matched by auth email).
+- **`purchases`**: `id, email, nama, umur, kota_asal, instagram, course_id, order_id (midtrans), status (pending/paid/failed), amount, created_at, paid_at`. RLS: a user can only read their own rows (matched by auth email); admin CMS can read all rows for later use (e.g. marketing/outreach export).
 - **`course_modules`**: `id, course_id, title, video_url (Google Drive), sort_order`. Replaces the current fake `modules` *count* field for display purposes; admin-editable. `courses.modules` (count) stays for list-page display but detail page prefers real modules when present.
 
 Existing tables unaffected (`courses`, `users`, `testimonials`, `settings`).
@@ -72,7 +72,8 @@ Reuse Supabase Auth (already used for admin Google OAuth) but add **email magic 
 
 ## Error handling
 
-- Checkout: if Snap transaction creation fails, show inline error, don't lose the buyer's email input.
+- Checkout form: validate required fields (nama, umur numeric, kota asal, instagram handle, email format) client-side before submit.
+- Checkout: if Snap transaction creation fails, show inline error, don't lose the buyer's filled-in form data.
 - Webhook: verify signature; reject/ignore invalid requests; idempotent on `order_id` (re-deliveries don't double-create purchases).
 - Magic link email failure: log server-side; buyer can request resend from a "didn't get the email?" link on a confirmation page.
 - Module video missing/broken Drive link: admin CMS should validate URL format on save; rendered page falls back to "Video sedang diperbarui" message rather than a broken iframe.
