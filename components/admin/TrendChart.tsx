@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { projectTrend, type SeriesPoint } from '@/lib/forecast';
+import { projectTrend, backtestProjection, type SeriesPoint } from '@/lib/forecast';
 
 type TrendChartProps = {
   title: string;
@@ -23,7 +23,20 @@ type TrendChartProps = {
   horizon?: number;
   loading?: boolean;
   error?: string | null;
+  /** Appended after formatted numbers, e.g. '%' for a rate series. */
+  unit?: string;
+  /** Round to this many decimals instead of the default integer display. */
+  decimals?: number;
+  /** 'sum' for counts (default), 'avg' for rates like conversion % where totaling days is meaningless. */
+  aggregate?: 'sum' | 'avg';
 };
+
+function formatValue(value: number, unit?: string, decimals = 0): string {
+  return `${value.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })}${unit ?? ''}`;
+}
 
 const formatDay = (day: string) => {
   const d = new Date(`${day}T00:00:00Z`);
@@ -38,8 +51,12 @@ export default function TrendChart({
   horizon = 7,
   loading = false,
   error = null,
+  unit,
+  decimals = 0,
+  aggregate = 'sum',
 }: TrendChartProps) {
   const projection = useMemo(() => projectTrend(series, horizon), [series, horizon]);
+  const backtest = useMemo(() => backtestProjection(series, horizon), [series, horizon]);
 
   /**
    * Recharts draws a gap wherever a value is null, so actual and projected are
@@ -61,7 +78,8 @@ export default function TrendChart({
     ];
   }, [series, projection]);
 
-  const total = series.reduce((sum, p) => sum + p.value, 0);
+  const sum = series.reduce((s, p) => s + p.value, 0);
+  const total = aggregate === 'avg' ? (series.length ? sum / series.length : 0) : sum;
 
   const trendIcon =
     projection?.direction === 'up' ? (
@@ -79,9 +97,9 @@ export default function TrendChart({
         ? 'text-red-600 bg-red-50'
         : 'text-stone-500 bg-stone-100';
 
-  const projectedTotal = projection
-    ? projection.points.reduce((sum, p) => sum + p.value, 0)
-    : 0;
+  const projectedSum = projection ? projection.points.reduce((s, p) => s + p.value, 0) : 0;
+  const projectedTotal =
+    aggregate === 'avg' && projection ? projectedSum / projection.points.length : projectedSum;
 
   const gradientId = `grad-${title.replace(/\s+/g, '-').toLowerCase()}`;
 
@@ -91,22 +109,32 @@ export default function TrendChart({
         <div>
           <h3 className="font-semibold text-stone-900">{title}</h3>
           <p className="text-sm text-stone-500 mt-1">
-            {subtitle ?? `${total.toLocaleString()} in selected range`}
+            {subtitle ?? `${formatValue(total, unit, decimals)} in selected range`}
           </p>
         </div>
-        {projection && (
-          <div
-            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full ${trendColor}`}
-            title={`Fitted trend: ${projection.slope >= 0 ? '+' : ''}${projection.slope.toFixed(2)} per day`}
-          >
-            {trendIcon}
-            <span>
-              {projection.direction === 'flat'
-                ? 'Holding steady'
-                : `${projection.direction === 'up' ? 'Trending up' : 'Trending down'}`}
+        <div className="flex flex-col items-end gap-1.5">
+          {projection && (
+            <div
+              className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full ${trendColor}`}
+              title={`Fitted trend: ${projection.slope >= 0 ? '+' : ''}${projection.slope.toFixed(2)} per day`}
+            >
+              {trendIcon}
+              <span>
+                {projection.direction === 'flat'
+                  ? 'Holding steady'
+                  : `${projection.direction === 'up' ? 'Trending up' : 'Trending down'}`}
+              </span>
+            </div>
+          )}
+          {backtest && (
+            <span
+              className="text-[11px] text-stone-400"
+              title={`Held out the last ${backtest.horizon} days, fit on what remained, and compared the projection to what actually happened. Mean absolute error: ${backtest.mape.toFixed(0)}%.`}
+            >
+              Projection accuracy: {backtest.accuracy.toFixed(0)}%
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="px-2 pb-4">
@@ -145,12 +173,13 @@ export default function TrendChart({
                 axisLine={false}
                 tickLine={false}
                 width={36}
-                allowDecimals={false}
+                allowDecimals={decimals > 0}
+                tickFormatter={(v) => formatValue(Number(v), unit, decimals)}
               />
               <Tooltip
                 labelFormatter={(day) => formatDay(String(day))}
                 formatter={(value, name) => [
-                  value == null ? 0 : Number(value),
+                  formatValue(value == null ? 0 : Number(value), unit, decimals),
                   name === 'projected' ? 'Projected' : 'Actual',
                 ]}
                 contentStyle={{
@@ -193,9 +222,9 @@ export default function TrendChart({
       <div className="px-6 py-3 bg-stone-50 border-t border-stone-100 text-xs text-stone-500">
         {projection ? (
           <>
-            Projected next {horizon} days:{' '}
+            Projected {aggregate === 'avg' ? 'average over' : 'total over'} next {horizon} days:{' '}
             <span className="font-semibold text-stone-700">
-              ~{projectedTotal.toLocaleString()}
+              ~{formatValue(projectedTotal, unit, decimals)}
             </span>{' '}
             <span className="text-stone-400">
               · linear trend on a {3}-day average, not a guarantee

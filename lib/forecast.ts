@@ -96,3 +96,50 @@ export function percentChange(current: number, previous: number): number | null 
   if (previous === 0) return current === 0 ? 0 : null;
   return ((current - previous) / previous) * 100;
 }
+
+export type Backtest = {
+  /** Mean absolute percentage error of the held-out projection vs what actually happened. */
+  mape: number;
+  /** 0-100, `100 - mape` clamped -- a plain-language "accuracy" score for the UI. */
+  accuracy: number;
+  horizon: number;
+};
+
+/**
+ * Retroactively checks the projection method: fit on everything except the
+ * last `horizon` days, project forward, and compare against what those days
+ * actually did. This is the only way to show "the projection is worth
+ * trusting" instead of just asserting it -- a fitted line always looks
+ * confident on its own training data.
+ *
+ * Returns null when there isn't enough history to hold out a full horizon
+ * and still clear MIN_POINTS for the fit.
+ */
+export function backtestProjection(series: SeriesPoint[], horizon = 7): Backtest | null {
+  if (!series || series.length < MIN_POINTS + horizon) return null;
+
+  const training = series.slice(0, series.length - horizon);
+  const actualHeldOut = series.slice(series.length - horizon);
+
+  const projection = projectTrend(training, horizon);
+  if (!projection) return null;
+
+  // Skip days where actual was 0 -- percentage error is undefined/infinite
+  // against a zero denominator, and low-traffic days shouldn't dominate the score.
+  let errorSum = 0;
+  let counted = 0;
+  for (let i = 0; i < horizon; i++) {
+    const actual = actualHeldOut[i]?.value ?? 0;
+    const predicted = projection.points[i]?.value ?? 0;
+    if (actual === 0) continue;
+    errorSum += Math.abs(actual - predicted) / actual;
+    counted++;
+  }
+
+  if (counted === 0) return null;
+
+  const mape = (errorSum / counted) * 100;
+  const accuracy = Math.max(0, 100 - mape);
+
+  return { mape, accuracy, horizon };
+}

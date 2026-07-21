@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
   Package,
@@ -50,11 +50,13 @@ type TopPage = { path: string; views: number; sessions: number };
 
 /**
  * The analytics rollups live in Postgres (see
- * supabase/migrations/20260719_analytics_rollups.sql). If they haven't been
- * applied yet the RPC 404s, so surface that instead of rendering zeros.
+ * supabase/migrations/20260719_analytics_rollups.sql and
+ * 20260720_analytics_dashboard_bundle.sql, applied in that order). If they
+ * haven't been applied yet the RPC 404s, so surface that instead of
+ * rendering zeros.
  */
 const MISSING_RPC_HINT =
-  'Analytics functions not found. Apply supabase/migrations/20260719_analytics_rollups.sql.';
+  'Analytics functions not found. Apply supabase/migrations/20260719_analytics_rollups.sql then 20260720_analytics_dashboard_bundle.sql.';
 
 function describeError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
@@ -76,6 +78,20 @@ export default function Dashboard() {
   const [clickSeries, setClickSeries] = useState<SeriesPoint[]>([]);
   const [leadSeries, setLeadSeries] = useState<SeriesPoint[]>([]);
   const [topPages, setTopPages] = useState<TopPage[]>([]);
+
+  /**
+   * Leads / sessions per day, as a percent. This is the number that actually
+   * says whether traffic is "performing" -- sessions and leads can both climb
+   * while the site is converting worse, and the raw count charts alone don't
+   * show that.
+   */
+  const conversionSeries = useMemo(() => {
+    const leadsByDay = new Map(leadSeries.map((p) => [p.day, p.value]));
+    return sessionSeries.map((p) => ({
+      day: p.day,
+      value: p.value > 0 ? ((leadsByDay.get(p.day) ?? 0) / p.value) * 100 : 0,
+    }));
+  }, [sessionSeries, leadSeries]);
 
   const [loading, setLoading] = useState(true);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
@@ -110,51 +126,45 @@ export default function Dashboard() {
    */
   const reqIdRef = useRef(0);
 
+  /**
+   * One RPC instead of five (summary + 3 daily series + top pages). Same
+   * underlying queries, bundled server-side into one jsonb payload -- see
+   * supabase/migrations/20260720_analytics_dashboard_bundle.sql. Cuts
+   * round-trips on every load and every range switch from 5 to 1.
+   */
   const fetchAnalytics = useCallback(async (range: number) => {
     const reqId = ++reqIdRef.current;
     const isStale = () => reqId !== reqIdRef.current;
 
     setAnalyticsError(null);
     try {
-      const [summaryRes, sessionsRes, clicksRes, leadsRes, pagesRes] = await Promise.all([
-        supabase.rpc('analytics_summary', { days: range }),
-        supabase.rpc('analytics_daily_sessions', { days: range }),
-        supabase.rpc('analytics_daily_clicks', { days: range }),
-        supabase.rpc('analytics_daily_leads', { days: range }),
-        supabase.rpc('analytics_top_pages', { days: range, lim: 8 }),
-      ]);
-
+      const { data, error } = await supabase.rpc('analytics_dashboard', { days: range, lim: 8 });
       if (isStale()) return;
+      if (error) throw error;
 
-      const firstError = [summaryRes, sessionsRes, clicksRes, leadsRes, pagesRes].find(
-        (r) => r.error,
-      )?.error;
-      if (firstError) throw firstError;
-
-      // analytics_summary returns a single row via a set-returning function.
-      const row = Array.isArray(summaryRes.data) ? summaryRes.data[0] : summaryRes.data;
-      setSummary(row ? { ...EMPTY_SUMMARY, ...row } : EMPTY_SUMMARY);
+      const summaryData = data?.summary;
+      setSummary(summaryData ? { ...EMPTY_SUMMARY, ...summaryData } : EMPTY_SUMMARY);
 
       setSessionSeries(
-        (sessionsRes.data ?? []).map((d: { day: string; sessions: number }) => ({
+        (data?.sessions ?? []).map((d: { day: string; sessions: number }) => ({
           day: d.day,
           value: Number(d.sessions),
         })),
       );
       setClickSeries(
-        (clicksRes.data ?? []).map((d: { day: string; clicks: number }) => ({
+        (data?.clicks ?? []).map((d: { day: string; clicks: number }) => ({
           day: d.day,
           value: Number(d.clicks),
         })),
       );
       setLeadSeries(
-        (leadsRes.data ?? []).map((d: { day: string; leads: number }) => ({
+        (data?.leads ?? []).map((d: { day: string; leads: number }) => ({
           day: d.day,
           value: Number(d.leads),
         })),
       );
       setTopPages(
-        (pagesRes.data ?? []).map((p: { path: string; views: number; sessions: number }) => ({
+        (data?.top_pages ?? []).map((p: { path: string; views: number; sessions: number }) => ({
           path: p.path,
           views: Number(p.views),
           sessions: Number(p.sessions),
@@ -164,6 +174,17 @@ export default function Dashboard() {
     } catch (err) {
       if (isStale()) return;
       setAnalyticsError(describeError(err));
+    }
+  }, []);
+
+  /** Polled independently of the range-scoped bundle above -- "Active Now" is a live figure, not a range figure. */
+  const fetchActiveNow = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.rpc('analytics_active_now');
+      if (error) throw error;
+      setSummary((prev) => ({ ...prev, active_now: Number(data ?? 0) }));
+    } catch (err) {
+      console.error('Error fetching active now:', describeError(err));
     }
   }, []);
 
@@ -179,6 +200,11 @@ export default function Dashboard() {
   useEffect(() => {
     refresh(days);
   }, [days, refresh]);
+
+  useEffect(() => {
+    const id = setInterval(fetchActiveNow, 30_000);
+    return () => clearInterval(id);
+  }, [fetchActiveNow]);
 
   return (
     <div className="space-y-8">
@@ -290,6 +316,17 @@ export default function Dashboard() {
           subtitle={`${summary.clicks.toLocaleString()} clicks in the last ${days} days`}
           series={clickSeries}
           color="#6366f1"
+          loading={loading}
+          error={analyticsError}
+        />
+        <TrendChart
+          title="Conversion Rate"
+          subtitle="Leads as a share of sessions, per day"
+          series={conversionSeries}
+          color="#d97706"
+          unit="%"
+          decimals={1}
+          aggregate="avg"
           loading={loading}
           error={analyticsError}
         />
