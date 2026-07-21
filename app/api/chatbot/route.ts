@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSiteKnowledge } from '@/lib/chatbot-knowledge';
+import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -20,6 +21,10 @@ function isValidMessage(value: unknown): value is ChatMessage {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(`chatbot:${getClientIp(request)}`, 10, 60_000)) {
+    return NextResponse.json({ error: 'Terlalu banyak pesan. Coba lagi sebentar lagi ya.' }, { status: 429 });
+  }
+
   if (!process.env.DEEPSEEK_API_KEY) {
     return NextResponse.json({ error: 'Layanan chat belum dikonfigurasi.' }, { status: 503 });
   }

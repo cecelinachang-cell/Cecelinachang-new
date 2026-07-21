@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  if (isRateLimited(`leads:${getClientIp(req)}`, 5, 60_000)) {
+    return NextResponse.json({ ok: false }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
 
   if (!body || typeof body !== 'object') {
