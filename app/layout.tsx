@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
@@ -25,6 +25,10 @@ const caveat = Caveat({
   variable: '--font-caveat',
   weight: ['500', '600', '700'],
 });
+
+export const viewport: Viewport = {
+  themeColor: '#C4622D',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   let title = 'Cece Lina Chang | Belajar Baking dari Rumah';
@@ -72,9 +76,14 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
     },
     icons: {
-      icon: '/icon.png',
-      apple: '/icon.png',
+      icon: [
+        { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+        { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+        { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+      ],
+      apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
     },
+    manifest: '/site.webmanifest',
     twitter: {
       card: 'summary_large_image',
       title,

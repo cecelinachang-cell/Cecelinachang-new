@@ -1,0 +1,37 @@
+{
+  "name": "Cece Lina Chang | Belajar Baking dari Rumah",
+  "short_name": "Cece Lina Chang",
+  "description": "Belajar baking dari rumah dengan mudah untuk pemula. Kursus baking online dan alat baking premium.",
+  "lang": "id",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF6EE",
+  "theme_color": "#C4622D",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
