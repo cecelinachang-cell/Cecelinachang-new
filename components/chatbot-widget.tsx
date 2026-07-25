@@ -1,10 +1,12 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Heart, MessageCircle, Send, Sparkles, UserRound, X } from 'lucide-react';
+import type { SearchResult } from '@/lib/search';
 
-type Message = { role: 'user' | 'assistant'; content: string };
+type Message = { role: 'user' | 'assistant'; content: string; results?: SearchResult[] };
 
 const initialMessages: Message[] = [{
   role: 'assistant',
@@ -57,6 +59,16 @@ export function ChatbotWidget() {
     if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
 
+  useEffect(() => {
+    function handleOpenChatbot(event: Event) {
+      const detail = (event as CustomEvent<{ query?: string }>).detail;
+      setIsOpen(true);
+      if (detail?.query) sendMessage(detail.query);
+    }
+    window.addEventListener('toko:open-chatbot', handleOpenChatbot);
+    return () => window.removeEventListener('toko:open-chatbot', handleOpenChatbot);
+  });
+
   async function sendMessage(messageText = input) {
     const text = messageText.trim();
     if (!text || isSending) return;
@@ -76,7 +88,8 @@ export function ChatbotWidget() {
       const reply = response.ok && data.reply
         ? data.reply
         : data.error || 'Aduh, chat sedang istirahat sebentar. Kamu bisa lanjut cerita ke admin lewat WhatsApp, ya.';
-      setMessages((current) => [...current, { role: 'assistant', content: reply }]);
+      const results: SearchResult[] | undefined = response.ok && Array.isArray(data.results) ? data.results : undefined;
+      setMessages((current) => [...current, { role: 'assistant', content: reply, results }]);
     } catch {
       setMessages((current) => [...current, { role: 'assistant', content: 'Aduh, chat sedang belum tersambung. Kamu bisa langsung hubungi admin lewat WhatsApp, ya.' }]);
     } finally {
@@ -138,7 +151,30 @@ export function ChatbotWidget() {
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={`animate-chat-bubble-in flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {message.role === 'assistant' && <span className="mt-1"><LinaAvatar size="sm" /></span>}
-                <p className={`max-w-[82%] whitespace-pre-wrap rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-md bg-terracotta text-white shadow-[0_6px_16px_rgba(196,98,45,0.18)]' : 'rounded-bl-md border border-butter/20 bg-white text-charcoal-brown shadow-[0_5px_14px_rgba(88,58,36,0.1)]'}`}>{message.content}</p>
+                <div className="flex max-w-[82%] flex-col gap-2">
+                  <p className={`whitespace-pre-wrap rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-md bg-terracotta text-white shadow-[0_6px_16px_rgba(196,98,45,0.18)]' : 'rounded-bl-md border border-butter/20 bg-white text-charcoal-brown shadow-[0_5px_14px_rgba(88,58,36,0.1)]'}`}>{message.content}</p>
+                  {message.results && message.results.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      {message.results.slice(0, 4).map((item) => (
+                        <Link
+                          key={`${item.type}-${item.id}`}
+                          href={item.type === 'product' ? `/toko/${item.slug}` : `/kursus/${item.slug}`}
+                          className="flex items-center gap-2 rounded-xl border border-butter/30 bg-white px-2.5 py-2 shadow-sm hover:border-terracotta/40"
+                        >
+                          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                            {item.image && (
+                              <Image src={item.image} alt={item.title} fill sizes="40px" className="object-cover" referrerPolicy="no-referrer" />
+                            )}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-xs font-semibold text-charcoal-brown">{item.title}</span>
+                            <span className="block text-xs text-terracotta">{item.price ?? 'Hubungi admin'}</span>
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
             {isSending && (
