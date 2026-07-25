@@ -76,8 +76,13 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
     },
     icons: {
+      // Google picks the search-result favicon from these. It wants a square
+      // that is a multiple of 48px, so /icon-48.png and /icon-96.png exist
+      // purely for the crawler; browsers keep using the .ico and the big PNGs.
       icon: [
-        { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+        { url: '/favicon.ico', sizes: '16x16 32x32 48x48 96x96' },
+        { url: '/icon-48.png', type: 'image/png', sizes: '48x48' },
+        { url: '/icon-96.png', type: 'image/png', sizes: '96x96' },
         { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
         { url: '/icon.png', type: 'image/png', sizes: '512x512' },
       ],
