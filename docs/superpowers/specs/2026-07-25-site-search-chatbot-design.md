@@ -3,6 +3,9 @@
 ## Goal
 Add a site-wide search bar (products + courses) and give the Lina chatbot the same search capability, so both surfaces use one source of truth and the chatbot can return clickable result cards instead of only text.
 
+## Mobile-first
+Traffic is mostly mobile. Every UI decision below defaults to the mobile layout first; desktop gets progressive enhancements, not the other way around.
+
 ## Scope
 - Searchable content: **products** (`/toko`) and **courses** (`/kursus`).
 - Explicitly excluded: **recipes** (`/resep`) — that page is a stub today (hardcoded list; `app/resep/[slug]/page.tsx` ignores the `slug` param and always renders the same recipe). Fixing that is a separate, later task.
@@ -34,14 +37,14 @@ Add a site-wide search bar (products + courses) and give the Lina chatbot the sa
 
 ## 2. Search bar UI
 
-- `components/navbar.tsx`: add a search (magnifying glass) icon next to the existing cart icon, in both the desktop row and the mobile row.
+- `components/navbar.tsx`: add a search (magnifying glass) icon next to the existing cart icon, in both the desktop row and the mobile row. Mobile row already has hamburger + cart icon — check spacing/tap-target size (44px min) so a third icon doesn't crowd it.
 - New `components/SearchOverlay.tsx`:
-  - Opens on icon click or `Cmd/Ctrl+K`.
-  - Centered modal, backdrop blur, closes on `Escape` or backdrop click.
+  - **Mobile (default): full-screen takeover.** Input pinned to the top (so the on-screen keyboard never covers it), large tap-friendly close (X) button, results as a single-column stacked list with generous row height (~56px min) for thumb tapping. The whole result row is tappable, not just the title text (no hover-dependent affordances — mobile has no hover).
+  - **Desktop (`md:` and up): progressive enhancement** to a centered modal with backdrop blur, closable via `Escape` or backdrop click. `Cmd/Ctrl+K` shortcut is desktop-only convenience; the icon tap is the primary entry point on all sizes.
   - Debounced (~300ms) input calls `/api/search`.
-  - Results grouped under "Produk" / "Kursus" headers, each rendered as a card (thumbnail, title, price, category badge) linking to `/toko/[slug]` or `/kursus/[slug]`.
+  - Results grouped under "Produk" / "Kursus" headers, each card showing thumbnail, title, price, category badge, linking to `/toko/[slug]` or `/kursus/[slug]`.
   - Empty/no-match state: message + "Tanya Lina" button that opens the chatbot widget with the query pre-filled.
-- `components/chatbot-widget.tsx` exposes a small way to be opened programmatically from outside (e.g. a lightweight custom event or shared context), since it's mounted independently in `app/layout.tsx`, so the "Tanya Lina" button can trigger it.
+- `components/chatbot-widget.tsx` exposes a small way to be opened programmatically from outside (e.g. a lightweight custom event or shared context), since it's mounted independently in `app/layout.tsx`, so the "Tanya Lina" button can trigger it. Its existing mobile sizing (`calc(100vw-2rem)`) already works with this — no change needed there.
 
 ## 3. Chatbot tool integration
 
@@ -53,8 +56,8 @@ Add a site-wide search bar (products + courses) and give the Lina chatbot the sa
   - **Fallback**: if tool calls aren't supported by `deepseek-v4-flash` or the tool-call parsing fails, catch it and skip the tool loop — behavior degrades to exactly what exists today (plain text reply using the embedded catalog knowledge from `lib/chatbot-knowledge.ts`). No regression risk.
 - `components/chatbot-widget.tsx`:
   - `Message` type gains optional `results?: SearchResult[]`.
-  - When present, render small product/course cards under Lina's bubble (same visual style as the search overlay cards), linking to the item's page.
+  - When present, render small product/course cards under Lina's bubble (same visual style as the search overlay cards), linking to the item's page. Cards stay full-width within the chat bubble column (already narrow on mobile at `max-w-sm`) so no separate mobile treatment needed there.
 
 ## Testing
-- Search bar: verify results for product-name query, course-title query, category query, and no-match query (shows Ask Lina fallback).
+- Search bar (mobile viewport first): verify full-screen takeover opens/closes correctly, input stays visible above the virtual keyboard, tap targets are comfortably tappable, results for product-name query, course-title query, category query, and no-match query (shows Ask Lina fallback). Then re-verify the desktop modal enhancement.
 - Chatbot: verify a product/course question triggers the tool and renders cards; verify a general question (e.g. shipping) still works via plain knowledge text; verify graceful fallback behavior if tool calling errors.
