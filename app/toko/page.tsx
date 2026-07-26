@@ -1,35 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { products as fallbackProducts } from "@/app/data/products";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence } from "motion/react";
 
 import { ShoppingBag } from "lucide-react";
 import Faq from "@/components/Faq";
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  imageUrl: string;
-  category?: string;
-  description?: string;
-  createdAt?: string;
-}
-
-const parseImageUrls = (url: string | undefined): string[] => {
-  if (!url) return [];
-  try {
-    const urls = JSON.parse(url);
-    if (Array.isArray(urls)) return urls;
-  } catch (e) {
-    //
-  }
-  return [url];
-};
+import ProductCard, { type Product } from "@/components/ProductCard";
 
 export default function TokoPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -94,12 +73,11 @@ export default function TokoPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
         <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-4">
-          Toko Alat Masak Signora
+          Toko Alat Baking Signora
         </h1>
         <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
-          Peralatan baking pilihan dari Signora yang saya gunakan sendiri di
-          setiap video. Kualitas terjamin untuk hasil baking yang maksimal dan
-          anti gagal.
+          Alat yang saya pakai sendiri di setiap video, biar hasil baking Anda
+          anti gagal juga.
         </p>
       </div>
 
@@ -122,67 +100,28 @@ export default function TokoPage() {
 
       {/* Product Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden animate-pulse flex flex-col"
             >
               <div className="w-full aspect-square sm:h-64 bg-stone-200"></div>
-              <div className="p-4 sm:p-6 flex flex-col flex-grow space-y-3 sm:space-y-4">
-                <div className="h-4 sm:h-6 bg-stone-200 rounded w-3/4"></div>
-                <div className="h-4 sm:h-6 bg-stone-200 rounded w-1/2"></div>
-                <div className="h-10 sm:h-12 bg-stone-200 rounded-xl w-full mt-auto"></div>
+              <div className="p-4 sm:p-6 flex flex-col flex-grow space-y-3">
+                <div className="h-6 bg-stone-200 rounded w-3/4"></div>
+                <div className="h-4 bg-stone-200 rounded w-1/3"></div>
+                <div className="h-6 bg-stone-200 rounded w-1/2 mt-auto"></div>
+                <div className="h-10 bg-stone-200 rounded-xl w-full"></div>
+                <div className="h-10 bg-stone-200 rounded-xl w-full"></div>
               </div>
             </div>
           ))}
         </div>
       ) : filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
           <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
-              >
-                <Link
-                  href={`/toko/${product.id}`}
-                  className="block relative aspect-square sm:aspect-auto sm:h-64 bg-stone-50 overflow-hidden"
-                >
-                  <Image
-                    src={
-                      parseImageUrls(product.imageUrl)[0] ||
-                      "https://picsum.photos/seed/placeholder/400/400"
-                    }
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                </Link>
-                <div className="p-4 sm:p-6 flex flex-col flex-grow">
-                  <Link href={`/toko/${product.id}`}>
-                    <h3 className="font-serif text-sm sm:text-xl font-bold text-charcoal-brown mb-1 sm:mb-2 group-hover:text-terracotta transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <div className="text-terracotta font-bold text-base sm:text-lg mb-3 sm:mb-4 mt-auto">
-                    {product.price}
-                  </div>
-                  <Link
-                    href={`/toko/${product.id}`}
-                    className="block w-full text-center py-2 sm:py-3 px-2 sm:px-4 bg-butter/20 text-rust-ink text-xs sm:text-base font-medium rounded-xl hover:bg-butter/35 transition-colors"
-                  >
-                    Detail
-                  </Link>
-                </div>
-              </motion.div>
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </AnimatePresence>
         </div>
@@ -196,8 +135,8 @@ export default function TokoPage() {
           </h2>
           <p className="text-charcoal-brown/60 max-w-md mx-auto">
             {selectedCategory === "Semua"
-              ? "Produk sedang dalam proses pembaruan. Silakan kembali lagi nanti."
-              : `Belum ada produk untuk kategori "${selectedCategory}".`}
+              ? "Produk sedang diperbarui. Kembali lagi sebentar lagi, ya."
+              : `Belum ada produk di kategori "${selectedCategory}".`}
           </p>
           {selectedCategory !== "Semua" && (
             <button
@@ -218,8 +157,9 @@ export default function TokoPage() {
               Butuh Rekomendasi Alat?
             </h2>
             <p className="text-butter/90 text-lg mb-8">
-              Jangan bingung memilih. Chat admin kami via WhatsApp untuk
-              konsultasi alat baking yang paling cocok untuk kebutuhan Anda.
+              Jangan bingung memilih. Chat admin kami via WhatsApp — respon
+              cepat, gratis konsultasi alat baking yang cocok untuk kebutuhan
+              Anda.
             </p>
             <a
               href="https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20butuh%20rekomendasi%20alat%20baking"

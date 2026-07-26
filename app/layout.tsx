@@ -4,6 +4,7 @@ import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ChatbotWidget } from '@/components/chatbot-widget';
+import { SearchOverlay } from '@/components/SearchOverlay';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { supabase } from '@/lib/supabase';
@@ -128,6 +129,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           </main>
           <Footer />
           <ChatbotWidget />
+          <SearchOverlay />
         </AuthProvider>
       </body>
     </html>
