@@ -16,8 +16,8 @@ interface Product {
   price: string;
   originalPrice?: string;
   category: string;
-  rating: number;
-  reviews: number;
+  rating?: number;
+  reviews?: number;
   imageUrl: string;
   isBundle?: boolean;
   description?: string;
@@ -228,12 +228,16 @@ export default function ProductDetail({ slug }: { slug: string }) {
               {product.name}
             </h1>
             <div className="flex items-center gap-4 text-stone-600 mb-4">
-              <div className="flex items-center">
-                <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                <span className="font-bold text-stone-800 ml-1.5">{product.rating}</span>
-                <span className="ml-1">({product.reviews} Ulasan)</span>
-              </div>
-              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+              {typeof product.rating === "number" && (
+                <>
+                  <div className="flex items-center">
+                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                    <span className="font-bold text-stone-800 ml-1.5">{product.rating}</span>
+                    <span className="ml-1">({product.reviews ?? 0} Ulasan)</span>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                </>
+              )}
               <div className="text-green-600 font-medium">Stok Tersedia</div>
             </div>
             <div className="flex items-center gap-4 mb-6">
