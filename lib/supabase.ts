@@ -22,6 +22,15 @@ export const supabase = typeof window === 'undefined'
   ? createClient(supabaseUrl, supabaseAnonKey)
   : createBrowserClient(supabaseUrl, supabaseAnonKey)
 
+// Stateless anon client for public, unauthenticated reads (product catalog,
+// search, etc.). Unlike `supabase` above, this never touches GoTrueClient's
+// navigator.locks-based session init, so it can't hang if that lock is ever
+// left stuck held by another tab/session. Use this instead of `supabase` for
+// any client-side fetch that doesn't need the logged-in user's session.
+export const supabasePublic = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+})
+
 export const isSupabaseConfigured = (): boolean => {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return false;
