@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       // Next.js injects inline bootstrap scripts; nonce-based CSP would need
       // per-request nonces, so allow inline as the pragmatic baseline.
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co",
       "font-src 'self' data:",
