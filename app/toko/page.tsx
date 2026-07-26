@@ -8,6 +8,8 @@ import { AnimatePresence } from "motion/react";
 
 import { ShoppingBag } from "lucide-react";
 import Faq from "@/components/Faq";
+import { Button } from "@/components/ui/Button";
+import { Marginalia } from "@/components/Marginalia";
 import ProductCard, { type Product } from "@/components/ProductCard";
 
 export default function TokoPage() {
@@ -70,24 +72,27 @@ export default function TokoPage() {
   }, [products, selectedCategory]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="text-fluid-h1 font-serif font-bold text-rust-ink mb-2 sm:mb-4">
           Toko Alat Baking Signora
         </h1>
-        <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
+        <Marginalia rotate={-2} className="block mb-3">
+          alat yang beneran aku pakai sendiri, bukan sekedar endorse
+        </Marginalia>
+        <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Alat yang saya pakai sendiri di setiap video, biar hasil baking Anda
           anti gagal juga.
         </p>
       </div>
 
       {/* Category Filter */}
-      <div className="flex flex-wrap justify-center gap-2 mb-12">
+      <div className="flex sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-12 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`tap-target shrink-0 px-5 rounded-full text-sm font-medium transition-all ${
               selectedCategory === category
                 ? "bg-terracotta text-white shadow-md scale-105"
                 : "bg-white text-charcoal-brown/70 border border-butter/40 hover:border-terracotta/50 hover:text-terracotta"
@@ -150,31 +155,34 @@ export default function TokoPage() {
       )}
 
       {/* Banner Promo */}
-      <div className="mt-16 bg-rust-ink rounded-3xl overflow-hidden shadow-xl">
+      <div className="mt-10 sm:mt-16 bg-rust-ink rounded-3xl overflow-hidden shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-          <div className="p-8 md:p-12 text-center md:text-left">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4">
+          <div className="p-6 sm:p-8 md:p-12 text-center md:text-left">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
               Butuh Rekomendasi Alat?
             </h2>
-            <p className="text-butter/90 text-lg mb-8">
+            <p className="text-butter/90 text-base sm:text-lg mb-6 sm:mb-8">
               Jangan bingung memilih. Chat admin kami via WhatsApp — respon
               cepat, gratis konsultasi alat baking yang cocok untuk kebutuhan
               Anda.
             </p>
-            <a
+            <Button
               href="https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20butuh%20rekomendasi%20alat%20baking"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-rust-ink bg-white hover:bg-butter/15 transition-colors"
+              external
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="sm:w-fit bg-white text-rust-ink border-transparent hover:bg-butter/15"
             >
               Chat Admin Sekarang
-            </a>
+            </Button>
           </div>
-          <div className="relative h-64 md:h-full min-h-[300px]">
+          <div className="relative h-56 sm:h-64 md:h-full min-h-[240px] md:min-h-[300px]">
             <Image
-              src="https://picsum.photos/seed/kitchen/800/600"
-              alt="Kitchen Tools"
+              src="/images/bakso-sapi-premium.png"
+              alt="Alat Masak Signora"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
               referrerPolicy="no-referrer"
             />

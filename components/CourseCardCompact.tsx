@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface Course {
   id: string;
@@ -51,17 +52,18 @@ export default function CourseCardCompact({ course }: { course: Course }) {
               {course.price}
             </span>
           </div>
-          <a
+          <Button
             href={`https://wa.me/6281284250718?text=${encodeURIComponent(`Halo Cece Lina Chang, saya ingin daftar kursus: ${course.title}\n\nBerikut data diri saya:\n- Email: \n- Nomor WhatsApp: \n- Asal Kota: \n- User TikTok: \n\n(Mohon lampirkan foto bukti transfer di chat ini ya Cece)`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center px-4 py-2.5 text-sm font-bold rounded-full text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
+            external
+            variant="whatsapp"
+            size="md"
+            fullWidth
           >
             Chat Cece, Daftar Kelas
-          </a>
+          </Button>
           <Link
             href={`/kursus/${course.slug}`}
-            className="block text-center text-terracotta text-xs font-medium mt-2 hover:text-rust-ink transition-colors"
+            className="tap-target flex items-center justify-center text-center text-terracotta text-sm font-medium mt-1 hover:text-rust-ink transition-colors"
           >
             Lihat detail & kurikulum
           </Link>

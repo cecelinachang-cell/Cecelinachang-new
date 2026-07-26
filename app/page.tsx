@@ -6,6 +6,8 @@ import { ArrowRight, ShoppingBag, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 import { Marginalia } from "@/components/Marginalia";
+import { Button } from "@/components/ui/Button";
+import { Tape } from "@/components/ui/Tape";
 
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -128,29 +130,49 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col gap-16 pb-16">
+    <div className="flex flex-col gap-10 sm:gap-14 lg:gap-16 pb-10 sm:pb-16">
       {/* Hero Section */}
       <section className="relative bg-cream overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-32 lg:pb-32 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10 sm:pt-12 sm:pb-14 lg:pt-32 lg:pb-32 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <motion.div
-              className="flex flex-col text-center lg:text-left"
+              initial={{ opacity: 0, scale: 0.95, rotate: -1 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="relative block order-1 lg:order-2"
+            >
+              <div className="relative w-full aspect-[4/3] lg:aspect-[4/5] rounded-[2.5rem_1rem_2.5rem_1rem] overflow-hidden shadow-2xl border-8 border-white">
+                <Image
+                  src={
+                    assets["hero_image"] ||
+                    "/images/meat-pie.png"
+                  }
+                  alt="Cece Lina Chang Baking"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                  priority
+                  unoptimized
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-8 text-white">
+                  <p className="font-serif text-lg sm:text-xl font-semibold">Cece Lina Chang</p>
+                  <p className="text-sm text-white/80">Pembuat kelas ini</p>
+                </div>
+              </div>
+              <Tape className="hidden lg:block -top-3 -left-3" rotate={-8} />
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col text-center lg:text-left order-2 lg:order-1"
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
             >
-              <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
-                <p className="text-sm text-charcoal-brown/60 mb-1">Yang paling sering ditanya ke aku:</p>
-                <Marginalia rotate={-3}>&quot;Kenapa harus belajar dari Cece?&quot;</Marginalia>
-              </motion.div>
-
-              <motion.div variants={fadeUpVariant} className="mb-6 mx-auto lg:mx-0 w-fit">
-                <Marginalia rotate={2}>Karena aku udah 28 tahun ngurus pabrik bakso sapi sendiri, sejak 1998.</Marginalia>
-              </motion.div>
-
               <motion.h1
                 variants={fadeUpVariant}
-                className="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-charcoal-brown leading-[1.1] mb-6"
+                className="text-fluid-h1 font-serif font-bold text-charcoal-brown leading-[1.1] mb-4 sm:mb-6"
               >
                 Belajar Baking <br />
                 <span className="text-terracotta italic font-normal">
@@ -160,66 +182,39 @@ export default function Home() {
 
               <motion.p
                 variants={fadeUpVariant}
-                className="text-lg sm:text-xl text-charcoal-brown/80 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+                className="text-base sm:text-xl text-charcoal-brown/80 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
                 Sudah ribuan ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
               </motion.p>
 
               <motion.div
                 variants={fadeUpVariant}
-                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
               >
-                <Link
-                  href="#kelas"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink hover:scale-105 active:scale-95 transition-all shadow-lg shadow-terracotta/20"
-                >
+                <Button href="#kelas" variant="primary" size="lg" fullWidth className="sm:w-fit">
                   Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-                <Link
-                  href="/toko"
-                  className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-charcoal-brown bg-white border border-butter/40 hover:border-terracotta/50 hover:bg-butter/10 hover:scale-105 active:scale-95 transition-all shadow-sm"
-                >
+                </Button>
+                <Button href="/toko" variant="secondary" size="lg" fullWidth className="sm:w-fit">
                   Lihat Alat Masak <ShoppingBag className="ml-2 w-5 h-5" />
-                </Link>
+                </Button>
               </motion.div>
 
               <motion.div
                 variants={fadeUpVariant}
-                className="mt-10 flex items-center justify-center lg:justify-start"
+                className="mt-6 sm:mt-8 flex items-center justify-center lg:justify-start"
               >
-                <Marginalia rotate={-2} className="text-lg sm:text-xl">
+                <Marginalia rotate={-2} className="text-base sm:text-xl">
                   — Cece Lina Chang, yang bakal temenin kamu belajar
                 </Marginalia>
               </motion.div>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-              className="relative block mt-12 lg:mt-0"
-            >
-              <div className="relative w-full aspect-[4/5] rounded-[2.5rem_1rem_2.5rem_1rem] overflow-hidden shadow-2xl border-8 border-white">
-                <Image
-                  src={
-                    assets["hero_image"] ||
-                    "/images/meat-pie.png"
-                  }
-                  alt="Cece Lina Chang Baking"
-                  fill
-                  className="object-cover"
-                  priority
-                  unoptimized
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                <div className="absolute bottom-8 left-8 right-8 text-white">
-                  <p className="font-serif text-xl font-semibold">Cece Lina Chang</p>
-                  <p className="text-sm text-white/80">Pembuat kelas ini</p>
-                </div>
-              </div>
-
-              {/* Floating Badge */}
+              <motion.div variants={fadeUpVariant} className="mt-6 sm:mt-8 mx-auto lg:mx-0 w-fit">
+                <p className="text-sm text-charcoal-brown/60 mb-1">Yang paling sering ditanya ke aku:</p>
+                <Marginalia rotate={-3}>&quot;Kenapa harus belajar dari Cece?&quot;</Marginalia>
+                <span className="block mt-2">
+                  <Marginalia rotate={2}>Karena aku udah 28 tahun ngurus pabrik bakso sapi sendiri, sejak 1998.</Marginalia>
+                </span>
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -230,21 +225,21 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              image: assets["home_course_2"] || "https://i.postimg.cc/rmKx8jyp/LAPISLEGITPHOTO.png",
+              image: assets["home_course_2"] || "/images/lapis-legit.png",
               alt: "Lapis legit buatan Cece Lina Chang",
               title: "Resep Teruji",
               desc: "Setiap resep telah diuji coba berkali-kali untuk memastikan anti gagal.",
               note: "ini lapis legit favoritku!",
             },
             {
-              image: assets["home_course_1"] || "https://i.postimg.cc/t10xCGvR/image.png",
+              image: assets["home_course_1"] || "/images/ogura-softcake.png",
               alt: "Video tutorial baking",
               title: "Video Detail",
               desc: "Panduan video langkah demi langkah yang sangat jelas dan mudah diikuti.",
               note: "nonton bareng aku, ya",
             },
             {
-              image: assets["home_course_3"] || "https://i.postimg.cc/ppmR9mmT/MEATPIEPHOTO.png",
+              image: assets["home_course_3"] || "/images/meat-pie.png",
               alt: "Komunitas murid baking",
               title: "Dukungan Penuh",
               desc: "Grup komunitas dan konsultasi langsung untuk menjawab pertanyaan Anda.",
@@ -274,11 +269,11 @@ export default function Home() {
                   {feature.note}
                 </Marginalia>
               </div>
-              <div className="p-6 text-center">
-                <h3 className="font-bold text-xl text-charcoal-brown mb-3">
+              <div className="p-5 sm:p-6 text-center">
+                <h3 className="font-bold text-lg sm:text-xl text-charcoal-brown mb-2 sm:mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-charcoal-brown/70 leading-relaxed">{feature.desc}</p>
+                <p className="text-sm sm:text-base text-charcoal-brown/70 leading-relaxed">{feature.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -298,27 +293,27 @@ export default function Home() {
           className="bg-butter/25 rounded-3xl overflow-hidden"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            <div className="p-8 lg:p-16 flex flex-col justify-center">
-              <div className="inline-flex items-center space-x-2 bg-butter/50 text-rust-ink px-4 py-2 rounded-full w-fit mb-6">
+            <div className="p-6 sm:p-8 lg:p-16 flex flex-col justify-center">
+              <div className="inline-flex items-center space-x-2 bg-butter/50 text-rust-ink px-4 py-2 rounded-full w-fit mb-4 sm:mb-6">
                 <BookOpen className="w-5 h-5" />
                 <span className="font-medium">Kelas Online</span>
               </div>
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold text-rust-ink mb-4">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-rust-ink mb-3 sm:mb-4">
                 Belajar Lebih Dalam Bersama Saya
               </h2>
-              <p className="text-charcoal-brown/80 text-lg mb-8">
+              <p className="text-charcoal-brown/80 text-base sm:text-lg mb-6 sm:mb-8">
                 Ikuti kelas online eksklusif di mana saya akan membimbing Anda
                 langkah demi langkah. Mulai dari pengenalan bahan hingga teknik
                 dekorasi profesional, semua dijelaskan dengan bahasa yang mudah
                 dimengerti.
               </p>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
                 {[
                   "Akses video materi seumur hidup",
                   "Materi yang mudah dipahami pemula",
                   "Konsultasi langsung dengan cece lina chang",
                 ].map((benefit, i) => (
-                  <li key={i} className="flex items-center text-charcoal-brown/80">
+                  <li key={i} className="flex items-center text-sm sm:text-base text-charcoal-brown/80">
                     <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 flex-shrink-0">
                       ✓
                     </div>
@@ -326,12 +321,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/kursus"
-                className="inline-flex justify-center items-center px-8 py-4 text-lg font-medium rounded-full text-white bg-terracotta hover:bg-rust-ink transition-all hover:scale-105 active:scale-95 shadow-md w-fit"
-              >
+              <Button href="/kursus" variant="primary" size="lg">
                 Lihat Daftar Kelas
-              </Link>
+              </Button>
             </div>
             <motion.div
               variants={staggerContainer}
@@ -450,43 +442,34 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-all group flex flex-col"
               >
-                <Link
-                  href={`/toko/${product.id}`}
-                  className="block relative aspect-square bg-stone-50 overflow-hidden"
-                >
-                  <Image
-                    src={
-                      parseImageUrls(product.imageUrl)[0] ||
-                      "https://picsum.photos/seed/placeholder/400/400"
-                    }
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                </Link>
-                <div className="p-4 sm:p-6 flex flex-col flex-grow">
-                  {product.category && (
-                    <div className="text-[10px] sm:text-xs font-bold text-terracotta uppercase tracking-wider mb-1">
-                      {product.category}
-                    </div>
-                  )}
-                  <Link href={`/toko/${product.id}`}>
-                    <h3 className="font-serif text-sm sm:text-lg font-bold text-charcoal-brown mb-1 sm:mb-2 group-hover:text-terracotta transition-colors line-clamp-2 sm:line-clamp-1">
+                <Link href={`/toko/${product.id}`} className="flex flex-col flex-grow">
+                  <div className="relative aspect-square bg-stone-50 overflow-hidden">
+                    <Image
+                      src={
+                        parseImageUrls(product.imageUrl)[0] ||
+                        "https://picsum.photos/seed/placeholder/400/400"
+                      }
+                      alt={product.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="p-4 sm:p-6 flex flex-col flex-grow">
+                    {product.category && (
+                      <div className="text-xs font-bold text-terracotta uppercase tracking-wider mb-1">
+                        {product.category}
+                      </div>
+                    )}
+                    <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-brown mb-1 sm:mb-2 group-hover:text-terracotta transition-colors line-clamp-2 sm:line-clamp-1">
                       {product.name}
                     </h3>
-                  </Link>
-                  <div className="text-terracotta font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-auto">
-                    {product.price}
+                    <div className="text-terracotta font-bold text-base mt-auto">
+                      {product.price}
+                    </div>
                   </div>
-                  <Link
-                    href={`/toko/${product.id}`}
-                    className="block w-full text-center py-2 px-2 sm:px-4 bg-butter/20 text-rust-ink font-medium rounded-xl hover:bg-butter/35 transition-colors text-xs sm:text-sm"
-                  >
-                    Detail Produk
-                  </Link>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </div>
