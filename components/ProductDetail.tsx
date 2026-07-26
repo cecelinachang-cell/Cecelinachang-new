@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Star, ShoppingBag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { notFound } from 'next/navigation';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { POLICIES } from '@/lib/policies';
 
@@ -65,7 +65,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
           return;
         }
 
-        const { data, error } = await supabase.from('items').select('*').eq('id', slug).single();
+        const { data, error } = await supabasePublic.from('items').select('*').eq('id', slug).single();
         if (error) {
            const errMsg = error?.message || (error as any)?.toString() || '';
            if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {

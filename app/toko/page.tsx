@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabasePublic, isSupabaseConfigured } from "@/lib/supabase";
 import { products as fallbackProducts } from "@/app/data/products";
 import { AnimatePresence } from "motion/react";
 
@@ -24,7 +24,7 @@ export default function TokoPage() {
           return;
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabasePublic
           .from("items")
           .select("*")
           .order("createdAt", { ascending: false });
