@@ -176,16 +176,16 @@ export function TestimonialCarousel() {
         {/* Navigation Buttons */}
         {testimonials.length > 1 && (
           <>
-            <button 
+            <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
+              className="tap-target absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
               aria-label="Previous testimonial"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button 
+            <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
+              className="tap-target absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white rounded-full shadow-md flex items-center justify-center text-terracotta hover:bg-butter/20 hover:scale-110 transition-all z-20 focus:outline-none focus:ring-2 focus:ring-terracotta"
               aria-label="Next testimonial"
             >
               <ChevronRight className="w-6 h-6" />
@@ -201,11 +201,15 @@ export function TestimonialCarousel() {
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex ? 'bg-terracotta scale-125' : 'bg-butter/60 hover:bg-butter'
-              }`}
+              className="tap-target flex items-center justify-center"
               aria-label={`Go to testimonial ${index + 1}`}
-            />
+            >
+              <span
+                className={`block w-3 h-3 rounded-full transition-all ${
+                  index === currentIndex ? 'bg-terracotta scale-125' : 'bg-butter/60 hover:bg-butter'
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}

@@ -10,4 +10,37 @@
   --color-pencil-blue: #34424A;
 
   --font-hand: var(--font-caveat);
+
+  --text-fluid-h1: clamp(2rem, 1.5rem + 2.2vw, 4.5rem);
+  --text-fluid-h2: clamp(1.5rem, 1.25rem + 1.1vw, 2.5rem);
+  --text-fluid-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
+}
+
+@utility tap-target {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility paper-grain {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.48 0 0 0 0 0.38 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

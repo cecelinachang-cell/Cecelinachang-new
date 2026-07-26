@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
@@ -25,6 +25,12 @@ const caveat = Caveat({
   variable: '--font-caveat',
   weight: ['500', '600', '700'],
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   let title = 'Cece Lina Chang | Belajar Baking dari Rumah';
