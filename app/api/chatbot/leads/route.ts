@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 
 const clean = (value: unknown, maxLength: number) => typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 
 export async function POST(request: Request) {
+  if (isRateLimited(`chatbot-leads:${getClientIp(request)}`, 5, 60_000)) {
+    return NextResponse.json({ error: 'Terlalu banyak permintaan. Silakan coba lagi sebentar lagi.' }, { status: 429 });
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ error: 'Penyimpanan pesan belum dikonfigurasi.' }, { status: 503 });
   }

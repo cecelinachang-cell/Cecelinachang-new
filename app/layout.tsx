@@ -4,6 +4,7 @@ import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ChatbotWidget } from '@/components/chatbot-widget';
+import { SearchOverlay } from '@/components/SearchOverlay';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { supabase } from '@/lib/supabase';
@@ -30,6 +31,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#C4622D',
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -78,9 +80,19 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
     },
     icons: {
-      icon: '/icon.png',
-      apple: '/icon.png',
+      // Google picks the search-result favicon from these. It wants a square
+      // that is a multiple of 48px, so /icon-48.png and /icon-96.png exist
+      // purely for the crawler; browsers keep using the .ico and the big PNGs.
+      icon: [
+        { url: '/favicon.ico', sizes: '16x16 32x32 48x48 96x96' },
+        { url: '/icon-48.png', type: 'image/png', sizes: '48x48' },
+        { url: '/icon-96.png', type: 'image/png', sizes: '96x96' },
+        { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+        { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+      ],
+      apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
     },
+    manifest: '/site.webmanifest',
     twitter: {
       card: 'summary_large_image',
       title,
@@ -120,6 +132,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           </main>
           <Footer />
           <ChatbotWidget />
+          <SearchOverlay />
         </AuthProvider>
       </body>
     </html>

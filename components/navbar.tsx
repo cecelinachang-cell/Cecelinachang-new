@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SquiggleUnderline } from '@/components/SquiggleUnderline';
@@ -78,6 +78,14 @@ export function Navbar() {
             <Link href="/toko" className="text-rust-ink hover:text-terracotta">
               <ShoppingBag className="w-6 h-6" />
             </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('toko:open-search'))}
+              aria-label="Cari produk atau kelas"
+              className="text-rust-ink hover:text-terracotta"
+            >
+              <Search className="w-6 h-6" />
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -88,6 +96,14 @@ export function Navbar() {
             >
               <ShoppingBag className="w-6 h-6" />
             </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('toko:open-search'))}
+              aria-label="Cari produk atau kelas"
+              className="text-rust-ink hover:text-terracotta mr-2 -m-2 p-2"
+            >
+              <Search className="w-6 h-6" />
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-expanded={isOpen}
