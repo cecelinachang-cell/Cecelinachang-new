@@ -19,6 +19,29 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close the mobile panel on route change (e.g. browser back) and lock
+  // background scroll while it's open.
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
   const links = [
     { href: '/', label: 'Beranda' },
     { href: '/toko', label: 'Toko' },
@@ -67,7 +90,10 @@ export function Navbar() {
 
           {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
-            <Link href="/toko" className="text-rust-ink hover:text-terracotta mr-4">
+            <Link
+              href="/toko"
+              className="tap-target flex items-center justify-center text-rust-ink hover:text-terracotta"
+            >
               <ShoppingBag className="w-6 h-6" />
             </Link>
             <button
@@ -80,7 +106,10 @@ export function Navbar() {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-rust-ink hover:bg-butter/20 focus:outline-none"
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
+              aria-label={isOpen ? 'Tutup menu' : 'Buka menu'}
+              className="tap-target inline-flex items-center justify-center rounded-md text-rust-ink hover:bg-butter/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-terracotta"
             >
               {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
             </button>
@@ -90,14 +119,14 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden bg-cream border-b border-butter/40">
+        <div id="mobile-menu" className="md:hidden bg-cream border-b border-butter/40">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                className={`flex items-center px-3 tap-target rounded-md text-base font-medium ${
                   pathname === link.href
                     ? 'bg-butter/30 text-rust-ink'
                     : 'text-charcoal-brown/70 hover:bg-butter/20 hover:text-rust-ink'

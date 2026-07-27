@@ -91,13 +91,13 @@ export default function ProductCard({ product }: { product: Product }) {
               href={waHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-green-500 text-white text-sm sm:text-base font-bold rounded-xl hover:bg-green-600 transition-colors"
+              className="tap-target flex items-center justify-center gap-2 w-full px-4 bg-green-500 text-white text-sm sm:text-base font-bold rounded-xl hover:bg-green-600 transition-colors"
             >
               <ShoppingBag className="w-4 h-4" /> Beli via WA
             </a>
             <Link
               href={`/toko/${product.id}`}
-              className="block w-full text-center py-2 sm:py-2.5 px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"
+              className="tap-target flex items-center justify-center w-full text-center px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"
             >
               Lihat Detail
             </Link>

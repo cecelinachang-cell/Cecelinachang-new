@@ -130,8 +130,17 @@ export function ChatbotWidget() {
 
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo Cece Lina Chang, saya ingin dibantu.\n\n${chatSummary.slice(-1500)}`)}`;
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   return (
-    <div className="fixed bottom-5 right-4 z-[60] sm:bottom-6 sm:right-6">
+    <div className="pb-safe fixed bottom-5 right-4 z-[60] sm:bottom-6 sm:right-6">
       {isOpen && (
         <section className="animate-chat-window-in mb-4 flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-[2rem] border border-butter/45 bg-[#fffaf3] shadow-[0_24px_70px_rgba(95,54,32,0.3)]" aria-label="Chat layanan pelanggan">
           <div className="relative overflow-hidden bg-rust-ink px-5 py-4 text-white">
@@ -142,12 +151,12 @@ export function ChatbotWidget() {
                 <div className="relative"><LinaAvatar /><span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-rust-ink bg-[#83c58b]" /></div>
                 <div><p className="font-serif text-lg font-bold">Lina si Teman Dapur</p><p className="text-xs text-white/80">online, siap bantu dengan hangat</p></div>
               </div>
-              <button type="button" onClick={() => { setIsOpen(false); toggleRef.current?.focus(); }} className="rounded-full p-2 transition hover:bg-white/15" aria-label="Tutup chat"><X size={20} /></button>
+              <button type="button" onClick={() => { setIsOpen(false); toggleRef.current?.focus(); }} className="tap-target flex items-center justify-center rounded-full transition hover:bg-white/15" aria-label="Tutup chat"><X size={20} /></button>
             </div>
           </div>
 
           <div className="flex-1 space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_12px_12px,rgba(232,184,109,0.17)_1px,transparent_1.5px)] bg-[length:22px_22px] px-4 py-5" role="log" aria-live="polite" aria-relevant="additions">
-            <div className="mx-auto flex w-fit items-center gap-1.5 rounded-full border border-butter/30 bg-white/80 px-3 py-1 text-[11px] font-medium text-rust-ink/75 shadow-sm"><Sparkles size={12} className="text-terracotta" /> ngobrol santai, tanya sepuasnya</div>
+            <div className="mx-auto flex w-fit items-center gap-1.5 rounded-full border border-butter/30 bg-white/80 px-3 py-1 text-xs font-medium text-rust-ink/75 shadow-sm"><Sparkles size={12} className="text-terracotta" /> ngobrol santai, tanya sepuasnya</div>
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={`animate-chat-bubble-in flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {message.role === 'assistant' && <span className="mt-1"><LinaAvatar size="sm" /></span>}
@@ -192,7 +201,7 @@ export function ChatbotWidget() {
 
           <div className="border-t border-butter/25 bg-white/90 p-3">
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {quickPrompts.map((prompt) => <button key={prompt} type="button" disabled={isSending} onClick={() => sendMessage(prompt)} className="shrink-0 rounded-full border border-terracotta/20 bg-[#fffaf3] px-3 py-1.5 text-xs font-semibold text-rust-ink transition hover:-translate-y-0.5 hover:bg-butter/20 disabled:opacity-50">{prompt}</button>)}
+              {quickPrompts.map((prompt) => <button key={prompt} type="button" disabled={isSending} onClick={() => sendMessage(prompt)} className="tap-target shrink-0 rounded-full border border-terracotta/20 bg-[#fffaf3] px-3 text-xs font-semibold text-rust-ink transition hover:-translate-y-0.5 hover:bg-butter/20 disabled:opacity-50">{prompt}</button>)}
             </div>
             <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className={`flex gap-2 rounded-2xl border border-butter/45 bg-white p-1.5 shadow-inner transition-opacity ${isSending ? 'opacity-70' : ''}`}>
               <input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} disabled={isSending} maxLength={1200} placeholder="Tulis ceritamu di sini…" className="min-w-0 flex-1 rounded-xl bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-charcoal-brown/45 disabled:cursor-not-allowed" />
@@ -206,7 +215,7 @@ export function ChatbotWidget() {
 
           {showLeadForm && (
             <form ref={formRef} onSubmit={submitLead} className="animate-chat-bubble-in max-h-[45vh] space-y-2 overflow-y-auto border-t border-butter/25 bg-[#fffaf3] px-4 py-3">
-              <div className="flex items-center justify-between"><div><p className="font-serif font-bold text-rust-ink">Biar kami yang menyapa dulu</p><p className="text-[11px] text-charcoal-brown/60">Tinggalkan kontak, ya. Kami bantu lanjutkan.</p></div><button type="button" onClick={() => setShowLeadForm(false)} aria-label="Tutup formulir"><ChevronDown size={18} /></button></div>
+              <div className="flex items-center justify-between"><div><p className="font-serif font-bold text-rust-ink">Biar kami yang menyapa dulu</p><p className="text-xs text-charcoal-brown/60">Tinggalkan kontak, ya. Kami bantu lanjutkan.</p></div><button type="button" onClick={() => setShowLeadForm(false)} aria-label="Tutup formulir" className="tap-target flex items-center justify-center"><ChevronDown size={18} /></button></div>
               <input name="name" maxLength={120} placeholder="Nama panggilan (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
               <input name="whatsapp" maxLength={40} placeholder="Nomor WhatsApp" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
               <input name="email" type="email" maxLength={160} placeholder="Email (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
@@ -215,7 +224,7 @@ export function ChatbotWidget() {
               {leadStatus === 'success' && <p className="text-xs text-green-700">Makasih ya, pesanmu sudah kami terima 🤎</p>}
               {leadStatus === 'error' && <p className="text-xs text-red-700">{leadError}</p>}
               <button type="submit" disabled={leadStatus === 'sending'} className="flex w-full items-center justify-center gap-2 rounded-xl bg-rust-ink px-3 py-2.5 text-sm font-semibold text-white hover:bg-terracotta disabled:opacity-50"><UserRound size={16} /> {leadStatus === 'sending' ? 'Mengirim…' : 'Tolong hubungi aku'}</button>
-              <p className="text-[11px] leading-relaxed text-charcoal-brown/60">Data ini hanya dipakai untuk membantu menindaklanjuti pertanyaanmu.</p>
+              <p className="text-xs leading-relaxed text-charcoal-brown/60">Data ini hanya dipakai untuk membantu menindaklanjuti pertanyaanmu.</p>
             </form>
           )}
         </section>

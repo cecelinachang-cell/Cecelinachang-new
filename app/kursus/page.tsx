@@ -84,18 +84,18 @@ export default async function KursusPage() {
   const sweetCourses = restCourses.filter((c) => isSweet(c));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-16">
-        <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="text-center mb-10 sm:mb-16">
+        <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-4 sm:mb-6">
           <BookOpen className="w-5 h-5" /> Belajar Bersama Cece Lina
         </div>
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-4">
+        <h1 className="text-fluid-h1 font-serif font-bold text-rust-ink mb-3 sm:mb-4">
           Kursus Online
         </h1>
-        <Marginalia rotate={-2} className="block mb-4">
+        <Marginalia rotate={-2} className="block mb-3 sm:mb-4">
           kenapa aku bikin kelas ini? biar kamu nggak perlu gagal berkali-kali kayak aku dulu.
         </Marginalia>
-        <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Belajar langsung dari ahlinya melalui video tutorial yang jelas,
           detail, dan mudah diikuti. Akses seumur hidup dan konsultasi langsung
           dengan cece lina chang.
@@ -105,14 +105,14 @@ export default async function KursusPage() {
       {finalCourses.length > 0 ? (
         <>
           {heroCourse && (
-            <div className="mb-20">
+            <div className="mb-10 sm:mb-20">
               <CourseCard course={heroCourse} />
             </div>
           )}
 
           {savoryCourses.length > 0 && (
-            <div className="mb-16">
-              <Marginalia rotate={-2} className="text-3xl block mb-6">
+            <div className="mb-10 sm:mb-16">
+              <Marginalia rotate={-2} className="text-2xl sm:text-3xl block mb-4 sm:mb-6">
                 Kelas Gurih
               </Marginalia>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -124,8 +124,8 @@ export default async function KursusPage() {
           )}
 
           {sweetCourses.length > 0 && (
-            <div className="mb-16">
-              <Marginalia rotate={2} className="text-3xl block mb-6">
+            <div className="mb-10 sm:mb-16">
+              <Marginalia rotate={2} className="text-2xl sm:text-3xl block mb-4 sm:mb-6">
                 Kelas Manis
               </Marginalia>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
