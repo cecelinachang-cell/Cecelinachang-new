@@ -16,19 +16,19 @@ interface Testimonial {
 const FALLBACK_TESTIMONIALS: Testimonial[] = [
   {
     id: 'default-1',
-    image: '/images/lapis-legit.png'
+    image: '/images/lapis-legit.webp'
   },
   {
     id: 'default-2',
-    image: '/images/bakso-sapi-premium.png'
+    image: '/images/bakso-sapi-premium.webp'
   },
   {
     id: 'default-3',
-    image: '/images/meat-pie.png'
+    image: '/images/meat-pie.webp'
   },
   {
     id: 'default-4',
-    image: '/images/ogura-softcake.png'
+    image: '/images/ogura-softcake.webp'
   }
 ];
 

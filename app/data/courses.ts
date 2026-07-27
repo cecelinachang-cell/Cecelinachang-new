@@ -10,7 +10,7 @@ export const courses = [
     students: 3450,
     duration: '60 Menit',
     modules: 8,
-    imageUrl: '/images/bakso-sapi-premium.png',
+    imageUrl: '/images/bakso-sapi-premium.webp',
     video: 'https://jumpshare.com/embed/Lp5SdX6V3xnytDhsOW2j',
     benefits: [
       'Teknik memilih daging sapi yang tepat',
@@ -28,7 +28,7 @@ export const courses = [
     students: 1250,
     duration: '45 Menit',
     modules: 5,
-    imageUrl: '/images/lapis-legit.png',
+    imageUrl: '/images/lapis-legit.webp',
     benefits: [
       'Resep otentik warisan 3 generasi',
       'Teknik memanggang lapis per lapis',
@@ -45,7 +45,7 @@ export const courses = [
     students: 890,
     duration: '38 Menit',
     modules: 6,
-    imageUrl: '/images/meat-pie.png',
+    imageUrl: '/images/meat-pie.webp',
     benefits: [
       'Teknik membuat kulit pie shortcrust yang renyah, flaky, dan tidak remuk saat dipegang',
       'Cara memasak isian daging sapi agar juicy, tidak alot, dan rasanya meresap sempurna',
@@ -63,7 +63,7 @@ export const courses = [
     students: 1100,
     duration: '25 Menit',
     modules: 4,
-    imageUrl: '/images/ogura-softcake.png',
+    imageUrl: '/images/ogura-softcake.webp',
     benefits: [
       'Teknik dasar membuat adonan ogura agar teksturnya ringan seperti kapas dan lumer di mulut',
       'Cara menggabungkan rasa matcha, cokelat, dan durian ke dalam adonan tanpa merusak tekstur',

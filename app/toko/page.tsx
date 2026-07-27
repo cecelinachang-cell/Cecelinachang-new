@@ -179,7 +179,7 @@ export default function TokoPage() {
           </div>
           <div className="relative h-56 sm:h-64 md:h-full min-h-[240px] md:min-h-[300px]">
             <Image
-              src="/images/bakso-sapi-premium.png"
+              src="/images/bakso-sapi-premium.webp"
               alt="Alat Masak Signora"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

@@ -145,7 +145,7 @@ export default function Home() {
                 <Image
                   src={
                     assets["hero_image"] ||
-                    "/images/meat-pie.png"
+                    "/images/meat-pie.webp"
                   }
                   alt="Cece Lina Chang Baking"
                   fill
@@ -225,21 +225,21 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              image: assets["home_course_2"] || "/images/lapis-legit.png",
+              image: assets["home_course_2"] || "/images/lapis-legit.webp",
               alt: "Lapis legit buatan Cece Lina Chang",
               title: "Resep Teruji",
               desc: "Setiap resep telah diuji coba berkali-kali untuk memastikan anti gagal.",
               note: "ini lapis legit favoritku!",
             },
             {
-              image: assets["home_course_1"] || "/images/ogura-softcake.png",
+              image: assets["home_course_1"] || "/images/ogura-softcake.webp",
               alt: "Video tutorial baking",
               title: "Video Detail",
               desc: "Panduan video langkah demi langkah yang sangat jelas dan mudah diikuti.",
               note: "nonton bareng aku, ya",
             },
             {
-              image: assets["home_course_3"] || "/images/meat-pie.png",
+              image: assets["home_course_3"] || "/images/meat-pie.webp",
               alt: "Komunitas murid baking",
               title: "Dukungan Penuh",
               desc: "Grup komunitas dan konsultasi langsung untuk menjawab pertanyaan Anda.",
@@ -336,28 +336,28 @@ export default function Home() {
                 {
                   src:
                     assets["home_course_1"] ||
-                    "/images/bakso-sapi-premium.png",
+                    "/images/bakso-sapi-premium.webp",
                   alt: "Bakso Sapi Premium",
                   margin: "",
                 },
                 {
                   src:
                     assets["home_course_2"] ||
-                    "/images/lapis-legit.png",
+                    "/images/lapis-legit.webp",
                   alt: "Lapis Legit",
                   margin: "mt-4 lg:mt-8",
                 },
                 {
                   src:
                     assets["home_course_3"] ||
-                    "/images/meat-pie.png",
+                    "/images/meat-pie.webp",
                   alt: "Meat Pie",
                   margin: "-mt-4 lg:-mt-8",
                 },
                 {
                   src:
                     assets["home_course_4"] ||
-                    "/images/ogura-softcake.png",
+                    "/images/ogura-softcake.webp",
                   alt: "Ogura Softcake",
                   margin: "",
                 },

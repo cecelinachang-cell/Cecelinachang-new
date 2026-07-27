@@ -28,7 +28,14 @@ export const supabase = typeof window === 'undefined'
 // left stuck held by another tab/session. Use this instead of `supabase` for
 // any client-side fetch that doesn't need the logged-in user's session.
 export const supabasePublic = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    // Distinct storageKey so GoTrueClient doesn't flag this as a duplicate
+    // instance sharing the same key as the `supabase` client above.
+    storageKey: 'sb-yjxvrsmubrasvoipkwvn-auth-token-public',
+  },
 })
 
 export const isSupabaseConfigured = (): boolean => {
