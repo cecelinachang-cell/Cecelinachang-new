@@ -6,6 +6,7 @@ import { Heart, Users, Instagram } from 'lucide-react';
 import { motion } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { Marginalia } from '@/components/Marginalia';
+import { isOptimizableImage } from '@/lib/images';
 
 export default function TentangPage() {
   const [aboutImage, setAboutImage] = useState<string>('https://i.postimg.cc/tCXKbMWY/image.png');
@@ -40,7 +41,7 @@ export default function TentangPage() {
             fill
             className="object-contain object-bottom p-4 group-hover:scale-105 transition-transform duration-700"
             referrerPolicy="no-referrer"
-            unoptimized
+            unoptimized={!isOptimizableImage(aboutImage)}
           />
           <div className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
             <h2 className="font-serif text-2xl font-bold text-rust-ink mb-2">Cece Lina Chang</h2>

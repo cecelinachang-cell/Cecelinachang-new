@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { MessageCircle, Package, Search, X } from 'lucide-react';
 import type { SearchResult } from '@/lib/search';
+import { isOptimizableImage } from '@/lib/images';
 
 export function SearchOverlay() {
   const [isOpen, setIsOpen] = useState(false);
@@ -167,7 +168,7 @@ function SearchResultRow({ item, onNavigate }: { item: SearchResult; onNavigate:
     >
       <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-stone-100">
         {item.image ? (
-          <Image src={item.image} alt={item.title} fill sizes="48px" className="object-cover" referrerPolicy="no-referrer" />
+          <Image src={item.image} alt={item.title} fill sizes="48px" className="object-cover" referrerPolicy="no-referrer" unoptimized={!isOptimizableImage(item.image)} />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-stone-400">
             <Package className="h-5 w-5" />

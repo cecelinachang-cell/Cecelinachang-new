@@ -1,9 +1,47 @@
+import type { Metadata } from 'next';
 import { MessageCircle, Mail, MapPin, Send } from 'lucide-react';
 import Faq from '@/components/Faq';
+import { SITE_NAME, SITE_URL, breadcrumbJsonLd } from '@/lib/seo';
+
+const PAGE_TITLE = 'Hubungi Cece Lina Chang';
+const PAGE_DESCRIPTION =
+  'Tanya resep, konsultasi alat baking, atau daftar kelas online. Chat WhatsApp admin di jam kerja 09:00–17:00 atau kirim email ke halo@cecelinachang.com.';
+
+export const metadata: Metadata = {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  alternates: { canonical: '/kontak' },
+  openGraph: {
+    title: `${PAGE_TITLE} | ${SITE_NAME}`,
+    description: PAGE_DESCRIPTION,
+    url: `${SITE_URL}/kontak`,
+    type: 'website',
+  },
+};
+
+const structuredData = [
+  breadcrumbJsonLd([
+    { name: 'Beranda', path: '/' },
+    { name: 'Hubungi Saya', path: '/kontak' },
+  ]),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    url: `${SITE_URL}/kontak`,
+    name: `${PAGE_TITLE} | ${SITE_NAME}`,
+    description: PAGE_DESCRIPTION,
+    inLanguage: 'id-ID',
+    mainEntity: { '@id': `${SITE_URL}/#organization` },
+  },
+];
 
 export default function KontakPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <div className="text-center mb-16">
         <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-6">Hubungi Saya</h1>
         <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">

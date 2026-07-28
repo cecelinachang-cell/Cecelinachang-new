@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { isOptimizableImage } from '@/lib/images';
 
 interface Course {
   id: string;
@@ -25,6 +26,7 @@ export default function CourseCardCompact({ course }: { course: Course }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover"
           referrerPolicy="no-referrer"
+          unoptimized={!isOptimizableImage(course.imageUrl)}
         />
       </Link>
       <div className="p-6 flex flex-col flex-grow">

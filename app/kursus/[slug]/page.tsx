@@ -5,6 +5,14 @@ import { notFound } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
+import {
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+  breadcrumbJsonLd,
+  clampDescription,
+  parsePriceValue,
+} from '@/lib/seo';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
 import { CoursePricingPanel } from '@/components/CoursePricingPanel';
 
@@ -24,6 +32,28 @@ interface Course {
   imageUrl: string;
   video?: string;
   benefits: string[];
+}
+
+/**
+ * Prerender every known course. Besides being faster, this keeps the page's
+ * JSON-LD in the initial HTML — on a streamed dynamic render it would only
+ * reach the client through the Flight payload. Unknown slugs still render on
+ * demand, and `revalidate` above keeps the prerendered pages fresh.
+ */
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    if (isSupabaseConfigured()) {
+      const { data } = await supabase.from('courses').select('slug');
+      if (data && data.length > 0) {
+        return data.filter((row: any) => row.slug).map((row: any) => ({ slug: row.slug }));
+      }
+    }
+  } catch {
+    // Fall through to the bundled seed data.
+  }
+
+  const { courses: fallbackCourses } = await import('@/app/data/courses');
+  return fallbackCourses.map((course: any) => ({ slug: course.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -48,29 +78,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   if (!course) {
-    return { title: 'Kelas Tidak Ditemukan | Cece Lina Chang' };
+    // Nothing to index on a missing course, and no canonical to point at.
+    return { title: 'Kelas Tidak Ditemukan', robots: { index: false, follow: true } };
   }
 
-  const title = `${course.title} | Cece Lina Chang`;
-  const description = stripHtml(course.description).slice(0, 155);
+  const title = course.title;
+  const description = clampDescription(stripHtml(course.description));
+  const image = absoluteUrl(course.imageUrl);
 
   return {
     title,
     description,
+    alternates: { canonical: `/kursus/${course.slug}` },
     openGraph: {
-      title,
+      title: `${title} | ${SITE_NAME}`,
       description,
-      url: `https://cecelinachang.com/kursus/${course.slug}`,
-      siteName: 'Cece Lina Chang',
-      images: [{ url: course.imageUrl, width: 1200, height: 630, alt: course.title }],
+      url: `${SITE_URL}/kursus/${course.slug}`,
+      siteName: SITE_NAME,
+      images: [{ url: image, width: 1200, height: 630, alt: course.title }],
       locale: 'id_ID',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${title} | ${SITE_NAME}`,
       description,
-      images: [course.imageUrl],
+      images: [image],
     },
   };
 }
@@ -120,8 +153,53 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
     notFound();
   }
 
+  const priceValue = parsePriceValue(course.price);
+  const structuredData = [
+    breadcrumbJsonLd([
+      { name: 'Beranda', path: '/' },
+      { name: 'Kursus Online', path: '/kursus' },
+      { name: course.title, path: `/kursus/${course.slug}` },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      name: course.title,
+      description: clampDescription(stripHtml(course.description), 300),
+      url: `${SITE_URL}/kursus/${course.slug}`,
+      image: absoluteUrl(course.imageUrl),
+      inLanguage: 'id-ID',
+      provider: { '@id': `${SITE_URL}/#organization` },
+      hasCourseInstance: [
+        {
+          '@type': 'CourseInstance',
+          courseMode: 'online',
+          courseWorkload: course.duration,
+          inLanguage: 'id-ID',
+        },
+      ],
+      ...(priceValue
+        ? {
+            offers: [
+              {
+                '@type': 'Offer',
+                category: 'Paid',
+                price: priceValue,
+                priceCurrency: 'IDR',
+                availability: 'https://schema.org/InStock',
+                url: `${SITE_URL}/kursus/${course.slug}`,
+              },
+            ],
+          }
+        : {}),
+    },
+  ];
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Link href="/kursus" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-6 sm:mb-8">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Daftar Kelas
       </Link>

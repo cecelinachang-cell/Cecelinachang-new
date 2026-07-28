@@ -13,6 +13,7 @@ import {
 import { stripHtml } from "@/lib/utils";
 import LeadFormModal from "./LeadFormModal";
 import { Button } from "@/components/ui/Button";
+import { isOptimizableImage } from '@/lib/images';
 
 interface Course {
   id: string;
@@ -65,6 +66,7 @@ export default function CourseCard({ course }: { course: Course }) {
               fill
               className="object-cover"
               referrerPolicy="no-referrer"
+              unoptimized={!isOptimizableImage(course.imageUrl)}
             />
             {course.video && (
               <div

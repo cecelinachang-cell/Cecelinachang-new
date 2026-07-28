@@ -10,7 +10,12 @@ const nextConfig: NextConfig = {
   },
   // Allow access to remote image placeholder.
   images: {
-    unoptimized: true,
+    // Optimization is on: Next serves resized AVIF/WebP from /_next/image, which
+    // is the single biggest LCP win on the product and course pages. Images whose
+    // host is not in `remotePatterns` below (admin-supplied URLs) must opt out
+    // per-image with the `unoptimized` prop, or the optimizer returns 400.
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Marginalia } from '@/components/Marginalia';
+import { isOptimizableImage } from '@/lib/images';
 
 interface Testimonial {
   id: string;
@@ -166,6 +167,7 @@ export function TestimonialCarousel() {
                     className="object-contain"
                     referrerPolicy="no-referrer"
                     priority
+                    unoptimized={!isOptimizableImage(testimonials[currentIndex].image)}
                   />
                 </motion.div>
               )}
