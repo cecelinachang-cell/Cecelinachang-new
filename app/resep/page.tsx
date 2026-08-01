@@ -16,10 +16,10 @@ export default function ResepPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-4">Koleksi Resep</h1>
-        <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-rust-ink mb-4">Koleksi Resep</h1>
+        <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Langkah demi langkah yang mudah diikuti, bahkan jika Anda baru pertama kali menyalakan oven.
         </p>
       </div>
