@@ -3,36 +3,36 @@ import Faq from '@/components/Faq';
 
 export default function KontakPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24">
-      <div className="text-center mb-16">
-        <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-6">Hubungi Saya</h1>
-        <p className="text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
+      <div className="text-center mb-10 sm:mb-16">
+        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-rust-ink mb-4 sm:mb-6">Hubungi Saya</h1>
+        <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Punya pertanyaan seputar resep, ingin konsultasi alat baking, atau butuh bantuan pendaftaran kelas? Jangan ragu untuk menghubungi saya.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
         {/* Contact Info & WhatsApp */}
         <div className="flex flex-col justify-center">
-          <div className="bg-butter/15 rounded-3xl p-8 sm:p-12 border border-butter/30 mb-8">
-            <h2 className="font-serif text-2xl font-bold text-rust-ink mb-8">Cara Tercepat Menghubungi Kami</h2>
+          <div className="bg-butter/15 rounded-3xl p-6 sm:p-8 lg:p-12 border border-butter/30 mb-6 sm:mb-8">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-6 sm:mb-8">Cara Tercepat Menghubungi Kami</h2>
 
             <a
               href="https://wa.me/6281284250718"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center w-full bg-green-500 hover:bg-green-600 text-white p-6 rounded-2xl transition-colors shadow-md mb-8 group"
+              className="flex items-center w-full bg-green-500 hover:bg-green-600 text-white p-4 sm:p-6 rounded-2xl transition-colors shadow-md mb-6 sm:mb-8 group"
             >
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-6 group-hover:scale-110 transition-transform">
-                <MessageCircle className="w-8 h-8" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center mr-4 sm:mr-6 shrink-0 group-hover:scale-110 transition-transform">
+                <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
               <div>
-                <div className="text-xl font-bold mb-1">Chat WhatsApp Admin</div>
-                <div className="text-green-100">Respon cepat di jam kerja (09:00 - 17:00)</div>
+                <div className="text-base sm:text-xl font-bold mb-1">Chat WhatsApp Admin</div>
+                <div className="text-sm sm:text-base text-green-100">Respon cepat di jam kerja (09:00 - 17:00)</div>
               </div>
             </a>
 
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               <div className="flex items-start">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-terracotta mr-4 shadow-sm flex-shrink-0">
                   <Mail className="w-6 h-6" />
@@ -56,8 +56,8 @@ export default function KontakPage() {
         </div>
 
         {/* Contact Form */}
-        <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg border border-butter/30">
-          <h2 className="font-serif text-2xl font-bold text-rust-ink mb-8">Kirim Pesan</h2>
+        <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-12 shadow-lg border border-butter/30">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-6 sm:mb-8">Kirim Pesan</h2>
           <form className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-charcoal-brown mb-2">Nama Lengkap</label>

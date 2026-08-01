@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       // Next.js injects inline bootstrap scripts; nonce-based CSP would need
       // per-request nonces, so allow inline as the pragmatic baseline.
+      // Dev-only 'unsafe-eval': Fast Refresh's runtime uses eval() to patch
+      // modules in place. Without it, every recompile throws a CSP EvalError
+      // that aborts hydration, leaving the whole app inert (no click
+      // handlers fire) any time this repo is run locally. Production never
+      // needs eval, so the built bundle stays eval-free either way.
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co",

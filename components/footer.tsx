@@ -3,11 +3,11 @@ import { Instagram, Youtube } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-rust-ink text-cream py-12">
+    <footer className="bg-rust-ink text-cream py-10 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
           <div className="col-span-1 md:col-span-2">
-            <span className="font-hand text-3xl mb-4 block">Cece Lina Chang</span>
+            <span className="font-hand text-3xl mb-3 sm:mb-4 block">Cece Lina Chang</span>
             <p className="text-butter/90 mb-6 max-w-sm">
               Belajar baking dari rumah dengan mudah. Misi saya adalah membantu ibu-ibu Indonesia menciptakan kebahagiaan dari dapur sendiri.
             </p>
@@ -44,7 +44,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-cream/20 mt-12 pt-8 text-center text-butter/70 text-sm">
+        <div className="border-t border-cream/20 mt-8 pt-6 sm:mt-12 sm:pt-8 text-center text-butter/70 text-sm">
           <p>&copy; {new Date().getFullYear()} Cece Lina Chang. All rights reserved.</p>
         </div>
       </div>
