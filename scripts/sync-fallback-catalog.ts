@@ -14,12 +14,19 @@
 //   npx tsx scripts/sync-fallback-catalog.ts          # rewrite the files
 //   npx tsx scripts/sync-fallback-catalog.ts --check  # CI: fail on drift
 //
+// Pass --localize-images to also download each course photo into
+// public/images/<slug>.webp and point the fallback at the checked-in copy
+// instead of a remote URL, so the images survive both a dead image host and a
+// restricted Supabase project. Requires storage egress, so it cannot run while
+// the project is returning 402.
+//
 // Uses the service-role key (server-side only, bypasses RLS) so it must be
 // run locally and never shipped to the client.
 import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
 
 config({ path: '.env.local' });
 
@@ -32,6 +39,9 @@ if (!url || !serviceKey) {
 
 const supabase = createClient(url, serviceKey);
 const checkOnly = process.argv.includes('--check');
+const localizeImages = process.argv.includes('--localize-images');
+
+const IMAGE_DIR = path.join(process.cwd(), 'public/images');
 
 const COURSES_FILE = path.join(process.cwd(), 'app/data/courses.ts');
 const PRODUCTS_FILE = path.join(process.cwd(), 'app/data/products.ts');
@@ -130,6 +140,43 @@ function normalizeCourse(row: Record<string, unknown>): Record<string, unknown> 
   };
 }
 
+// Downloads a course image and re-encodes it into public/images/<slug>.webp at
+// its native resolution, returning the local path to store in the fallback.
+//
+// Without this the fallback points at whatever host the catalog happens to use,
+// which is how the course photos rotted: four of them hotlinked i.postimg.cc,
+// that host went away, and Next's image optimizer cached the 180x120 stub it
+// got back. A checked-in file cannot rot, and cannot 402 when Supabase is
+// restricted. Native resolution is deliberate — an earlier pass capped these at
+// 1000px and the cards visibly softened on retina screens.
+async function localizeImage(slug: string, remoteUrl: string): Promise<string> {
+  const localPath = `/images/${slug}.webp`;
+  const destination = path.join(IMAGE_DIR, `${slug}.webp`);
+
+  if (!/^https?:\/\//.test(remoteUrl)) {
+    return remoteUrl;
+  }
+
+  const response = await fetch(remoteUrl);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to download image for "${slug}" (${response.status}): ${remoteUrl}`,
+    );
+  }
+
+  const input = Buffer.from(await response.arrayBuffer());
+  const { width, height } = await sharp(input).metadata();
+  const output = await sharp(input).webp({ quality: 82, effort: 6 }).toBuffer();
+
+  fs.mkdirSync(IMAGE_DIR, { recursive: true });
+  fs.writeFileSync(destination, output);
+  console.log(
+    `  ${slug}: ${width}x${height}  ${(input.length / 1024).toFixed(0)}KB -> ${(output.length / 1024).toFixed(0)}KB`,
+  );
+
+  return localPath;
+}
+
 async function fetchTable(table: string) {
   const { data, error } = await supabase.from(table).select('*');
   if (error) {
@@ -150,6 +197,15 @@ async function main() {
   const productRows = (await fetchTable('items'))
     .map(normalizeProduct)
     .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+  if (localizeImages) {
+    console.log('Localizing course images:');
+    for (const row of courseRows) {
+      if (typeof row.imageUrl === 'string' && row.imageUrl) {
+        row.imageUrl = await localizeImage(String(row.slug), row.imageUrl);
+      }
+    }
+  }
 
   const targets = [
     { file: COURSES_FILE, next: renderFile('courses', courseRows, COURSE_KEYS), label: 'courses' },
