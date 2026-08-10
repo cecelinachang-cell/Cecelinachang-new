@@ -41,6 +41,17 @@ const supabase = createClient(url, serviceKey);
 const checkOnly = process.argv.includes('--check');
 const localizeImages = process.argv.includes('--localize-images');
 
+// --only=courses / --only=products limits the run to one catalog. Needed
+// because the two are not equally safe to regenerate: many `items` rows still
+// carry remote Supabase storage URLs, so rewriting products.ts wholesale would
+// undo 8520dd9, which deliberately moved the shop onto checked-in local images.
+const onlyArg = process.argv.find((arg) => arg.startsWith('--only='));
+const only = onlyArg ? onlyArg.slice('--only='.length) : null;
+
+if (only && only !== 'courses' && only !== 'products') {
+  throw new Error(`--only must be "courses" or "products", got "${only}"`);
+}
+
 const IMAGE_DIR = path.join(process.cwd(), 'public/images');
 
 const COURSES_FILE = path.join(process.cwd(), 'app/data/courses.ts');
@@ -191,14 +202,21 @@ async function fetchTable(table: string) {
 }
 
 async function main() {
-  const courseRows = (await fetchTable('courses'))
-    .map(normalizeCourse)
-    .sort((a, b) => String(a.slug).localeCompare(String(b.slug)));
-  const productRows = (await fetchTable('items'))
-    .map(normalizeProduct)
-    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const doCourses = only !== 'products';
+  const doProducts = only !== 'courses';
 
-  if (localizeImages) {
+  const courseRows = doCourses
+    ? (await fetchTable('courses'))
+        .map(normalizeCourse)
+        .sort((a, b) => String(a.slug).localeCompare(String(b.slug)))
+    : [];
+  const productRows = doProducts
+    ? (await fetchTable('items'))
+        .map(normalizeProduct)
+        .sort((a, b) => String(a.name).localeCompare(String(b.name)))
+    : [];
+
+  if (localizeImages && doCourses) {
     console.log('Localizing course images:');
     for (const row of courseRows) {
       if (typeof row.imageUrl === 'string' && row.imageUrl) {
@@ -208,8 +226,12 @@ async function main() {
   }
 
   const targets = [
-    { file: COURSES_FILE, next: renderFile('courses', courseRows, COURSE_KEYS), label: 'courses' },
-    { file: PRODUCTS_FILE, next: renderFile('products', productRows, PRODUCT_KEYS), label: 'products' },
+    ...(doCourses
+      ? [{ file: COURSES_FILE, next: renderFile('courses', courseRows, COURSE_KEYS), label: 'courses' }]
+      : []),
+    ...(doProducts
+      ? [{ file: PRODUCTS_FILE, next: renderFile('products', productRows, PRODUCT_KEYS), label: 'products' }]
+      : []),
   ];
 
   let drifted = false;
