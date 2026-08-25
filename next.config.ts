@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   },
   // Allow access to remote image placeholder.
   images: {
+    // Vercel's Image Optimization has a monthly source-image quota; once
+    // exceeded, any uncached size/quality variant 402s
+    // (OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED). All images here are
+    // already pre-sized/compressed, so skip the optimizer entirely.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

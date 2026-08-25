@@ -163,6 +163,7 @@ export default function Home() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-top"
                   priority
+                  unoptimized
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
