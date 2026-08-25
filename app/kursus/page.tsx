@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { unstable_cache } from "next/cache";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
@@ -32,33 +33,42 @@ function isSweet(course: Course): boolean {
   return SWEET_KEYWORDS.some((kw) => title.includes(kw));
 }
 
+// Next 15 doesn't cache fetch() by default and supabase-js's internal fetch
+// doesn't opt in, so this page's `revalidate = 60` was caching nothing --
+// every visit re-hit Supabase and rendered dynamically. Wrap the fetch.
+const getAllCourses = unstable_cache(
+  async (): Promise<Course[]> => {
+    if (!isSupabaseConfigured()) {
+      const { courses: fallbackCourses } = await import("@/app/data/courses");
+      return fallbackCourses as unknown as Course[];
+    }
+    const { data, error } = await supabase.from("courses").select("*");
+
+    if (error || !data || data.length === 0) {
+      if (error && error.message && error.message.includes("schema cache")) {
+        console.warn("Supabase schema not initialized yet.");
+      } else if (error) {
+        const errMsg = error?.message || (error as any)?.toString() || '';
+        if (errMsg === "Failed to fetch" || errMsg.includes("Failed to fetch")) {
+          console.warn("AdBlocker or Network issue detected. Falling back to mock data.");
+        } else {
+          console.error("Error fetching courses:", errMsg);
+        }
+      }
+      const { courses: fallbackCourses } = await import("@/app/data/courses");
+      return fallbackCourses as unknown as Course[];
+    }
+    return data as Course[];
+  },
+  ["all-courses"],
+  { revalidate: 60 }
+);
+
 export default async function KursusPage() {
   let finalCourses: Course[] = [];
 
   try {
-    if (!isSupabaseConfigured()) {
-      const { courses: fallbackCourses } = await import("@/app/data/courses");
-      finalCourses = fallbackCourses as unknown as Course[];
-    } else {
-      const { data, error } = await supabase.from("courses").select("*");
-
-      if (error || !data || data.length === 0) {
-        if (error && error.message && error.message.includes("schema cache")) {
-          console.warn("Supabase schema not initialized yet.");
-        } else if (error) {
-          const errMsg = error?.message || (error as any)?.toString() || '';
-          if (errMsg === "Failed to fetch" || errMsg.includes("Failed to fetch")) {
-            console.warn("AdBlocker or Network issue detected. Falling back to mock data.");
-          } else {
-            console.error("Error fetching courses:", errMsg);
-          }
-        }
-        const { courses: fallbackCourses } = await import("@/app/data/courses");
-        finalCourses = fallbackCourses as unknown as Course[];
-      } else {
-        finalCourses = data as Course[];
-      }
-    }
+    finalCourses = await getAllCourses();
 
     finalCourses.sort((a: any, b: any) => {
       const indexA = a.orderIndex ?? a.orderindex ?? a.order_index ?? 0;
