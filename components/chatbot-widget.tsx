@@ -140,9 +140,13 @@ export function ChatbotWidget() {
   }, [isOpen]);
 
   return (
-    <div className="pb-safe fixed bottom-5 right-4 z-[60] sm:bottom-6 sm:right-6">
+    <div className="pb-safe fixed right-4 z-[60] sm:right-6" style={{ bottom: 'var(--floating-offset)' }}>
       {isOpen && (
-        <section className="animate-chat-window-in mb-4 flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-[2rem] border border-butter/45 bg-[#fffaf3] shadow-[0_24px_70px_rgba(95,54,32,0.3)]" aria-label="Chat layanan pelanggan">
+        <section
+          className="animate-chat-window-in flex w-[calc(100dvw-2rem)] max-w-sm flex-col overflow-hidden rounded-[2rem] border border-butter/45 bg-[#fffaf3] shadow-[0_24px_70px_rgba(95,54,32,0.3)]"
+          style={{ height: 'min(680px, calc(100dvh - var(--floating-offset) - 1.5rem))' }}
+          aria-label="Chat layanan pelanggan"
+        >
           <div className="relative overflow-hidden bg-rust-ink px-5 py-4 text-white">
             <span className="absolute -right-7 -top-6 h-20 w-20 rounded-full bg-butter/20 sm:-top-9 sm:h-28 sm:w-28" />
             <span className="absolute -bottom-9 right-16 h-16 w-16 rounded-full bg-terracotta/35 sm:right-20 sm:h-20 sm:w-20" />
@@ -217,7 +221,7 @@ export function ChatbotWidget() {
           </div>
 
           {showLeadForm && (
-            <form ref={formRef} onSubmit={submitLead} className="animate-chat-bubble-in max-h-[45vh] space-y-2 overflow-y-auto border-t border-butter/25 bg-[#fffaf3] px-4 py-3">
+            <form ref={formRef} onSubmit={submitLead} className="animate-chat-bubble-in max-h-[45dvh] space-y-2 overflow-y-auto border-t border-butter/25 bg-[#fffaf3] px-4 py-3">
               <div className="flex items-center justify-between"><div><p className="font-serif font-bold text-rust-ink">Biar kami yang menyapa dulu</p><p className="text-xs text-charcoal-brown/60">Tinggalkan kontak, ya. Kami bantu lanjutkan.</p></div><button type="button" onClick={() => setShowLeadForm(false)} aria-label="Tutup formulir" className="tap-target flex items-center justify-center"><ChevronDown size={18} /></button></div>
               <input name="name" maxLength={120} placeholder="Nama panggilan (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
               <input name="whatsapp" maxLength={40} placeholder="Nomor WhatsApp" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
@@ -233,16 +237,18 @@ export function ChatbotWidget() {
         </section>
       )}
 
-      <button
-        ref={toggleRef}
-        type="button"
-        onClick={() => { setIsOpen((value) => !value); setInvite(false); }}
-        className={`group relative flex h-[68px] w-[68px] items-center justify-center rounded-[46%_54%_51%_49%/48%_42%_58%_52%] border-4 border-[#fffaf3] bg-butter shadow-[0_10px_30px_rgba(196,98,45,0.42)] transition hover:-translate-y-1 hover:rotate-3 hover:shadow-[0_15px_35px_rgba(122,59,30,0.5)] ${!isOpen && invite ? 'animate-chat-toggle-bounce' : ''}`}
-        onAnimationEnd={() => setInvite(false)}
-        aria-label={isOpen ? 'Tutup chat layanan pelanggan' : 'Buka chat layanan pelanggan'}
-      >
-        {isOpen ? <X size={28} className="text-rust-ink" /> : <><LinaAvatar size="lg" /><span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-white shadow-sm"><MessageCircle size={13} /></span></>}
-      </button>
+      {!isOpen && (
+        <button
+          ref={toggleRef}
+          type="button"
+          onClick={() => { setIsOpen(true); setInvite(false); }}
+          className={`group relative flex h-[68px] w-[68px] items-center justify-center rounded-[46%_54%_51%_49%/48%_42%_58%_52%] border-4 border-[#fffaf3] bg-butter shadow-[0_10px_30px_rgba(196,98,45,0.42)] transition hover:-translate-y-1 hover:rotate-3 hover:shadow-[0_15px_35px_rgba(122,59,30,0.5)] ${invite ? 'animate-chat-toggle-bounce' : ''}`}
+          onAnimationEnd={() => setInvite(false)}
+          aria-label="Buka chat layanan pelanggan"
+        >
+          <LinaAvatar size="lg" /><span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-white shadow-sm"><MessageCircle size={13} /></span>
+        </button>
+      )}
     </div>
   );
 }

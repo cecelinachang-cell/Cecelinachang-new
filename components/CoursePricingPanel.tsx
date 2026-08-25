@@ -1,8 +1,14 @@
+"use client";
+
+import { useState } from 'react';
 import { CheckCircle2, MessageCircle } from 'lucide-react';
 import { POLICIES } from '@/lib/policies';
 import { Button } from '@/components/ui/Button';
+import LeadFormModal from '@/components/LeadFormModal';
+import { trackConversion } from '@/lib/analytics';
 
 interface Course {
+  slug: string;
   title: string;
   price: string;
   originalPrice?: string;
@@ -15,7 +21,7 @@ interface CoursePricingPanelProps {
 }
 
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
-  const whatsappHref = `https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20daftar%20${encodeURIComponent(course.title)}`;
+  const [showLeadForm, setShowLeadForm] = useState(false);
 
   return (
     <div className={`bg-white rounded-3xl shadow-xl border border-butter/30 ${compact ? 'p-5' : 'p-8'}`}>
@@ -59,7 +65,17 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         </div>
       )}
 
-      <Button href={whatsappHref} external variant="whatsapp" size="lg" fullWidth className="mb-4">
+      <Button
+        type="button"
+        onClick={() => {
+          trackConversion('lead_form_open', course.slug);
+          setShowLeadForm(true);
+        }}
+        variant="whatsapp"
+        size="lg"
+        fullWidth
+        className="mb-4"
+      >
         <MessageCircle className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
       </Button>
 
@@ -72,6 +88,15 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
             {POLICIES.COURSE_REFUND_SHORT}
           </p>
         </>
+      )}
+
+      {showLeadForm && (
+        <LeadFormModal
+          courseSlug={course.slug}
+          courseTitle={course.title}
+          coursePrice={course.price}
+          onClose={() => setShowLeadForm(false)}
+        />
       )}
     </div>
   );

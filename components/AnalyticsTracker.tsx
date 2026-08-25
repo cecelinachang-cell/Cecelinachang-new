@@ -21,15 +21,19 @@ export default function AnalyticsTracker() {
       sessionStorage.setItem('analytics_session_id', sessionId);
     }
 
+    let pageViewId: string | number | null = null;
+
     const recordPageView = async () => {
       try {
-        console.log(`Tracking page view: ${pathname}`);
-        const { error } = await supabase.from('page_views').insert({
-          path: pathname,
-          session_id: sessionId
-        });
+        const { data, error } = await supabase
+          .from('page_views')
+          .insert({ path: pathname, session_id: sessionId })
+          .select('id')
+          .single();
         if (error) {
            console.warn('Could not record page view (possibly missing tables or RLS enabled):', error.message || error.code || 'Unknown error');
+        } else if (data) {
+          pageViewId = data.id;
         }
       } catch (err) {
         console.warn('Unexpected error recording page view:', err);
@@ -38,13 +42,16 @@ export default function AnalyticsTracker() {
 
     recordPageView();
 
-    // Active usage heartbeat
+    // Active usage heartbeat: update duration on the existing row instead of
+    // inserting a new one every minute (that was inflating pageview counts).
+    const startedAt = Date.now();
     const interval = setInterval(async () => {
+       if (!pageViewId) return;
        try {
-         await supabase.from('page_views').insert({
-           path: pathname,
-           session_id: sessionId
-         });
+         await supabase
+           .from('page_views')
+           .update({ duration_seconds: Math.round((Date.now() - startedAt) / 1000) })
+           .eq('id', pageViewId);
        } catch (e) {}
     }, 60000); // every minute
 

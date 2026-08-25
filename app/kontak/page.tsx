@@ -1,7 +1,37 @@
-import { MessageCircle, Mail, MapPin, Send } from 'lucide-react';
+"use client";
+
+import { useState } from 'react';
+import { MessageCircle, Mail, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import Faq from '@/components/Faq';
 
 export default function KontakPage() {
+  const [name, setName] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [message, setMessage] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (status === 'submitting') return;
+    setStatus('submitting');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, whatsapp, message, website }),
+      });
+      if (!res.ok) throw new Error('failed');
+      setStatus('sent');
+      setName('');
+      setWhatsapp('');
+      setMessage('');
+    } catch {
+      setStatus('error');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
       <div className="text-center mb-10 sm:mb-16">
@@ -58,44 +88,76 @@ export default function KontakPage() {
         {/* Contact Form */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-12 shadow-lg border border-butter/30">
           <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-6 sm:mb-8">Kirim Pesan</h2>
-          <form className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-charcoal-brown mb-2">Nama Lengkap</label>
+          {status === 'sent' ? (
+            <div className="flex flex-col items-center text-center py-8">
+              <CheckCircle2 className="w-12 h-12 text-green-500 mb-4" />
+              <p className="font-bold text-charcoal-brown mb-1">Pesan terkirim!</p>
+              <p className="text-charcoal-brown/60 text-sm">Kami akan membalas via WhatsApp secepatnya.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
               <input
                 type="text"
-                id="name"
-                className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5"
-                placeholder="Masukkan nama Anda"
+                className="hidden"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
               />
-            </div>
-            <div>
-              <label htmlFor="whatsapp" className="block text-sm font-medium text-charcoal-brown mb-2">Nomor WhatsApp</label>
-              <input
-                type="tel"
-                id="whatsapp"
-                className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5"
-                placeholder="Contoh: 0812xxxx"
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-charcoal-brown mb-2">Pesan Anda</label>
-              <textarea
-                id="message"
-                rows={5}
-                className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5 resize-none"
-                placeholder="Tuliskan pertanyaan atau pesan Anda di sini..."
-              ></textarea>
-            </div>
-            <button
-              type="button"
-              className="w-full flex justify-center items-center px-8 py-4 text-lg font-bold rounded-xl text-white bg-terracotta hover:bg-rust-ink transition-colors shadow-md"
-            >
-              <Send className="w-5 h-5 mr-3" /> Kirim Pesan
-            </button>
-            <p className="text-sm text-charcoal-brown/60 text-center mt-4">
-              Kami akan membalas pesan Anda melalui WhatsApp secepatnya.
-            </p>
-          </form>
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-charcoal-brown mb-2">Nama Lengkap</label>
+                <input
+                  type="text"
+                  id="name"
+                  required
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5"
+                  placeholder="Masukkan nama Anda"
+                />
+              </div>
+              <div>
+                <label htmlFor="whatsapp" className="block text-sm font-medium text-charcoal-brown mb-2">Nomor WhatsApp</label>
+                <input
+                  type="tel"
+                  id="whatsapp"
+                  required
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5"
+                  placeholder="Contoh: 0812xxxx"
+                />
+              </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-charcoal-brown mb-2">Pesan Anda</label>
+                <textarea
+                  id="message"
+                  rows={5}
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full px-5 py-4 rounded-xl border border-butter/40 focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent bg-butter/5 resize-none"
+                  placeholder="Tuliskan pertanyaan atau pesan Anda di sini..."
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="w-full flex justify-center items-center px-8 py-4 text-lg font-bold rounded-xl text-white bg-terracotta hover:bg-rust-ink transition-colors shadow-md disabled:opacity-60"
+              >
+                <Send className="w-5 h-5 mr-3" /> {status === 'submitting' ? 'Mengirim...' : 'Kirim Pesan'}
+              </button>
+              {status === 'error' && (
+                <p className="text-sm text-red-600 text-center">Gagal mengirim. Coba lagi atau chat WhatsApp di atas.</p>
+              )}
+              <p className="text-sm text-charcoal-brown/60 text-center mt-4">
+                Kami akan membalas pesan Anda melalui WhatsApp secepatnya.
+              </p>
+            </form>
+          )}
         </div>
       </div>
 

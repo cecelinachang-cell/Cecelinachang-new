@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 import { Marginalia } from "@/components/Marginalia";
@@ -12,6 +12,10 @@ import { Tape } from "@/components/ui/Tape";
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { products as fallbackProducts } from "@/app/data/products";
+
+const FEATURED_COURSE_SLUG = "bakso-sapi-premium";
+const FEATURED_COURSE_PRICE = "Rp 299.000";
+const FEATURED_COURSE_STUDENTS = "4.500+";
 
 interface Product {
   id: string;
@@ -37,6 +41,13 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [assets, setAssets] = useState<Record<string, string>>({});
+  const [videoTopic, setVideoTopic] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get("v") || params.get("utm_content");
+    if (v) setVideoTopic(v.replace(/[-_]/g, " "));
+  }, []);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -152,7 +163,6 @@ export default function Home() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-top"
                   priority
-                  unoptimized
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
@@ -170,55 +180,55 @@ export default function Home() {
               initial="hidden"
               animate="visible"
             >
+              <motion.div
+                variants={fadeUpVariant}
+                className="inline-flex items-center gap-1.5 mx-auto lg:mx-0 mb-4 bg-butter/40 text-rust-ink px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit"
+              >
+                <BookOpen className="w-3.5 h-3.5" /> Kelas Online · Cece Lina Chang
+              </motion.div>
+
               <motion.h1
                 variants={fadeUpVariant}
                 className="text-fluid-h1 font-serif font-bold text-charcoal-brown leading-[1.1] mb-4 sm:mb-6"
               >
-                Belajar Baking <br />
-                <span className="text-terracotta italic font-normal">
-                  Anti Gagal
-                </span>
+                {videoTopic ? (
+                  <>
+                    Baru Lihat Video <br />
+                    <span className="text-terracotta italic font-normal capitalize">{videoTopic}</span>?
+                  </>
+                ) : (
+                  <>
+                    Belajar Baking <br />
+                    <span className="text-terracotta italic font-normal">Anti Gagal</span>
+                  </>
+                )}
               </motion.h1>
 
               <motion.p
                 variants={fadeUpVariant}
                 className="text-base sm:text-xl text-charcoal-brown/80 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Sudah ribuan ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
+                Ribuan ibu sudah berhasil bikin lapis legit, otak-otak, dan bakso sendiri di rumah — meski belum pernah masak sebelumnya.
               </motion.p>
 
               <motion.div
                 variants={fadeUpVariant}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
+                className="flex flex-col items-center lg:items-start gap-3"
               >
-                <Button href="#kelas" variant="primary" size="lg" fullWidth className="sm:w-fit">
-                  Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
+                <Button href={`/kursus/${FEATURED_COURSE_SLUG}`} variant="primary" size="lg" fullWidth className="sm:w-fit">
+                  Lihat Kelas &amp; Daftar Sekarang <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
-                <Button href="/toko" variant="secondary" size="lg" fullWidth className="sm:w-fit">
-                  Lihat Alat Masak <ShoppingBag className="ml-2 w-5 h-5" />
-                </Button>
-              </motion.div>
-
-              <motion.div
-                variants={fadeUpVariant}
-                className="mt-6 sm:mt-8 flex items-center justify-center lg:justify-start"
-              >
-                <Marginalia rotate={-2} className="text-base sm:text-xl">
-                  — Cece Lina Chang, yang bakal temenin kamu belajar
-                </Marginalia>
-              </motion.div>
-
-              <motion.div variants={fadeUpVariant} className="mt-6 sm:mt-8 mx-auto lg:mx-0 w-fit">
-                <p className="text-sm text-charcoal-brown/60 mb-1">Yang paling sering ditanya ke aku:</p>
-                <Marginalia rotate={-3}>&quot;Kenapa harus belajar dari Cece?&quot;</Marginalia>
-                <span className="block mt-2">
-                  <Marginalia rotate={2}>Karena aku udah 28 tahun ngurus pabrik bakso sapi sendiri, sejak 1998.</Marginalia>
+                <span className="inline-flex items-center gap-1.5 text-sm text-charcoal-brown/60 whitespace-nowrap">
+                  Mulai {FEATURED_COURSE_PRICE} · {FEATURED_COURSE_STUDENTS} murid sudah bergabung
                 </span>
               </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
+
+      {/* Testimoni */}
+      <TestimonialCarousel />
 
       {/* Keunggulan Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8">
@@ -494,9 +504,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      {/* Testimoni */}
-      <TestimonialCarousel />
 
       {/* Social Media */}
       <section className="bg-butter/15 py-16">

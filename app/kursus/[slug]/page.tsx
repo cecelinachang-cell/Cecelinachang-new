@@ -7,6 +7,10 @@ import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
 import { CoursePricingPanel } from '@/components/CoursePricingPanel';
+import { MobileCourseBar } from '@/components/MobileCourseBar';
+import ProductCard from '@/components/ProductCard';
+import { courseProducts } from '@/app/data/course-products';
+import { products } from '@/app/data/products';
 
 export const revalidate = 60;
 
@@ -120,8 +124,12 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
     notFound();
   }
 
+  const usedProducts = (courseProducts[course.slug] || [])
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is (typeof products)[number] => Boolean(p));
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-28 lg:pb-12">
       <Link href="/kursus" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-6 sm:mb-8">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Daftar Kelas
       </Link>
@@ -172,11 +180,6 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
         </div>
       </div>
 
-      {/* Mobile: pricing/CTA shown above the fold, before the long description */}
-      <div className="lg:hidden mb-8">
-        <CoursePricingPanel course={course} compact />
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         {/* Left Column: Content */}
         <div className="lg:col-span-2 space-y-8 sm:space-y-12">
@@ -221,10 +224,29 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             </div>
           </section>
 
-          {/* Mobile: repeat the CTA at the end of the content column */}
-          <div className="lg:hidden">
-            <CoursePricingPanel course={course} compact />
-          </div>
+          {/* Alat yang digunakan */}
+          {usedProducts.length > 0 && (
+            <section>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-4 sm:mb-6">Alat yang Dipakai di Kelas Ini</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                {usedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Ajakan lihat kelas lain */}
+          <section className="text-center border-t border-butter/30 pt-8">
+            <p className="text-charcoal-brown/70 mb-3">Cece juga punya kelas online lainnya, lho.</p>
+            <Link
+              href="/kursus"
+              className="inline-flex items-center font-bold text-terracotta hover:text-rust-ink transition-colors"
+            >
+              Lihat Kelas Lainnya <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+            </Link>
+          </section>
+
         </div>
 
         {/* Right Column: Pricing & CTA (Sticky, desktop only) */}
@@ -234,6 +256,9 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
           </div>
         </div>
       </div>
+
+      {/* Mobile: fixed bottom price + CTA bar, always visible while scrolling */}
+      <MobileCourseBar course={course} />
     </div>
   );
 }

@@ -6,9 +6,9 @@ export function WhatsAppButton() {
       href="https://wa.me/6281284250718?text=Halo%20Cece%20Lina%20Chang,%20saya%20ingin%20bertanya..."
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-[100px] right-4 z-[55] flex items-center justify-center w-14 h-14 sm:bottom-[104px] sm:right-6 sm:w-16 sm:h-16 bg-[#25D366] text-white rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.4)] hover:bg-[#128C7E] hover:scale-110 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(37,211,102,0.5)] active:scale-95 active:bg-[#075E54] transition-all duration-300 group animate-bounce-subtle"
+      className="fixed right-4 z-[55] flex items-center justify-center w-14 h-14 sm:right-6 sm:w-16 sm:h-16 bg-[#25D366] text-white rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.4)] hover:bg-[#128C7E] hover:scale-110 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(37,211,102,0.5)] active:scale-95 active:bg-[#075E54] transition-all duration-300 group animate-bounce-subtle"
       aria-label="Chat WhatsApp"
-      style={{ animation: "bounceSubtle 3s infinite" }}
+      style={{ animation: "bounceSubtle 3s infinite", bottom: "calc(var(--floating-offset) + 80px)" }}
     >
       <style
         dangerouslySetInnerHTML={{

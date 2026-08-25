@@ -16,6 +16,19 @@
   --text-fluid-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
 }
 
+:root {
+  --floating-offset: 1.25rem;
+}
+
+/* Nudge floating action buttons (WhatsApp, chatbot) above the mobile
+   sticky course CTA bar — see components/MobileCourseBar.tsx. Scoped to
+   mobile widths since the bar itself is hidden at lg. */
+@media (max-width: 1023px) {
+  body.has-sticky-cta {
+    --floating-offset: 6rem;
+  }
+}
+
 @utility tap-target {
   min-height: 2.75rem;
   min-width: 2.75rem;
