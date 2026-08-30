@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { Marginalia } from '@/components/Marginalia';
 
 export default function TentangPage() {
-  const [aboutImage, setAboutImage] = useState<string>('https://i.postimg.cc/tCXKbMWY/image.png');
+  const [aboutImage, setAboutImage] = useState<string>('/images/lina-avatar.jpeg');
 
   useEffect(() => {
     const fetchAsset = async () => {

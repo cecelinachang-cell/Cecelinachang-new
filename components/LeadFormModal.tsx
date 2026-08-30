@@ -91,8 +91,8 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center sm:p-4 z-[100]">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center pt-20 sm:pt-4 sm:p-4 z-[100]">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-butter/30 shrink-0">
           <h2 className="font-serif text-xl font-bold text-rust-ink">Daftar Kelas</h2>
           <button

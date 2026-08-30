@@ -1,11 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
-// Server components can't run DOMPurify (needs `window`), so descriptions
-// authored as HTML via the admin RichTextEditor are sanitized client-side
-// here before being injected.
+// isomorphic-dompurify (jsdom-backed) so sanitizing produces the same output
+// during SSR and on the client -- the plain browser `dompurify` package
+// silently no-ops without `window`, which made the server-rendered HTML
+// differ from the client's and triggered React hydration errors.
 export function SanitizedHtml({ html, className }: { html: string; className?: string }) {
   const clean = useMemo(() => DOMPurify.sanitize(html || ''), [html]);
 

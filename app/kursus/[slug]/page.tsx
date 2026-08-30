@@ -147,6 +147,7 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             sizes="(max-width: 1024px) 100vw, 66vw"
             className="object-cover"
             referrerPolicy="no-referrer"
+            priority
           />
           {course.video && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/40">
