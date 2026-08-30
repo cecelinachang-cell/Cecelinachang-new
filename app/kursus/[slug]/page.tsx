@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
@@ -35,7 +36,14 @@ interface Course {
 // fetch doesn't opt in -- so without this, every request re-hits Supabase
 // and the whole route renders dynamically (page.tsx's `revalidate = 60`
 // only caches the render, not the data fetch it depends on).
-const getCourseBySlug = unstable_cache(
+//
+// generateMetadata() and the page component both call this, and without
+// React's per-request cache() wrapping unstable_cache, those two calls
+// aren't deduped within a single request -- they race as two independent
+// async streams, which is what was tearing the metadata/body hydration
+// and throwing React error #419 in production (never visible on
+// localhost, where both calls resolve too fast for the race to matter).
+const getCourseBySlug = cache(unstable_cache(
   async (slug: string): Promise<Course | null> => {
     try {
       if (!isSupabaseConfigured()) {
@@ -63,7 +71,7 @@ const getCourseBySlug = unstable_cache(
   },
   ['course-by-slug'],
   { revalidate: 60 }
-);
+));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
