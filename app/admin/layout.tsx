@@ -1,6 +1,6 @@
 'use client';
 
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { Sidebar } from '@/components/admin/Sidebar';
 import { Navbar } from '@/components/admin/Navbar';
 import { usePathname, useRouter } from 'next/navigation';
@@ -11,11 +11,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
+  const [sidebarState, setSidebarState] = useState({ open: false, pathname });
+  const sidebarOpen = sidebarState.pathname === pathname && sidebarState.open;
+  const setSidebarOpen = (value: boolean | ((current: boolean) => boolean)) => {
+    setSidebarState((current) => ({
+      pathname,
+      open: typeof value === 'function' ? value(current.pathname === pathname && current.open) : value,
+    }));
+  };
 
   useEffect(() => {
     document.body.classList.add('admin-mode');
@@ -34,16 +37,16 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [user, isAdmin, loading, router, pathname]);
 
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
       </div>
     );
-  }
-
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
   }
 
   if (!user || !isAdmin) {
@@ -64,9 +67,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AuthProvider>
-  );
+  // AuthProvider already wraps the complete application in app/layout.tsx.
+  // Mounting a second provider here can race the same Supabase auth session
+  // initialization and leave this gate permanently loading.
+  return <AdminLayoutContent>{children}</AdminLayoutContent>;
 }

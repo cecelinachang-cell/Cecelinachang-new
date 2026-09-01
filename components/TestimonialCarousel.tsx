@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
+import { withTimeout } from '@/lib/withTimeout';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -46,10 +47,17 @@ export function TestimonialCarousel() {
           return;
         }
 
-        const { data, error } = await supabase
-          .from('testimonials')
-          .select('*')
-          .order('createdAt', { ascending: false });
+        // Testimonials are public content. Avoid the session-backed client here:
+        // its auth initialization can be blocked by a stale browser lock and leave
+        // this component's loading state unresolved indefinitely.
+        const { data, error } = await withTimeout(
+          supabasePublic
+            .from('testimonials')
+            .select('*')
+            .order('createdAt', { ascending: false }),
+          15_000,
+          'Testimonial query timed out',
+        );
           
         if (error) {
           const errMsg = error.message || (error as any).toString();

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { withTimeout } from '@/lib/withTimeout';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -25,17 +26,25 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data: signInData, error: signInErr } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email,
+          password,
+        }),
+        15_000,
+        'Login request timed out. Please try again.',
+      );
 
       if (signInErr) throw signInErr;
 
       const currentUser = signInData?.session?.user;
       if (!currentUser) throw new Error('No user session found. Please check your credentials.');
 
-      const { data: userDoc } = await supabase.from('users').select('role').eq('id', currentUser.id).single();
+      const { data: userDoc } = await withTimeout(
+        supabase.from('users').select('role').eq('id', currentUser.id).single(),
+        10_000,
+        'Admin role check timed out. Please try again.',
+      );
 
       if (userDoc?.role === 'admin') {
         router.push('/admin/dashboard');
