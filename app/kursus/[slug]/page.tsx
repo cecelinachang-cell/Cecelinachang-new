@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
@@ -15,6 +17,10 @@ import {
 } from '@/lib/seo';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
 import { CoursePricingPanel } from '@/components/CoursePricingPanel';
+import { MobileCourseBar } from '@/components/MobileCourseBar';
+import ProductCard from '@/components/ProductCard';
+import { courseProducts } from '@/app/data/course-products';
+import { products } from '@/app/data/products';
 
 export const revalidate = 60;
 
@@ -56,26 +62,50 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return fallbackCourses.map((course: any) => ({ slug: course.slug }));
 }
 
+// Next 15 no longer caches `fetch` by default, and supabase-js's internal
+// fetch doesn't opt in -- so without this, every request re-hits Supabase
+// and the whole route renders dynamically (page.tsx's `revalidate = 60`
+// only caches the render, not the data fetch it depends on).
+//
+// generateMetadata() and the page component both call this, and without
+// React's per-request cache() wrapping unstable_cache, those two calls
+// aren't deduped within a single request -- they race as two independent
+// async streams, which is what was tearing the metadata/body hydration
+// and throwing React error #419 in production (never visible on
+// localhost, where both calls resolve too fast for the race to matter).
+const getCourseBySlug = cache(unstable_cache(
+  async (slug: string): Promise<Course | null> => {
+    try {
+      if (!isSupabaseConfigured()) {
+        const { courses: fallbackCourses } = await import('@/app/data/courses');
+        return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+      }
+      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
+      if (error) {
+        const errMsg = error?.message || (error as any)?.toString() || '';
+        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+          console.error('Error fetching course detail:', errMsg);
+        }
+      }
+      if (data) return data as Course;
+      const { courses: fallbackCourses } = await import('@/app/data/courses');
+      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+    } catch (err: any) {
+      const errMsg = err?.message || err?.toString() || '';
+      if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+        console.error('Unexpected error fetching course detail:', err);
+      }
+      const { courses: fallbackCourses } = await import('@/app/data/courses');
+      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
+    }
+  },
+  ['course-by-slug'],
+  { revalidate: 60 }
+));
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  let course: Course | null = null;
-
-  try {
-    if (!isSupabaseConfigured()) {
-      const { courses: fallbackCourses } = await import('@/app/data/courses');
-      course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-    } else {
-      const { data } = await supabase.from('courses').select('*').eq('slug', slug).single();
-      if (data) course = data as Course;
-      else {
-        const { courses: fallbackCourses } = await import('@/app/data/courses');
-        course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-      }
-    }
-  } catch {
-    const { courses: fallbackCourses } = await import('@/app/data/courses');
-    course = (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-  }
+  const course = await getCourseBySlug(slug);
 
   if (!course) {
     // Nothing to index on a missing course, and no canonical to point at.
@@ -110,48 +140,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function KursusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  let course: Course | null = null;
-
-  try {
-    if (!isSupabaseConfigured()) {
-      const { courses: fallbackCourses } = await import("@/app/data/courses");
-      const found = fallbackCourses.find((c: any) => c.slug === slug);
-      if (found) {
-        course = found as unknown as Course;
-      }
-    } else {
-      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
-      if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-          console.error("Error fetching course detail:", errMsg);
-        }
-        const { courses: fallbackCourses } = await import("@/app/data/courses");
-        const found = fallbackCourses.find((c: any) => c.slug === slug);
-        if (found) {
-          course = found as unknown as Course;
-        }
-      } else if (data) {
-        course = data as Course;
-      }
-    }
-  } catch (err: any) {
-    const errMsg = err?.message || err?.toString() || '';
-    if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-      console.error("Unexpected error fetching course detail:", err);
-    }
-    try {
-      const { courses: fallbackCourses } = await import("@/app/data/courses");
-      const found = fallbackCourses.find((c: any) => c.slug === slug);
-      if (found) {
-        course = found as unknown as Course;
-      }
-    } catch (_) {}
-  }
+  const course = await getCourseBySlug(slug);
 
   if (!course) {
     notFound();
   }
+
+  const usedProducts = (courseProducts[course.slug] || [])
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is (typeof products)[number] => Boolean(p));
 
   const priceValue = parsePriceValue(course.price);
   const structuredData = [
@@ -195,7 +192,7 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-28 lg:pb-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -236,6 +233,7 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             sizes="(max-width: 1024px) 100vw, 66vw"
             className="object-cover"
             referrerPolicy="no-referrer"
+            priority
           />
           {course.video && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/40">
@@ -248,11 +246,6 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             </div>
           )}
         </div>
-      </div>
-
-      {/* Mobile: pricing/CTA shown above the fold, before the long description */}
-      <div className="lg:hidden mb-8">
-        <CoursePricingPanel course={course} compact />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -299,10 +292,29 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             </div>
           </section>
 
-          {/* Mobile: repeat the CTA at the end of the content column */}
-          <div className="lg:hidden">
-            <CoursePricingPanel course={course} compact />
-          </div>
+          {/* Alat yang digunakan */}
+          {usedProducts.length > 0 && (
+            <section>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-4 sm:mb-6">Alat yang Dipakai di Kelas Ini</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                {usedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Ajakan lihat kelas lain */}
+          <section className="text-center border-t border-butter/30 pt-8">
+            <p className="text-charcoal-brown/70 mb-3">Cece juga punya kelas online lainnya, lho.</p>
+            <Link
+              href="/kursus"
+              className="inline-flex items-center font-bold text-terracotta hover:text-rust-ink transition-colors"
+            >
+              Lihat Kelas Lainnya <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+            </Link>
+          </section>
+
         </div>
 
         {/* Right Column: Pricing & CTA (Sticky, desktop only) */}
@@ -312,6 +324,9 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
           </div>
         </div>
       </div>
+
+      {/* Mobile: fixed bottom price + CTA bar, always visible while scrolling */}
+      <MobileCourseBar course={course} />
     </div>
   );
 }

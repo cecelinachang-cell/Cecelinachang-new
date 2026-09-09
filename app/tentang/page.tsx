@@ -9,7 +9,7 @@ import { Marginalia } from '@/components/Marginalia';
 import { isOptimizableImage } from '@/lib/images';
 
 export default function TentangPage() {
-  const [aboutImage, setAboutImage] = useState<string>('https://i.postimg.cc/tCXKbMWY/image.png');
+  const [aboutImage, setAboutImage] = useState<string>('/images/lina-avatar.jpeg');
 
   useEffect(() => {
     const fetchAsset = async () => {
@@ -26,14 +26,14 @@ export default function TentangPage() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
         {/* Foto Personal */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative h-[500px] lg:h-[700px] rounded-[3rem_0.5rem_3rem_0.5rem] overflow-hidden shadow-2xl bg-butter/20 border-8 border-white flex items-center justify-center group"
+          className="relative h-[360px] sm:h-[460px] lg:h-[700px] rounded-[3rem_0.5rem_3rem_0.5rem] overflow-hidden shadow-2xl bg-butter/20 border-8 border-white flex items-center justify-center group"
         >
           <Image
             src={aboutImage}
@@ -43,10 +43,10 @@ export default function TentangPage() {
             referrerPolicy="no-referrer"
             unoptimized={!isOptimizableImage(aboutImage)}
           />
-          <div className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-            <h2 className="font-serif text-2xl font-bold text-rust-ink mb-2">Cece Lina Chang</h2>
-            <p className="text-charcoal-brown/70 font-medium">Baking Content Creator & Instruktur</p>
-            <div className="flex items-center mt-4 text-terracotta">
+          <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-8 bg-white/90 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-2">Cece Lina Chang</h2>
+            <p className="text-charcoal-brown/70 font-medium text-sm sm:text-base">Baking Content Creator & Instruktur</p>
+            <div className="flex items-center mt-3 sm:mt-4 text-terracotta">
               <Instagram className="w-5 h-5 mr-2" />
               <a href="https://instagram.com/cecelinachang" target="_blank" rel="noopener noreferrer" className="hover:underline">@cecelinachang</a>
             </div>
@@ -60,15 +60,15 @@ export default function TentangPage() {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="flex flex-col justify-center"
         >
-          <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-8 w-fit">
+          <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-6 sm:mb-8 w-fit">
             <Heart className="w-5 h-5 fill-current" /> Halo, Saya Lina!
           </div>
 
-          <h1 className="font-serif text-4xl lg:text-5xl font-bold text-rust-ink mb-8 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-rust-ink mb-6 sm:mb-8 leading-tight">
             Berawal dari Dapur Kecil, Berbagi Kebahagiaan untuk Semua.
           </h1>
 
-          <div className="space-y-6 text-lg text-charcoal-brown/85 leading-relaxed">
+          <div className="space-y-5 sm:space-y-6 text-base sm:text-lg text-charcoal-brown/85 leading-relaxed">
             <p>
               Semua berawal dari keinginan sederhana: membuatkan camilan sehat dan enak untuk keluarga di rumah. Saya ingat betul, percobaan pertama saya membuat roti sobek berakhir dengan roti yang keras seperti batu.
             </p>
@@ -105,7 +105,7 @@ export default function TentangPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12 pt-12 border-t border-butter/40">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 mt-8 pt-8 sm:mt-12 sm:pt-12 border-t border-butter/40">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

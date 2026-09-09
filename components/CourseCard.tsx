@@ -14,6 +14,7 @@ import { stripHtml } from "@/lib/utils";
 import LeadFormModal from "./LeadFormModal";
 import { Button } from "@/components/ui/Button";
 import { isOptimizableImage } from '@/lib/images';
+import { trackConversion } from "@/lib/analytics";
 
 interface Course {
   id: string;
@@ -133,7 +134,10 @@ export default function CourseCard({ course }: { course: Course }) {
           </div>
           <Button
             type="button"
-            onClick={() => setShowLeadForm(true)}
+            onClick={() => {
+              trackConversion('lead_form_open', course.slug);
+              setShowLeadForm(true);
+            }}
             variant="whatsapp"
             size="lg"
             fullWidth
@@ -160,6 +164,7 @@ export default function CourseCard({ course }: { course: Course }) {
         <LeadFormModal
           courseSlug={course.slug}
           courseTitle={course.title}
+          coursePrice={course.price}
           onClose={() => setShowLeadForm(false)}
         />
       )}

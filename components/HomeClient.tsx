@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
 import { Marginalia } from "@/components/Marginalia";
@@ -12,7 +12,9 @@ import { Tape } from "@/components/ui/Tape";
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { products as fallbackProducts } from "@/app/data/products";
-import { isOptimizableImage } from "@/lib/images";
+import { courses as fallbackCourses } from "@/app/data/courses";
+
+const FEATURED_COURSE_SLUG = "bakso-sapi-premium";
 
 interface Product {
   id: string;
@@ -38,6 +40,46 @@ export default function HomeClient() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [assets, setAssets] = useState<Record<string, string>>({});
+  const [videoTopic, setVideoTopic] = useState<string | null>(null);
+
+  const fallbackFeaturedCourse = fallbackCourses.find(
+    (course) => course.slug === FEATURED_COURSE_SLUG
+  );
+  const [featuredCourse, setFeaturedCourse] = useState<{ price: string; students: number } | null>(
+    fallbackFeaturedCourse
+      ? { price: fallbackFeaturedCourse.price, students: fallbackFeaturedCourse.students }
+      : null
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get("v") || params.get("utm_content");
+    if (v) setVideoTopic(v.replace(/[-_]/g, " "));
+  }, []);
+
+  useEffect(() => {
+    // Hero shows this course's real price/enrollment, not a hardcoded
+    // figure, so it never drifts from what admins set on the course itself.
+    const fetchFeaturedCourse = async () => {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const { data, error } = await supabase
+          .from("courses")
+          .select("price, students")
+          .eq("slug", FEATURED_COURSE_SLUG)
+          .single();
+        if (!error && data) {
+          setFeaturedCourse({ price: data.price, students: data.students });
+        }
+      } catch (err: any) {
+        const errMsg = err?.message || err?.toString() || '';
+        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
+          console.error("Error fetching featured course:", err);
+        }
+      }
+    };
+    fetchFeaturedCourse();
+  }, []);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -111,8 +153,6 @@ export default function HomeClient() {
     fetchProducts();
   }, []);
 
-  const heroImage = assets["hero_image"] || "/images/meat-pie.png";
-
   const fadeUpVariant = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -146,15 +186,16 @@ export default function HomeClient() {
             >
               <div className="relative w-full aspect-[4/3] lg:aspect-[4/5] rounded-[2.5rem_1rem_2.5rem_1rem] overflow-hidden shadow-2xl border-8 border-white">
                 <Image
-                  src={heroImage}
-                  alt="Cece Lina Chang membuat kue di dapur rumahnya"
+                  src={
+                    assets["hero_image"] ||
+                    "/images/meat-pie.webp"
+                  }
+                  alt="Cece Lina Chang Baking"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-top"
                   priority
-                  // Admin-supplied hero URLs can point at any host, which the
-                  // image optimizer rejects unless it is in `remotePatterns`.
-                  unoptimized={!isOptimizableImage(heroImage)}
+                  unoptimized
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
@@ -172,76 +213,79 @@ export default function HomeClient() {
               initial="hidden"
               animate="visible"
             >
+              <motion.div
+                variants={fadeUpVariant}
+                className="inline-flex items-center gap-1.5 mx-auto lg:mx-0 mb-4 bg-butter/40 text-rust-ink px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit"
+              >
+                <BookOpen className="w-3.5 h-3.5" /> Kelas Online · Cece Lina Chang
+              </motion.div>
+
               <motion.h1
                 variants={fadeUpVariant}
                 className="text-fluid-h1 font-serif font-bold text-charcoal-brown leading-[1.1] mb-4 sm:mb-6"
               >
-                Belajar Baking <br />
-                <span className="text-terracotta italic font-normal">
-                  Anti Gagal
-                </span>
+                {videoTopic ? (
+                  <>
+                    Baru Lihat Video <br />
+                    <span className="text-terracotta italic font-normal capitalize">{videoTopic}</span>?
+                  </>
+                ) : (
+                  <>
+                    Belajar Baking <br />
+                    <span className="text-terracotta italic font-normal">Anti Gagal</span>
+                  </>
+                )}
               </motion.h1>
 
               <motion.p
                 variants={fadeUpVariant}
                 className="text-base sm:text-xl text-charcoal-brown/80 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Sudah ribuan ibu berhasil bikin lapis legit, otak otak, dan bakso sendiri di rumah tanpa pernah masak sebelumnya
+                Ribuan ibu sudah berhasil bikin lapis legit, otak-otak, dan bakso sendiri di rumah — meski belum pernah masak sebelumnya.
               </motion.p>
 
               <motion.div
                 variants={fadeUpVariant}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
+                className="flex flex-col items-center lg:items-start gap-3"
               >
-                <Button href="#kelas" variant="primary" size="lg" fullWidth className="sm:w-fit">
-                  Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
+                <Button href={`/kursus/${FEATURED_COURSE_SLUG}`} variant="primary" size="lg" fullWidth className="sm:w-fit">
+                  Lihat Kelas &amp; Daftar Sekarang <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
-                <Button href="/toko" variant="secondary" size="lg" fullWidth className="sm:w-fit">
-                  Lihat Alat Masak <ShoppingBag className="ml-2 w-5 h-5" />
-                </Button>
-              </motion.div>
-
-              <motion.div
-                variants={fadeUpVariant}
-                className="mt-6 sm:mt-8 flex items-center justify-center lg:justify-start"
-              >
-                <Marginalia rotate={-2} className="text-base sm:text-xl">
-                  — Cece Lina Chang, yang bakal temenin kamu belajar
-                </Marginalia>
-              </motion.div>
-
-              <motion.div variants={fadeUpVariant} className="mt-6 sm:mt-8 mx-auto lg:mx-0 w-fit">
-                <p className="text-sm text-charcoal-brown/60 mb-1">Yang paling sering ditanya ke aku:</p>
-                <Marginalia rotate={-3}>&quot;Kenapa harus belajar dari Cece?&quot;</Marginalia>
-                <span className="block mt-2">
-                  <Marginalia rotate={2}>Karena aku udah 28 tahun ngurus pabrik bakso sapi sendiri, sejak 1998.</Marginalia>
-                </span>
+                {featuredCourse && (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-charcoal-brown/60 whitespace-nowrap">
+                    Mulai {featuredCourse.price} ·{" "}
+                    {new Intl.NumberFormat("id-ID").format(featuredCourse.students)}+ murid sudah bergabung
+                  </span>
+                )}
               </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
+      {/* Testimoni */}
+      <TestimonialCarousel />
+
       {/* Keunggulan Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              image: assets["home_course_2"] || "/images/lapis-legit.png",
+              image: assets["home_course_2"] || "/images/lapis-legit.webp",
               alt: "Lapis legit buatan Cece Lina Chang",
               title: "Resep Teruji",
               desc: "Setiap resep telah diuji coba berkali-kali untuk memastikan anti gagal.",
               note: "ini lapis legit favoritku!",
             },
             {
-              image: assets["home_course_1"] || "/images/ogura-softcake.png",
+              image: assets["home_course_1"] || "/images/ogura-softcake.webp",
               alt: "Video tutorial baking",
               title: "Video Detail",
               desc: "Panduan video langkah demi langkah yang sangat jelas dan mudah diikuti.",
               note: "nonton bareng aku, ya",
             },
             {
-              image: assets["home_course_3"] || "/images/meat-pie.png",
+              image: assets["home_course_3"] || "/images/meat-pie.webp",
               alt: "Komunitas murid baking",
               title: "Dukungan Penuh",
               desc: "Grup komunitas dan konsultasi langsung untuk menjawab pertanyaan Anda.",
@@ -261,10 +305,8 @@ export default function HomeClient() {
                   src={feature.image}
                   alt={feature.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
-                  unoptimized={!isOptimizableImage(feature.image)}
                 />
                 <Marginalia
                   rotate={i % 2 === 0 ? -4 : 4}
@@ -340,28 +382,28 @@ export default function HomeClient() {
                 {
                   src:
                     assets["home_course_1"] ||
-                    "/images/bakso-sapi-premium.png",
+                    "/images/bakso-sapi-premium.webp",
                   alt: "Bakso Sapi Premium",
                   margin: "",
                 },
                 {
                   src:
                     assets["home_course_2"] ||
-                    "/images/lapis-legit.png",
+                    "/images/lapis-legit.webp",
                   alt: "Lapis Legit",
                   margin: "mt-4 lg:mt-8",
                 },
                 {
                   src:
                     assets["home_course_3"] ||
-                    "/images/meat-pie.png",
+                    "/images/meat-pie.webp",
                   alt: "Meat Pie",
                   margin: "-mt-4 lg:-mt-8",
                 },
                 {
                   src:
                     assets["home_course_4"] ||
-                    "/images/ogura-softcake.png",
+                    "/images/ogura-softcake.webp",
                   alt: "Ogura Softcake",
                   margin: "",
                 },
@@ -390,10 +432,8 @@ export default function HomeClient() {
                       src={img.src}
                       alt={img.alt}
                       fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                       referrerPolicy="no-referrer"
-                      unoptimized={!isOptimizableImage(img.src)}
                     />
                   </motion.div>
                 </motion.div>
@@ -460,7 +500,6 @@ export default function HomeClient() {
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
-                      unoptimized={!isOptimizableImage(parseImageUrls(product.imageUrl)[0])}
                     />
                   </div>
                   <div className="p-4 sm:p-6 flex flex-col flex-grow">
@@ -501,9 +540,6 @@ export default function HomeClient() {
           </Link>
         </div>
       </section>
-
-      {/* Testimoni */}
-      <TestimonialCarousel />
 
       {/* Social Media */}
       <section className="bg-butter/15 py-16">

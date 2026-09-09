@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -38,24 +40,36 @@ const parseImageUrls = (url: string | undefined): string[] => {
   return [url];
 };
 
-async function getProduct(slug: string): Promise<Product | null> {
-  try {
-    if (!isSupabaseConfigured()) {
-      const { products: fallbackProducts } = await import('@/app/data/products');
-      return (fallbackProducts.find((p: any) => p.id === slug) as unknown as Product) || null;
-    }
+// Next 15 doesn't cache fetch() by default and supabase-js's internal
+// fetch doesn't opt in, so wrap the lookup ourselves -- otherwise this page
+// always renders dynamically despite `revalidate`.
+//
+// Wrapped in React's cache() too: generateMetadata() and the page both
+// call this, and without per-request dedup they race as separate streams
+// (metadata vs body), which throws React error #419 in production on real
+// networks -- see the identical fix/comment in app/kursus/[slug]/page.tsx.
+const getProduct = cache(unstable_cache(
+  async (slug: string): Promise<Product | null> => {
+    try {
+      if (!isSupabaseConfigured()) {
+        const { products: fallbackProducts } = await import('@/app/data/products');
+        return (fallbackProducts.find((p: any) => p.id === slug) as unknown as Product) || null;
+      }
 
-    const { data, error } = await supabase.from('items').select('*').eq('id', slug).single();
-    if (error || !data) {
+      const { data, error } = await supabase.from('items').select('*').eq('id', slug).single();
+      if (error || !data) {
+        const { products: fallbackProducts } = await import('@/app/data/products');
+        return (fallbackProducts.find((p: any) => p.id === slug) as unknown as Product) || null;
+      }
+      return data as Product;
+    } catch {
       const { products: fallbackProducts } = await import('@/app/data/products');
       return (fallbackProducts.find((p: any) => p.id === slug) as unknown as Product) || null;
     }
-    return data as Product;
-  } catch {
-    const { products: fallbackProducts } = await import('@/app/data/products');
-    return (fallbackProducts.find((p: any) => p.id === slug) as unknown as Product) || null;
-  }
-}
+  },
+  ['product-by-slug'],
+  { revalidate: 60 }
+));
 
 /**
  * Prerender every known product so the Product JSON-LD ships in the initial

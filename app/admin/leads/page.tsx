@@ -22,6 +22,8 @@ type CourseLead = {
   phone: string | null;
   city: string | null;
   tiktok_handle: string | null;
+  welcome_email_sent_at: string | null;
+  reminder_email_sent_at: string | null;
 };
 
 type Inquiry = {
@@ -185,6 +187,7 @@ export default function LeadsPage() {
                     <Th>Phone</Th>
                     <Th>City</Th>
                     <Th>TikTok</Th>
+                    <Th>Follow-up</Th>
                     <Th className="text-right">When</Th>
                   </tr>
                 </thead>
@@ -209,6 +212,12 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-5 py-3 text-stone-600">
                         {lead.tiktok_handle ?? <span className="text-stone-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3">
+                        <FollowupBadge
+                          welcomed={Boolean(lead.welcome_email_sent_at)}
+                          reminded={Boolean(lead.reminder_email_sent_at)}
+                        />
                       </td>
                       <td className="whitespace-nowrap px-5 py-3 text-right text-xs text-stone-500">
                         {formatWhen(lead.created_at)}
@@ -289,6 +298,16 @@ function EmptyState({ text }: { text: string }) {
       </p>
     </div>
   );
+}
+
+function FollowupBadge({ welcomed, reminded }: { welcomed: boolean; reminded: boolean }) {
+  if (reminded) {
+    return <span className="text-xs font-medium text-orange-600">Reminded</span>;
+  }
+  if (welcomed) {
+    return <span className="text-xs font-medium text-green-600">Welcomed</span>;
+  }
+  return <span className="text-xs text-stone-300">—</span>;
 }
 
 function TabButton({

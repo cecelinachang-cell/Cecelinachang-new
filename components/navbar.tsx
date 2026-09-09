@@ -54,8 +54,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="font-hand text-3xl text-rust-ink">Cece Lina Chang</span>
+            <Link href="/" className="flex-shrink-0 flex items-center min-w-0">
+              <span className="font-hand text-2xl sm:text-3xl text-rust-ink truncate">Cece Lina Chang</span>
             </Link>
           </div>
 

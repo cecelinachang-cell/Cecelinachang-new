@@ -1,24 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import DOMPurify from 'dompurify';
-import { stripHtml } from '@/lib/utils';
+import { useMemo } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 
-// DOMPurify needs a real DOM, so it cannot run while the page is rendered on
-// the server. Rather than omitting the content there — which would hide it from
-// crawlers — the server (and the first client render, so hydration matches)
-// emits the text with tags stripped, and the sanitized rich markup is swapped
-// in once the component mounts in the browser.
+// isomorphic-dompurify (jsdom-backed) so sanitizing produces the same output
+// during SSR and on the client -- the plain browser `dompurify` package
+// silently no-ops without `window`, which made the server-rendered HTML
+// differ from the client's and triggered React hydration errors.
 export function SanitizedHtml({ html, className }: { html: string; className?: string }) {
-  const [clean, setClean] = useState<string | null>(null);
-
-  useEffect(() => {
-    setClean(DOMPurify.sanitize(html || ''));
-  }, [html]);
-
-  if (clean === null) {
-    return <div className={className}>{stripHtml(html || '')}</div>;
-  }
+  const clean = useMemo(() => DOMPurify.sanitize(html || ''), [html]);
 
   return <div className={className} dangerouslySetInnerHTML={{ __html: clean }} />;
 }

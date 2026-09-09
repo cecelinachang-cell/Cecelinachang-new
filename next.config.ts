@@ -10,12 +10,11 @@ const nextConfig: NextConfig = {
   },
   // Allow access to remote image placeholder.
   images: {
-    // Optimization is on: Next serves resized AVIF/WebP from /_next/image, which
-    // is the single biggest LCP win on the product and course pages. Images whose
-    // host is not in `remotePatterns` below (admin-supplied URLs) must opt out
-    // per-image with the `unoptimized` prop, or the optimizer returns 400.
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
+    // Vercel's Image Optimization has a monthly source-image quota; once
+    // exceeded, any uncached size/quality variant 402s
+    // (OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED). All images here are
+    // already pre-sized/compressed, so skip the optimizer entirely.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -48,6 +47,11 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       // Next.js injects inline bootstrap scripts; nonce-based CSP would need
       // per-request nonces, so allow inline as the pragmatic baseline.
+      // Dev-only 'unsafe-eval': Fast Refresh's runtime uses eval() to patch
+      // modules in place. Without it, every recompile throws a CSP EvalError
+      // that aborts hydration, leaving the whole app inert (no click
+      // handlers fire) any time this repo is run locally. Production never
+      // needs eval, so the built bundle stays eval-free either way.
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co",
