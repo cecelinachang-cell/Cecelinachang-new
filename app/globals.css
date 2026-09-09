@@ -16,6 +16,14 @@
   --text-fluid-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
 }
 
+html,
+body {
+  /* Rotated Marginalia notes and wide product images can push their layout
+     box past the viewport edge; clip at the document level rather than
+     chasing every offender since a sideways scrollbar is never wanted here. */
+  overflow-x: hidden;
+}
+
 @utility tap-target {
   min-height: 2.75rem;
   min-width: 2.75rem;

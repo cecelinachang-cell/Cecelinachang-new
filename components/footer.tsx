@@ -44,8 +44,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-cream/20 mt-12 pt-8 text-center text-butter/70 text-sm">
+        <div className="border-t border-cream/20 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-butter/70 text-sm">
           <p>&copy; {new Date().getFullYear()} Cece Lina Chang. All rights reserved.</p>
+          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+            <li><Link href="/kebijakan-privasi" className="hover:text-cream transition-colors">Kebijakan Privasi</Link></li>
+            <li><Link href="/syarat-ketentuan" className="hover:text-cream transition-colors">Syarat & Ketentuan</Link></li>
+            <li><Link href="/pengembalian-dana" className="hover:text-cream transition-colors">Pengembalian Dana</Link></li>
+            <li><Link href="/pengiriman" className="hover:text-cream transition-colors">Pengiriman</Link></li>
+          </ul>
         </div>
       </div>
     </footer>

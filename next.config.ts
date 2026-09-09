@@ -80,6 +80,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: '/shop', destination: '/toko', permanent: true },
+      { source: '/products', destination: '/toko', permanent: true },
+      { source: '/kelas', destination: '/kursus', permanent: true },
+    ];
+  },
   output: 'standalone',
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
