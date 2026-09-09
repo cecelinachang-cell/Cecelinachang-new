@@ -1,10 +1,22 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, ChefHat, Users, ArrowLeft, PlayCircle, CheckCircle2 } from 'lucide-react';
 
+// Every recipe route currently renders the same hardcoded "Roti Sobek" body,
+// so these pages are kept out of the index until each slug has its own content.
+// Once real per-recipe data exists, drop the noindex, add a canonical, and mark
+// the page up with schema.org/Recipe.
+export const metadata: Metadata = {
+  title: 'Resep Roti Sobek Susu Super Lembut Anti Gagal',
+  description:
+    'Resep roti sobek susu bertekstur lembut seperti kapas, lengkap dengan bahan, langkah, dan tips agar adonan kalis sempurna.',
+  robots: { index: false, follow: true },
+};
+
 export default async function ResepDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Link href="/resep" className="inline-flex items-center text-orange-600 hover:text-orange-800 font-medium mb-8">

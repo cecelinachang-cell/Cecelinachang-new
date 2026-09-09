@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation';
 import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { POLICIES } from '@/lib/policies';
+import { stripHtml } from '@/lib/utils';
+import { isOptimizableImage } from '@/lib/images';
 
 interface Product {
   id: string;
@@ -36,14 +38,38 @@ const parseImageUrls = (url: string | undefined): string[] => {
 
 import DOMPurify from 'dompurify';
 
-export default function ProductDetail({ slug }: { slug: string }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+/**
+ * `initialProduct` is resolved on the server by the route so the product name,
+ * price, images and description are in the crawlable HTML. The client fetch
+ * below only runs when the server could not supply one.
+ */
+export default function ProductDetail({
+  slug,
+  initialProduct = null,
+}: {
+  slug: string;
+  initialProduct?: Product | null;
+}) {
+  const [product, setProduct] = useState<Product | null>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState(false);
   const [sanitizedDescription, setSanitizedDescription] = useState<string>('');
-  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<string>(
+    () => parseImageUrls(initialProduct?.imageUrl)[0] || ''
+  );
+
+  // DOMPurify needs a browser DOM, so a server-supplied description is
+  // sanitized after mount; until then the plain-text version below is rendered,
+  // which keeps the copy in the prerendered HTML for crawlers.
+  useEffect(() => {
+    if (initialProduct?.description) {
+      setSanitizedDescription(DOMPurify.sanitize(initialProduct.description));
+    }
+  }, [initialProduct]);
 
   useEffect(() => {
+    if (initialProduct) return;
+
     const fetchProduct = async () => {
       try {
         if (!isSupabaseConfigured()) {
@@ -126,7 +152,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
     };
 
     fetchProduct();
-  }, [slug]);
+  }, [slug, initialProduct]);
 
   if (loading) {
     return (
@@ -191,6 +217,8 @@ export default function ProductDetail({ slug }: { slug: string }) {
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-contain p-8 group-hover:scale-110 transition-transform duration-500"
               referrerPolicy="no-referrer"
+              priority
+              unoptimized={!isOptimizableImage(selectedImage)}
             />
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-rust-ink shadow-sm flex items-center">
               <Star className="w-4 h-4 text-yellow-500 fill-current mr-2" />
@@ -206,10 +234,12 @@ export default function ProductDetail({ slug }: { slug: string }) {
               >
                 <Image
                   src={imgObj}
-                  alt={`Thumbnail ${i}`}
+                  alt={`${product.name} — foto ${i + 1}`}
                   fill
+                  sizes="(max-width: 640px) 25vw, 120px"
                   className="object-contain p-2"
                   referrerPolicy="no-referrer"
+                  unoptimized={!isOptimizableImage(imgObj)}
                 />
               </div>
             ))}
@@ -256,6 +286,8 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div className="bg-butter/15 rounded-2xl p-6 sm:p-8 border border-butter/30 mb-8 text-stone-700 space-y-4">
             {sanitizedDescription ? (
               <div dangerouslySetInnerHTML={{ __html: sanitizedDescription }} className="prose prose-stone max-w-none" />
+            ) : product.description ? (
+              <div className="prose prose-stone max-w-none">{stripHtml(product.description)}</div>
             ) : (
               <p>Deskripsi produk belum tersedia.</p>
             )}

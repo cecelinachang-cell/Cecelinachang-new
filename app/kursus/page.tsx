@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BookOpen } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -5,8 +6,25 @@ import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
 import Faq from "@/components/Faq";
+import { SITE_NAME, breadcrumbJsonLd, itemListJsonLd } from "@/lib/seo";
 
 export const revalidate = 60; // Cache the page for 60 seconds
+
+const PAGE_TITLE = "Kursus Baking Online";
+const PAGE_DESCRIPTION =
+  "Daftar kelas baking online Cece Lina Chang: bakso sapi, lapis legit, ogura, dan lainnya. Video tutorial detail, akses seumur hidup, konsultasi langsung.";
+
+export const metadata: Metadata = {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  alternates: { canonical: "/kursus" },
+  openGraph: {
+    title: `${PAGE_TITLE} | ${SITE_NAME}`,
+    description: PAGE_DESCRIPTION,
+    url: "/kursus",
+    type: "website",
+  },
+};
 
 interface Course {
   id: string;
@@ -93,8 +111,23 @@ export default async function KursusPage() {
   const savoryCourses = restCourses.filter((c) => !isSweet(c));
   const sweetCourses = restCourses.filter((c) => isSweet(c));
 
+  const structuredData = [
+    breadcrumbJsonLd([
+      { name: "Beranda", path: "/" },
+      { name: PAGE_TITLE, path: "/kursus" },
+    ]),
+    itemListJsonLd(
+      PAGE_TITLE,
+      finalCourses.map((course) => `/kursus/${course.slug}`)
+    ),
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <div className="text-center mb-10 sm:mb-16">
         <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-4 sm:mb-6">
           <BookOpen className="w-5 h-5" /> Belajar Bersama Cece Lina

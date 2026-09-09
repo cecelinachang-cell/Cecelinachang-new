@@ -8,6 +8,7 @@ import { SearchOverlay } from '@/components/SearchOverlay';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { supabase } from '@/lib/supabase';
+import { SITE_NAME, SITE_URL, DEFAULT_OG_IMAGE, absoluteUrl } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,7 +38,7 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   let title = 'Cece Lina Chang | Belajar Baking dari Rumah';
   let description = 'Belajar baking dari rumah dengan mudah untuk pemula. Temukan alat masak premium dan kursus baking online bersama Cece Lina Chang.';
-  let ogImage = 'https://i.postimg.cc/tCXKbMWY/image.png';
+  let ogImage = DEFAULT_OG_IMAGE;
 
   try {
     const { data: settings } = await supabase.from('settings').select('*').in('id', ['general', 'hero_image']);
@@ -60,14 +61,39 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title,
+    // Makes every relative URL in metadata (OG images, canonicals) resolve to
+    // an absolute one, which is what crawlers and social scrapers require.
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: title,
+      // Child pages set only their own name; the brand suffix is appended here
+      // so titles stay unique without every page repeating the boilerplate.
+      template: `%s | ${SITE_NAME}`,
+    },
     description,
+    applicationName: SITE_NAME,
+    authors: [{ name: SITE_NAME, url: SITE_URL }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
     keywords: ['baking for beginners', 'belajar baking dari rumah', 'kursus baking online', 'alat baking premium', 'resep kue', 'Cece Lina Chang'],
+    formatDetection: { telephone: false },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        // Let Google use full-size image previews and longer text snippets.
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
     openGraph: {
       title,
       description,
-      url: 'https://cecelinachang.com',
-      siteName: 'Cece Lina Chang',
+      url: SITE_URL,
+      siteName: SITE_NAME,
       images: [
         {
           url: ogImage,
@@ -102,16 +128,49 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Site-wide structured data. Kept as a @graph so the Organization and the
+// WebSite reference each other by @id instead of being duplicated per page.
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Cece Lina Chang',
-  description: 'Belajar baking dari rumah dengan mudah untuk pemula. Kursus baking online dan alat baking premium.',
-  url: 'https://cecelinachang.com',
-  logo: 'https://i.postimg.cc/tCXKbMWY/image.png',
-  sameAs: [
-    'https://instagram.com/cecelinachang'
-  ]
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      description:
+        'Belajar baking dari rumah dengan mudah untuk pemula. Kursus baking online dan alat baking premium.',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: absoluteUrl('/icon.png'),
+        width: 512,
+        height: 512,
+      },
+      image: DEFAULT_OG_IMAGE,
+      email: 'halo@cecelinachang.com',
+      areaServed: 'ID',
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          contactType: 'customer support',
+          telephone: '+6281284250718',
+          availableLanguage: ['id'],
+        },
+      ],
+      sameAs: [
+        'https://instagram.com/cecelinachang',
+        'https://tiktok.com/@lina_chang2',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      inLanguage: 'id-ID',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+  ],
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {

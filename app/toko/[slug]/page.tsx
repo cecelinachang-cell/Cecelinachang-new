@@ -2,8 +2,17 @@ import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/ProductDetail';
 import { stripHtml } from '@/lib/utils';
+import {
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+  breadcrumbJsonLd,
+  clampDescription,
+  parsePriceValue,
+} from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -62,33 +71,57 @@ const getProduct = cache(unstable_cache(
   { revalidate: 60 }
 ));
 
+/**
+ * Prerender every known product so the Product JSON-LD ships in the initial
+ * HTML rather than only in the streamed Flight payload. Unknown ids still
+ * render on demand, and `revalidate` above keeps these pages fresh.
+ */
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    if (isSupabaseConfigured()) {
+      const { data } = await supabase.from('items').select('id');
+      if (data && data.length > 0) {
+        return data.filter((row: any) => row.id).map((row: any) => ({ slug: String(row.id) }));
+      }
+    }
+  } catch {
+    // Fall through to the bundled seed data.
+  }
+
+  const { products: fallbackProducts } = await import('@/app/data/products');
+  return fallbackProducts.map((product: any) => ({ slug: product.id }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
 
   if (!product) {
-    return { title: 'Produk Tidak Ditemukan | Cece Lina Chang' };
+    return { title: 'Produk Tidak Ditemukan', robots: { index: false, follow: true } };
   }
 
-  const title = `${product.name} | Cece Lina Chang`;
-  const description = product.description ? stripHtml(product.description).slice(0, 155) : undefined;
-  const images = parseImageUrls(product.imageUrl);
+  const title = product.name;
+  const description = product.description
+    ? clampDescription(stripHtml(product.description))
+    : `${product.name} — alat baking Signora pilihan Cece Lina Chang. Konsultasi gratis via WhatsApp sebelum membeli.`;
+  const images = parseImageUrls(product.imageUrl).map(absoluteUrl);
 
   return {
     title,
     description,
+    alternates: { canonical: `/toko/${product.id}` },
     openGraph: {
-      title,
+      title: `${title} | ${SITE_NAME}`,
       description,
-      url: `https://cecelinachang.com/toko/${product.id}`,
-      siteName: 'Cece Lina Chang',
+      url: `${SITE_URL}/toko/${product.id}`,
+      siteName: SITE_NAME,
       images: images.length > 0 ? [{ url: images[0], width: 1200, height: 630, alt: product.name }] : undefined,
       locale: 'id_ID',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${title} | ${SITE_NAME}`,
       description,
       images: images.length > 0 ? [images[0]] : undefined,
     },
@@ -97,5 +130,51 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function TokoDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <ProductDetail slug={slug} />;
+  const product = await getProduct(slug);
+
+  if (!product) {
+    notFound();
+  }
+
+  const priceValue = parsePriceValue(product.price);
+  const structuredData = [
+    breadcrumbJsonLd([
+      { name: 'Beranda', path: '/' },
+      { name: 'Toko Alat Baking', path: '/toko' },
+      { name: product.name, path: `/toko/${product.id}` },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description: product.description
+        ? clampDescription(stripHtml(product.description), 300)
+        : undefined,
+      image: parseImageUrls(product.imageUrl).map(absoluteUrl),
+      category: product.category,
+      brand: { '@type': 'Brand', name: 'Signora' },
+      ...(priceValue
+        ? {
+            offers: {
+              '@type': 'Offer',
+              price: priceValue,
+              priceCurrency: 'IDR',
+              availability: 'https://schema.org/InStock',
+              url: `${SITE_URL}/toko/${product.id}`,
+              seller: { '@id': `${SITE_URL}/#organization` },
+            },
+          }
+        : {}),
+    },
+  ];
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <ProductDetail slug={slug} initialProduct={product} />
+    </>
+  );
 }

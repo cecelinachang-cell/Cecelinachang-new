@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Star, ShoppingBag } from "lucide-react";
+import { isOptimizableImage } from '@/lib/images';
 
 export interface Product {
   id: string;
@@ -57,6 +58,7 @@ export default function ProductCard({ product }: { product: Product }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           referrerPolicy="no-referrer"
+          unoptimized={!isOptimizableImage(parseImageUrls(product.imageUrl)[0])}
         />
       </Link>
       <div className="p-4 sm:p-6 flex flex-col flex-grow">
