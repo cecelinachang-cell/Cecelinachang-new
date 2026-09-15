@@ -35,7 +35,12 @@ export function MobileProductBar({ product }: MobileProductBarProps) {
       originalPrice={product.originalPrice}
       caption={POLICIES.PRODUCT_WARRANTY_SHORT}
       primary={{
-        label: 'Beli via WA',
+        // Short like ProductCard's "WA"/"Shopee" buttons: this bar is the
+        // only StickyCtaBar caller with both a price block *and* a
+        // secondary button competing for width on a 390px screen --
+        // "Beli via WA" wrapped to two lines here and blew the bar past
+        // the fixed 6rem chatbot-clearance offset in globals.css.
+        label: 'WA',
         icon: 'whatsapp',
         href: waLink(`Halo Admin, saya mau beli ${product.name}`),
         external: true,

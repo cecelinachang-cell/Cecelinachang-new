@@ -48,6 +48,7 @@ export default function CourseCardCompact({
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover"
           referrerPolicy="no-referrer"
+          priority={featured}
         />
       </Link>
       <div className="p-6 flex flex-col flex-grow">

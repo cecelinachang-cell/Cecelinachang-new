@@ -133,8 +133,8 @@ export function StickyCtaBar({ price, originalPrice, caption, primary, secondary
           </div>
         )}
         <div className="flex flex-1 gap-2">
-          <ActionButton action={primary} variant="whatsapp" size="md" className="flex-1" />
-          {secondary && <ActionButton action={secondary} variant="shopee" size="md" className="shrink-0" />}
+          <ActionButton action={primary} variant="whatsapp" size="md" className="flex-1 whitespace-nowrap overflow-hidden" />
+          {secondary && <ActionButton action={secondary} variant="shopee" size="md" className="shrink-0 whitespace-nowrap" />}
         </div>
       </div>
     </div>
