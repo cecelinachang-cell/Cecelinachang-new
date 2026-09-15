@@ -114,6 +114,19 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
           <p className="text-xs text-charcoal-brown/50 text-center mt-2">
             {POLICIES.COURSE_REFUND_SHORT}
           </p>
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent('toko:open-chatbot', {
+                  detail: { query: `Aku mau tanya soal ${course.title}` },
+                }),
+              )
+            }
+            className="tap-target flex items-center justify-center w-full text-center text-sm font-medium text-terracotta hover:text-rust-ink transition-colors mt-3"
+          >
+            Masih bingung? Tanya Lina dulu →
+          </button>
         </>
       )}
 

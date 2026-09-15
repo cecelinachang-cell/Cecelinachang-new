@@ -119,7 +119,7 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
     .filter((p): p is (typeof products)[number] => Boolean(p));
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-28 lg:pb-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <Link href="/kursus" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-6 sm:mb-8">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Daftar Kelas
       </Link>

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { ChevronDown, Heart, MessageCircle, Send, Sparkles, UserRound, X } from 'lucide-react';
 import type { SearchResult } from '@/lib/search';
 import { trackConversion } from '@/lib/analytics';
@@ -28,6 +29,13 @@ function LinaAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 }
 
 export function ChatbotWidget() {
+  const pathname = usePathname();
+  // The sticky WhatsApp CTA bar is the one floating element we want on the
+  // course-funnel routes -- a second bubble both competes for the same
+  // thumb-reach corner and gives visitors a slower path to the same
+  // WhatsApp handoff. It stays reachable via the "Tanya Lina dulu" text
+  // link in CoursePricingPanel, which opens the panel via this same event.
+  const bubbleHidden = pathname === '/' || pathname.startsWith('/kursus');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
@@ -47,10 +55,10 @@ export function ChatbotWidget() {
   );
 
   useEffect(() => {
-    if (isOpen) return;
+    if (isOpen || bubbleHidden) return;
     const timer = setTimeout(() => setInvite(true), 4000);
     return () => clearTimeout(timer);
-  }, [isOpen]);
+  }, [isOpen, bubbleHidden]);
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -140,6 +148,8 @@ export function ChatbotWidget() {
       document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
+
+  if (bubbleHidden && !isOpen) return null;
 
   return (
     <div className="pb-safe fixed right-4 z-[60] sm:right-6" style={{ bottom: 'var(--floating-offset)' }}>

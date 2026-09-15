@@ -27,6 +27,9 @@
   body.has-sticky-cta {
     --floating-offset: 6rem;
   }
+  body.has-sticky-cta main {
+    padding-bottom: 6rem;
+  }
 }
 
 @utility tap-target {
