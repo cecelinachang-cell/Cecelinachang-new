@@ -1,78 +1,21 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Users, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
 import { CoursePricingPanel } from '@/components/CoursePricingPanel';
 import { MobileCourseBar } from '@/components/MobileCourseBar';
+import { CourseVideoHero } from '@/components/CourseVideoHero';
+import { ViewContentPing } from '@/components/ViewContentPing';
+import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import ProductCard from '@/components/ProductCard';
 import { courseProducts } from '@/app/data/course-products';
 import { products } from '@/app/data/products';
+import { getCourseBySlug } from '@/lib/courses';
+import { parseIdr } from '@/lib/pixels';
 
 export const revalidate = 60;
-
-interface Course {
-  id: string;
-  slug: string;
-  isSignature: boolean;
-  title: string;
-  description: string;
-  price: string;
-  originalPrice?: string;
-  students: number;
-  duration: string;
-  modules: number;
-  imageUrl: string;
-  video?: string;
-  benefits: string[];
-  shopeeUrl?: string | null;
-}
-
-// Next 15 no longer caches `fetch` by default, and supabase-js's internal
-// fetch doesn't opt in -- so without this, every request re-hits Supabase
-// and the whole route renders dynamically (page.tsx's `revalidate = 60`
-// only caches the render, not the data fetch it depends on).
-//
-// generateMetadata() and the page component both call this, and without
-// React's per-request cache() wrapping unstable_cache, those two calls
-// aren't deduped within a single request -- they race as two independent
-// async streams, which is what was tearing the metadata/body hydration
-// and throwing React error #419 in production (never visible on
-// localhost, where both calls resolve too fast for the race to matter).
-const getCourseBySlug = cache(unstable_cache(
-  async (slug: string): Promise<Course | null> => {
-    try {
-      if (!isSupabaseConfigured()) {
-        const { courses: fallbackCourses } = await import('@/app/data/courses');
-        return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-      }
-      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
-      if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-          console.error('Error fetching course detail:', errMsg);
-        }
-      }
-      if (data) return data as Course;
-      const { courses: fallbackCourses } = await import('@/app/data/courses');
-      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-    } catch (err: any) {
-      const errMsg = err?.message || err?.toString() || '';
-      if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-        console.error('Unexpected error fetching course detail:', err);
-      }
-      const { courses: fallbackCourses } = await import('@/app/data/courses');
-      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-    }
-  },
-  ['course-by-slug'],
-  { revalidate: 60 }
-));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -120,6 +63,12 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <ViewContentPing
+        contentId={course.slug}
+        contentName={course.title}
+        contentType="course"
+        value={parseIdr(course.price)}
+      />
       <Link href="/kursus" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-6 sm:mb-8">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Daftar Kelas
       </Link>
@@ -143,32 +92,18 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             <span>{course.duration} Total Video</span>
           </div>
           <div className="flex items-center">
-            <Star className="w-5 h-5 mr-2 text-yellow-500 fill-current" />
-            <span>4.9 / 5.0 Rating</span>
+            <CheckCircle2 className="w-5 h-5 mr-2 text-green-500" />
+            <span>Akses seumur hidup</span>
           </div>
         </div>
 
-        <div className="relative aspect-video lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-          <Image
-            src={course.imageUrl || 'https://picsum.photos/seed/placeholder/800/600'}
-            alt={course.title}
-            fill
-            sizes="(max-width: 1024px) 100vw, 66vw"
-            className="object-cover"
-            referrerPolicy="no-referrer"
-            priority
-          />
-          {course.video && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <div className="flex flex-col items-center cursor-pointer group">
-                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform mb-3 sm:mb-4">
-                  <PlayCircle className="w-8 h-8 sm:w-12 sm:h-12 text-terracotta" />
-                </div>
-                <span className="text-white font-bold text-base sm:text-lg drop-shadow-md">Tonton Video Perkenalan</span>
-              </div>
-            </div>
-          )}
-        </div>
+        <CourseVideoHero imageUrl={course.imageUrl} title={course.title} video={course.video} />
+      </div>
+
+      {/* Mobile: pricing, benefits, and refund policy hidden on lg:block are
+          otherwise invisible on the device most visitors use. */}
+      <div className="lg:hidden mb-8">
+        <CoursePricingPanel course={course} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -198,21 +133,8 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
 
           {/* Testimoni */}
           <section>
-            <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-4 sm:mb-6">Kata Murid yang Sudah Lulus</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                { name: 'Ibu Ningsih', text: 'Penjelasan Ci Lina sangat detail dan sabar banget jawab pertanyaan di grup WA. Sangat bermanfaat!' },
-                { name: 'Mbak Rina', text: 'Dulu selalu gagal, ternyata salah di teknik dasar. Setelah ikut kelas ini, buatan saya selalu dipuji keluarga.' }
-              ].map((testi, i) => (
-                <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-butter/30">
-                  <div className="flex text-yellow-400 mb-3">
-                    {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}
-                  </div>
-                  <p className="text-charcoal-brown/70 mb-4 italic text-sm leading-relaxed">&quot;{testi.text}&quot;</p>
-                  <div className="font-bold text-charcoal-brown text-sm">{testi.name}</div>
-                </div>
-              ))}
-            </div>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-4 sm:mb-6">Kata Murid Cece</h2>
+            <TestimonialCarousel />
           </section>
 
           {/* Alat yang digunakan */}

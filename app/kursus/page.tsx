@@ -1,30 +1,11 @@
 import { BookOpen } from "lucide-react";
-import { unstable_cache } from "next/cache";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
 import Faq from "@/components/Faq";
+import { getAllCourses, type Course } from "@/lib/courses";
 
 export const revalidate = 60; // Cache the page for 60 seconds
-
-interface Course {
-  id: string;
-  slug: string;
-  isSignature: boolean;
-  title: string;
-  description: string;
-  price: string;
-  originalPrice?: string;
-  students: number;
-  duration: string;
-  modules: number;
-  imageUrl: string;
-  video?: string;
-  benefits: string[];
-  orderIndex?: number;
-  createdAt?: string;
-}
 
 const SWEET_KEYWORDS = ["legit", "ogura", "sponge", "cake", "manis"];
 
@@ -32,37 +13,6 @@ function isSweet(course: Course): boolean {
   const title = course.title.toLowerCase();
   return SWEET_KEYWORDS.some((kw) => title.includes(kw));
 }
-
-// Next 15 doesn't cache fetch() by default and supabase-js's internal fetch
-// doesn't opt in, so this page's `revalidate = 60` was caching nothing --
-// every visit re-hit Supabase and rendered dynamically. Wrap the fetch.
-const getAllCourses = unstable_cache(
-  async (): Promise<Course[]> => {
-    if (!isSupabaseConfigured()) {
-      const { courses: fallbackCourses } = await import("@/app/data/courses");
-      return fallbackCourses as unknown as Course[];
-    }
-    const { data, error } = await supabase.from("courses").select("*");
-
-    if (error || !data || data.length === 0) {
-      if (error && error.message && error.message.includes("schema cache")) {
-        console.warn("Supabase schema not initialized yet.");
-      } else if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg === "Failed to fetch" || errMsg.includes("Failed to fetch")) {
-          console.warn("AdBlocker or Network issue detected. Falling back to mock data.");
-        } else {
-          console.error("Error fetching courses:", errMsg);
-        }
-      }
-      const { courses: fallbackCourses } = await import("@/app/data/courses");
-      return fallbackCourses as unknown as Course[];
-    }
-    return data as Course[];
-  },
-  ["all-courses"],
-  { revalidate: 60 }
-);
 
 export default async function KursusPage() {
   let finalCourses: Course[] = [];

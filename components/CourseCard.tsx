@@ -84,8 +84,8 @@ export default function CourseCard({ course }: { course: Course }) {
       </div>
 
       {/* Course Details */}
-      <div className="p-6 sm:p-8 lg:p-10 w-full lg:w-3/5 flex flex-col justify-between">
-        <div>
+      <div className="p-5 sm:p-8 lg:p-10 w-full lg:w-3/5 flex flex-col justify-between">
+        <div className="order-2 lg:order-1">
           <Link href={`/kursus/${course.slug}`}>
             <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-rust-ink mb-3 sm:mb-4 hover:text-terracotta transition-colors">
               {course.title}
@@ -121,7 +121,7 @@ export default function CourseCard({ course }: { course: Course }) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-butter/30">
+        <div className="order-1 lg:order-2 flex flex-col sm:flex-row items-center justify-between pb-5 mb-5 border-b border-butter/30 lg:pb-0 lg:mb-0 lg:pt-6 lg:border-b-0 lg:border-t">
           <div className="flex flex-col mb-4 sm:mb-0">
             {course.originalPrice && (
               <span className="text-charcoal-brown/40 line-through text-sm font-medium mb-1">

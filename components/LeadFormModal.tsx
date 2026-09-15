@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { POLICIES } from "@/lib/policies";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
+import { waLink } from "@/lib/links";
+import { Button } from "@/components/ui/Button";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 interface LeadFormModalProps {
   courseSlug: string;
@@ -24,7 +28,16 @@ function queuePendingLead(payload: Record<string, unknown>) {
   } catch {}
 }
 
+// Module-level, not component state: LeadFormModal mounts twice on the
+// course detail page (the sticky bar and the pricing panel each carry
+// their own instance), and both run flushPendingLeads() on mount. Without
+// this guard, two concurrent flushes can both read the same queued lead
+// before either has written the drained queue back, double-posting it.
+let flushInFlight = false;
+
 async function flushPendingLeads() {
+  if (flushInFlight) return;
+  flushInFlight = true;
   try {
     const raw = localStorage.getItem(PENDING_LEADS_KEY);
     if (!raw) return;
@@ -42,7 +55,10 @@ async function flushPendingLeads() {
       if (!ok) remaining.push(payload);
     }
     localStorage.setItem(PENDING_LEADS_KEY, JSON.stringify(remaining));
-  } catch {}
+  } catch {
+  } finally {
+    flushInFlight = false;
+  }
 }
 
 export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, onClose }: LeadFormModalProps) {
@@ -52,10 +68,30 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
   const [tiktokHandle, setTiktokHandle] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState<"form" | "done">("form");
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  useBodyScrollLock(true);
 
   useEffect(() => {
     flushPendingLeads();
   }, []);
+
+  useEffect(() => {
+    emailInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const waUrl = waLink(
+    `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${coursePrice ? `\n- Harga: ${coursePrice}` : ""}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,9 +104,7 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
 
     // Open WhatsApp first (synchronous with the click) so mobile Safari never
     // blocks the popup while we wait on the network.
-    const priceLine = coursePrice ? `\n- Harga: ${coursePrice}` : "";
-    const message = `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
-    window.open(`https://wa.me/6281284250718?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    window.open(waUrl, "_blank", "noopener,noreferrer");
     trackConversion("whatsapp_open", courseSlug, pixelExtra);
 
     const sent =
@@ -89,93 +123,124 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
       if (!ok) queuePendingLead(payload);
     }
 
-    onClose();
+    setSubmitting(false);
+    setStep("done");
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center pt-20 sm:pt-4 sm:p-4 z-[100]">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] flex flex-col">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center pt-20 sm:pt-4 sm:p-4 z-[100]"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lead-form-title"
+      >
         <div className="flex items-center justify-between p-6 border-b border-butter/30 shrink-0">
-          <h2 className="font-serif text-xl font-bold text-rust-ink">Daftar Kelas</h2>
+          <h2 id="lead-form-title" className="font-serif text-xl font-bold text-rust-ink">
+            {step === "done" ? "Makasih ya! 🤎" : "Daftar Kelas"}
+          </h2>
           <button
             onClick={onClose}
-            className="text-charcoal-brown/40 hover:text-charcoal-brown/70 p-2 -m-2"
+            className="tap-target flex items-center justify-center rounded-full text-charcoal-brown/40 hover:text-charcoal-brown/70 hover:bg-butter/15 transition-colors"
             aria-label="Tutup"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
-          <p className="text-sm text-charcoal-brown/60">
-            Isi data ini biar Cece bisa langsung proses pendaftaranmu di WhatsApp, nggak perlu ketik ulang.
-          </p>
-
-          <input
-            type="text"
-            className="hidden"
-            tabIndex={-1}
-            autoComplete="off"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-charcoal-brown mb-1">Email</label>
-            <input
-              type="email"
-              required
-              inputMode="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
-              placeholder="nama@email.com"
-            />
+        {step === "done" ? (
+          <div className="p-6 space-y-4">
+            <p className="text-sm text-charcoal-brown/70 leading-relaxed">
+              WhatsApp-nya harusnya udah kebuka di tab baru. Kalau belum, tekan tombol di bawah ini.
+            </p>
+            <Button href={waUrl} external variant="whatsapp" size="lg" fullWidth>
+              <WhatsAppIcon className="w-5 h-5 mr-2" /> Buka WhatsApp
+            </Button>
+            <p className="text-xs text-charcoal-brown/50 text-center">
+              Aku juga kirim panduan singkat ke email kamu.
+            </p>
+            <Button type="button" onClick={onClose} variant="secondary" size="md" fullWidth>
+              Tutup
+            </Button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-charcoal-brown mb-1">Nomor WhatsApp</label>
-            <input
-              type="tel"
-              required
-              inputMode="tel"
-              autoComplete="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
-              placeholder="0812xxxxxxx"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-charcoal-brown mb-1">Asal Kota (opsional)</label>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+            <p className="text-sm text-charcoal-brown/60">
+              Isi data ini biar Cece bisa langsung proses pendaftaranmu di WhatsApp, nggak perlu ketik ulang.
+            </p>
+
             <input
               type="text"
-              autoComplete="address-level2"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
-              placeholder="Jakarta"
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-charcoal-brown mb-1">User TikTok (opsional)</label>
-            <input
-              type="text"
-              value={tiktokHandle}
-              onChange={(e) => setTiktokHandle(e.target.value)}
-              className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
-              placeholder="@username"
-            />
-          </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full flex justify-center items-center px-6 py-4 text-lg font-bold rounded-full text-white bg-green-600 hover:bg-green-700 transition-colors shadow-md disabled:opacity-60"
-          >
-            Lanjut ke WhatsApp
-          </button>
-        </form>
+            <div>
+              <label className="block text-sm font-medium text-charcoal-brown mb-1">Email</label>
+              <input
+                ref={emailInputRef}
+                type="email"
+                required
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
+                placeholder="nama@email.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-charcoal-brown mb-1">Nomor WhatsApp</label>
+              <input
+                type="tel"
+                required
+                inputMode="tel"
+                autoComplete="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
+                placeholder="0812xxxxxxx"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-charcoal-brown mb-1">Asal Kota (opsional)</label>
+              <input
+                type="text"
+                autoComplete="address-level2"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
+                placeholder="Jakarta"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-charcoal-brown mb-1">User TikTok (opsional)</label>
+              <input
+                type="text"
+                value={tiktokHandle}
+                onChange={(e) => setTiktokHandle(e.target.value)}
+                className="w-full px-4 py-3.5 border border-butter/50 rounded-xl focus:ring-2 focus:ring-terracotta focus:border-terracotta outline-none transition-all"
+                placeholder="@username"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full flex justify-center items-center px-6 py-4 text-lg font-bold rounded-full text-white bg-green-600 hover:bg-green-700 transition-colors shadow-md disabled:opacity-60"
+            >
+              {submitting ? "Membuka WhatsApp…" : "Lanjut ke WhatsApp"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
