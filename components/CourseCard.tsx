@@ -66,8 +66,10 @@ export default function CourseCard({ course }: { course: Course }) {
               }
               alt={course.title}
               fill
+              sizes="(max-width: 1024px) 100vw, 40vw"
               className="object-cover"
               referrerPolicy="no-referrer"
+              priority
             />
             {course.video && (
               <div

@@ -93,10 +93,9 @@ export const getCourseBySlug = cache(unstable_cache(
   { revalidate: 60 },
 ));
 
-export function pickFeatured(courses: Course[]): Course | undefined {
-  return courses.find((c) => c.isSignature) ?? courses[0];
-}
-
-export function totalStudents(courses: Course[]): number {
-  return courses.reduce((sum, c) => sum + (c.students || 0), 0);
-}
+// Re-exported for convenience so server code can `import { ... } from
+// '@/lib/courses'` for everything in one place. Client components should
+// import these two directly from '@/lib/course-stats' instead, to avoid
+// pulling this file's unstable_cache/Supabase imports into the client
+// bundle -- see the comment there.
+export { pickFeatured, totalStudents } from './course-stats';

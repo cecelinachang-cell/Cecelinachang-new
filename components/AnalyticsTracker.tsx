@@ -68,7 +68,9 @@ export default function AnalyticsTracker() {
         const url = anchor.href;
         const linkText = anchor.innerText || anchor.textContent || '';
         
-        console.log(`Tracking click: ${linkText} -> ${url}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Tracking click: ${linkText} -> ${url}`);
+        }
         try {
           const { error } = await supabase.from('clicks').insert({
             url: url,

@@ -98,7 +98,7 @@ export function SearchOverlay() {
             type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Tutup pencarian"
-            className="shrink-0 rounded-full p-2 text-charcoal-brown/60 hover:bg-butter/20"
+            className="tap-target shrink-0 flex items-center justify-center rounded-full text-charcoal-brown/60 hover:bg-butter/20"
           >
             <X className="h-5 w-5" />
           </button>

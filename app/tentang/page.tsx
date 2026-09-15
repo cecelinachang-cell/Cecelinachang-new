@@ -6,9 +6,19 @@ import { Heart, Users, Instagram } from 'lucide-react';
 import { motion } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { Marginalia } from '@/components/Marginalia';
+import { Button } from '@/components/ui/Button';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
+import { waLink } from '@/lib/links';
+import { trackConversion } from '@/lib/analytics';
+import { totalStudents } from '@/lib/course-stats';
+import { courses as fallbackCourses } from '@/app/data/courses';
 
 export default function TentangPage() {
   const [aboutImage, setAboutImage] = useState<string>('/images/lina-avatar.jpeg');
+  // Same figure the homepage shows (lib/courses.ts's totalStudents), not a
+  // separately hardcoded number -- the two pages previously drifted
+  // ("10.000+" on the homepage vs "2000+" here for the same audience).
+  const [studentsLabel, setStudentsLabel] = useState(() => totalStudents(fallbackCourses as any).toLocaleString('id-ID'));
 
   useEffect(() => {
     const fetchAsset = async () => {
@@ -22,6 +32,18 @@ export default function TentangPage() {
       }
     };
     fetchAsset();
+
+    const fetchStudentCount = async () => {
+      try {
+        const { data, error } = await supabase.from('courses').select('students');
+        if (!error && data && data.length > 0) {
+          setStudentsLabel(totalStudents(data as any).toLocaleString('id-ID'));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchStudentCount();
   }, []);
 
   return (
@@ -115,7 +137,7 @@ export default function TentangPage() {
               <div className="w-16 h-16 bg-butter/30 rounded-full flex items-center justify-center text-terracotta mb-4 hover:scale-110 transition-transform">
                 <Users className="w-8 h-8" />
               </div>
-              <div className="font-serif text-3xl font-bold text-rust-ink mb-2">2000+</div>
+              <div className="font-serif text-3xl font-bold text-rust-ink mb-2">{studentsLabel}+</div>
               <div className="text-charcoal-brown/70">Murid Kelas Online</div>
             </motion.div>
             <motion.div
@@ -131,6 +153,25 @@ export default function TentangPage() {
               <Marginalia rotate={-2} className="text-4xl mb-1">50rb+</Marginalia>
               <div className="text-charcoal-brown/70">Pengikut Setia</div>
             </motion.div>
+          </div>
+
+          <div className="mt-8 pt-8 sm:mt-12 sm:pt-12 border-t border-butter/40">
+            <h2 className="font-serif text-2xl font-bold text-rust-ink mb-2">Mau belajar bareng aku?</h2>
+            <p className="text-charcoal-brown/70 mb-6">Pilih kelas yang kamu suka, aku temenin sampai bisa.</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button href="/kursus" variant="primary" size="lg">
+                Lihat Kelas
+              </Button>
+              <Button
+                href={waLink('Halo Cece, aku baru baca ceritamu, mau tanya soal kelas')}
+                external
+                variant="whatsapp"
+                size="lg"
+                onClick={() => trackConversion('whatsapp_open')}
+              >
+                <WhatsAppIcon className="w-5 h-5 mr-2" /> Tanya via WA
+              </Button>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { withTimeout } from '@/lib/withTimeout';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Marginalia } from '@/components/Marginalia';
 
 interface Testimonial {
@@ -37,6 +37,8 @@ export function TestimonialCarousel() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -104,15 +106,25 @@ export function TestimonialCarousel() {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   }, [testimonials.length]);
 
+  // Tracked as state (not read directly in the interval effect below) so
+  // the tab going into the background actually clears/restarts the
+  // interval instead of a stale closure ignoring the change.
+  const [tabHidden, setTabHidden] = useState(false);
   useEffect(() => {
-    if (testimonials.length <= 1) return;
-    
+    const handleVisibility = () => setTabHidden(document.hidden);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (testimonials.length <= 1 || paused || prefersReducedMotion || tabHidden) return;
+
     const interval = setInterval(() => {
       nextSlide();
     }, 5000); // Auto-advance every 5 seconds
 
     return () => clearInterval(interval);
-  }, [testimonials.length, nextSlide]);
+  }, [testimonials.length, nextSlide, paused, prefersReducedMotion, tabHidden]);
 
   if (loading) {
     return (
@@ -143,22 +155,29 @@ export function TestimonialCarousel() {
         <Marginalia rotate={-3} className="text-lg">setiap pesan ini aku baca sendiri :&#39;)</Marginalia>
       </div>
 
-      <div className="relative bg-white rounded-[1.75rem] shadow-xl p-4 md:p-8 border border-butter/30 overflow-hidden">
+      <div
+        className="relative bg-white rounded-[1.75rem] shadow-xl p-4 md:p-8 border border-butter/30 overflow-hidden"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Testimoni murid"
+      >
         <div className="relative z-10 flex flex-col items-center justify-center">
           <div className="w-full max-w-lg aspect-[4/5] sm:aspect-square relative rounded-2xl overflow-hidden shadow-sm bg-stone-50 border border-stone-100">
             <AnimatePresence mode="wait">
               {testimonials[currentIndex]?.image && (
                 <motion.div
                   key={currentIndex}
-                  initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, scale: 1.05, filter: 'blur(4px)' }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                   className="absolute inset-0 cursor-grab active:cursor-grabbing"
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
+                  onPointerDown={() => setPaused(true)}
                   onDragEnd={(e, { offset, velocity }) => {
+                    setPaused(false);
                     const swipe = offset.x;
                     if (swipe < -50) {
                       nextSlide();
@@ -173,7 +192,7 @@ export function TestimonialCarousel() {
                     fill
                     className="object-contain"
                     referrerPolicy="no-referrer"
-                    priority
+                    loading="lazy"
                   />
                 </motion.div>
               )}

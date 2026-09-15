@@ -51,7 +51,11 @@ function useRevealAfter(id?: string) {
     if (!id) return;
     const target = document.getElementById(id);
     if (!target) {
-      setVisible(true);
+      // Defensive fallback for a caller passing an id that never renders --
+      // queued as a microtask (rather than called directly here) so this
+      // stays a reaction to an external check, not an unconditional
+      // setState in the effect body.
+      queueMicrotask(() => setVisible(true));
       return;
     }
     const observer = new IntersectionObserver(

@@ -48,7 +48,6 @@ export function trackPixelEvent(event: PixelEvent, params: PixelParams = {}): vo
   try {
     if (typeof window === 'undefined') return;
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.debug('[pixel]', event, params);
     }
 

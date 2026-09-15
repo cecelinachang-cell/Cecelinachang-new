@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, X, ShoppingBag, Search } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search, MessageCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SquiggleUnderline } from '@/components/SquiggleUnderline';
+import { waLink } from '@/lib/links';
+import { trackConversion } from '@/lib/analytics';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +77,7 @@ export function Navbar() {
                 )}
               </Link>
             ))}
-            <Link href="/toko" className="text-rust-ink hover:text-terracotta">
+            <Link href="/toko" className="text-rust-ink hover:text-terracotta" aria-label="Toko">
               <ShoppingBag className="w-6 h-6" />
             </Link>
             <button
@@ -86,21 +88,27 @@ export function Navbar() {
             >
               <Search className="w-6 h-6" />
             </button>
+            <Link
+              href="/kursus"
+              className="bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-rust-ink transition-colors"
+            >
+              Daftar Kelas
+            </Link>
           </div>
 
           {/* Mobile menu button */}
-          <div className="flex items-center md:hidden">
+          <div className="flex items-center gap-1 md:hidden">
             <Link
-              href="/toko"
-              className="tap-target flex items-center justify-center text-rust-ink hover:text-terracotta"
+              href="/kursus"
+              className="tap-target flex items-center justify-center bg-terracotta text-white text-sm font-bold px-3 rounded-full hover:bg-rust-ink transition-colors"
             >
-              <ShoppingBag className="w-6 h-6" />
+              Daftar Kelas
             </Link>
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('toko:open-search'))}
               aria-label="Cari produk atau kelas"
-              className="text-rust-ink hover:text-terracotta mr-2 -m-2 p-2"
+              className="tap-target flex items-center justify-center text-rust-ink hover:text-terracotta"
             >
               <Search className="w-6 h-6" />
             </button>
@@ -135,6 +143,25 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/toko"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 px-3 tap-target rounded-md text-base font-medium text-charcoal-brown/70 hover:bg-butter/20 hover:text-rust-ink"
+            >
+              <ShoppingBag className="w-5 h-5" /> Toko Alat Baking
+            </Link>
+            <a
+              href={waLink('Halo Cece, aku mau tanya-tanya')}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                trackConversion('whatsapp_open');
+                setIsOpen(false);
+              }}
+              className="flex items-center gap-2 px-3 tap-target rounded-md text-base font-medium text-green-700 hover:bg-green-50"
+            >
+              <MessageCircle className="w-5 h-5" /> Chat Cece via WhatsApp
+            </a>
           </div>
         </div>
       )}

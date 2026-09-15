@@ -223,8 +223,8 @@ export function ChatbotWidget() {
               {quickPrompts.map((prompt) => <button key={prompt} type="button" disabled={isSending} onClick={() => sendMessage(prompt)} className="tap-target shrink-0 rounded-full border border-terracotta/20 bg-[#fffaf3] px-3 text-xs font-semibold text-rust-ink transition hover:-translate-y-0.5 hover:bg-butter/20 disabled:opacity-50">{prompt}</button>)}
             </div>
             <form onSubmit={(event) => { event.preventDefault(); sendMessage(); }} className={`flex gap-2 rounded-2xl border border-butter/45 bg-white p-1.5 shadow-inner transition-opacity ${isSending ? 'opacity-70' : ''}`}>
-              <input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} disabled={isSending} maxLength={1200} placeholder="Tulis ceritamu di sini…" className="min-w-0 flex-1 rounded-xl bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-charcoal-brown/45 disabled:cursor-not-allowed" />
-              <button type="submit" disabled={!input.trim() || isSending} className="rounded-xl bg-terracotta p-2.5 text-white transition hover:scale-105 hover:bg-rust-ink disabled:cursor-not-allowed disabled:opacity-50" aria-label="Kirim pesan"><Send size={18} /></button>
+              <input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} disabled={isSending} maxLength={1200} placeholder="Tulis ceritamu di sini…" className="min-w-0 flex-1 rounded-xl bg-transparent px-2.5 py-2 text-base outline-none placeholder:text-charcoal-brown/45 disabled:cursor-not-allowed" />
+              <button type="submit" disabled={!input.trim() || isSending} className="tap-target flex items-center justify-center rounded-xl bg-terracotta text-white transition hover:scale-105 hover:bg-rust-ink disabled:cursor-not-allowed disabled:opacity-50" aria-label="Kirim pesan"><Send size={18} /></button>
             </form>
             <div className="mt-3 flex items-center justify-between gap-3 text-xs">
               <button type="button" onClick={() => { setShowLeadForm((value) => !value); setLeadStatus('idle'); }} className="inline-flex items-center gap-1 font-semibold text-rust-ink hover:underline"><Heart size={13} className="fill-current" /> Minta dihubungi</button>
@@ -235,11 +235,11 @@ export function ChatbotWidget() {
           {showLeadForm && (
             <form ref={formRef} onSubmit={submitLead} className="animate-chat-bubble-in max-h-[45dvh] space-y-2 overflow-y-auto border-t border-butter/25 bg-[#fffaf3] px-4 py-3">
               <div className="flex items-center justify-between"><div><p className="font-serif font-bold text-rust-ink">Biar kami yang menyapa dulu</p><p className="text-xs text-charcoal-brown/60">Tinggalkan kontak, ya. Kami bantu lanjutkan.</p></div><button type="button" onClick={() => setShowLeadForm(false)} aria-label="Tutup formulir" className="tap-target flex items-center justify-center"><ChevronDown size={18} /></button></div>
-              <input name="name" maxLength={120} placeholder="Nama panggilan (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
-              <input name="whatsapp" maxLength={40} placeholder="Nomor WhatsApp" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
-              <input name="email" type="email" maxLength={160} placeholder="Email (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
-              <input name="topic" maxLength={160} placeholder="Topik (mis. pendaftaran kelas)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
-              <textarea name="message" required maxLength={2000} rows={3} placeholder="Ceritakan kebutuhan Anda" className="w-full resize-none rounded-lg border border-butter/45 bg-white px-3 py-2 text-sm" />
+              <input name="name" maxLength={120} placeholder="Nama panggilan (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-base" />
+              <input name="whatsapp" maxLength={40} placeholder="Nomor WhatsApp" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-base" />
+              <input name="email" type="email" maxLength={160} placeholder="Email (opsional)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-base" />
+              <input name="topic" maxLength={160} placeholder="Topik (mis. pendaftaran kelas)" className="w-full rounded-lg border border-butter/45 bg-white px-3 py-2 text-base" />
+              <textarea name="message" required maxLength={2000} rows={3} placeholder="Ceritakan kebutuhan Anda" className="w-full resize-none rounded-lg border border-butter/45 bg-white px-3 py-2 text-base" />
               {leadStatus === 'success' && <p className="text-xs text-green-700">Makasih ya, pesanmu sudah kami terima 🤎</p>}
               {leadStatus === 'error' && <p className="text-xs text-red-700">{leadError}</p>}
               <button type="submit" disabled={leadStatus === 'sending'} className="flex w-full items-center justify-center gap-2 rounded-xl bg-rust-ink px-3 py-2.5 text-sm font-semibold text-white hover:bg-terracotta disabled:opacity-50"><UserRound size={16} /> {leadStatus === 'sending' ? 'Mengirim…' : 'Tolong hubungi aku'}</button>
