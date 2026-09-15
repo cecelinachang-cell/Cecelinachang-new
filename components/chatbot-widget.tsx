@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Heart, MessageCircle, Send, Sparkles, UserRound, X } from 'lucide-react';
 import type { SearchResult } from '@/lib/search';
+import { trackConversion } from '@/lib/analytics';
 
 type Message = { role: 'user' | 'assistant'; content: string; results?: SearchResult[] };
 
@@ -121,6 +122,7 @@ export function ChatbotWidget() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pesan belum dapat dikirim.');
       setLeadStatus('success');
+      trackConversion('lead_form_submit', undefined, { contentName: 'chatbot' });
       formRef.current?.reset();
     } catch (error) {
       setLeadStatus('error');
@@ -216,7 +218,7 @@ export function ChatbotWidget() {
             </form>
             <div className="mt-3 flex items-center justify-between gap-3 text-xs">
               <button type="button" onClick={() => { setShowLeadForm((value) => !value); setLeadStatus('idle'); }} className="inline-flex items-center gap-1 font-semibold text-rust-ink hover:underline"><Heart size={13} className="fill-current" /> Minta dihubungi</button>
-              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-green-700 hover:underline"><MessageCircle size={14} /> Lanjut ke WhatsApp</a>
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_open', undefined, { contentName: 'chatbot' })} className="inline-flex items-center gap-1 font-semibold text-green-700 hover:underline"><MessageCircle size={14} /> Lanjut ke WhatsApp</a>
             </div>
           </div>
 

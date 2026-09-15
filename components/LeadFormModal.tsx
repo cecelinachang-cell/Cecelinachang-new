@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { POLICIES } from "@/lib/policies";
 import { trackConversion } from "@/lib/analytics";
+import { parseIdr } from "@/lib/pixels";
 
 interface LeadFormModalProps {
   courseSlug: string;
@@ -62,14 +63,15 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
     setSubmitting(true);
 
     const payload = { courseSlug, courseTitle, email, phone, city, tiktokHandle, website };
-    trackConversion("lead_form_submit", courseSlug);
+    const pixelExtra = { contentName: courseTitle, contentType: "course" as const, value: parseIdr(coursePrice) };
+    trackConversion("lead_form_submit", courseSlug, pixelExtra);
 
     // Open WhatsApp first (synchronous with the click) so mobile Safari never
     // blocks the popup while we wait on the network.
     const priceLine = coursePrice ? `\n- Harga: ${coursePrice}` : "";
     const message = `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
     window.open(`https://wa.me/6281284250718?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-    trackConversion("whatsapp_open", courseSlug);
+    trackConversion("whatsapp_open", courseSlug, pixelExtra);
 
     const sent =
       typeof navigator.sendBeacon === "function"

@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Star, ShoppingBag } from "lucide-react";
 import { waLink, shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
+import { parseIdr } from "@/lib/pixels";
 
 export interface Product {
   id: string;
@@ -94,6 +95,14 @@ export default function ProductCard({ product }: { product: Product }) {
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackConversion("whatsapp_open", undefined, {
+                    contentId: product.id,
+                    contentName: product.name,
+                    contentType: "product",
+                    value: parseIdr(product.price),
+                  })
+                }
                 className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition-colors"
               >
                 <ShoppingBag className="w-4 h-4" /> Beli via WA
@@ -102,7 +111,14 @@ export default function ProductCard({ product }: { product: Product }) {
                 href={shopeeHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackConversion("shopee_open")}
+                onClick={() =>
+                  trackConversion("shopee_open", undefined, {
+                    contentId: product.id,
+                    contentName: product.name,
+                    contentType: "product",
+                    value: parseIdr(product.price),
+                  })
+                }
                 className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-[#EE4D2D] text-white text-sm font-bold rounded-xl hover:bg-[#d8431f] transition-colors"
               >
                 <ShoppingBag className="w-4 h-4" /> Shopee

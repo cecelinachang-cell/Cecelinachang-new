@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import LeadFormModal from "@/components/LeadFormModal";
 import { trackConversion } from "@/lib/analytics";
+import { parseIdr } from "@/lib/pixels";
 
 interface Course {
   slug: string;
@@ -35,7 +36,11 @@ export function MobileCourseBar({ course }: { course: Course }) {
           <button
             type="button"
             onClick={() => {
-              trackConversion('lead_form_open', course.slug);
+              trackConversion('lead_form_open', course.slug, {
+                contentName: course.title,
+                contentType: 'course',
+                value: parseIdr(course.price),
+              });
               setShowLeadForm(true);
             }}
             className="tap-target flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full px-6 py-3.5 shadow-md transition-colors"

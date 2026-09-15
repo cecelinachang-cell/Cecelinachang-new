@@ -13,7 +13,24 @@ const wrap = (bodyHtml: string) => `
 </div>
 `;
 
-export function buildWelcomeEmail(courseTitle: string) {
+export function buildWelcomeEmail(courseTitle?: string) {
+  if (!courseTitle) {
+    const genericWaLink = `${WA_LINK}?text=${encodeURIComponent('Halo Cece, tadi aku chat di website')}`;
+    return {
+      subject: `Makasih udah ngobrol sama Lina 🤎`,
+      html: wrap(`
+        <h1 style="font-size: 22px; margin: 0 0 16px;">Makasih udah cerita ke Lina!</h1>
+        <p>Pesanmu tadi sudah kami terima. Cece atau tim akan lanjutkan obrolannya di WhatsApp begitu sempat.</p>
+        <p>Nggak sabar nunggu? Lanjutkan sendiri kapan aja, kami siap bantu:</p>
+        <p style="text-align: center; margin: 24px 0;">
+          <a href="${genericWaLink}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 14px 28px; border-radius: 999px; font-weight: bold;">
+            Lanjut ke WhatsApp
+          </a>
+        </p>
+      `),
+    };
+  }
+
   return {
     subject: `Sudah dapat kelasnya, ${courseTitle} — plus rahasia bakso kenyal dari Cece`,
     html: wrap(`

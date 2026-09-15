@@ -1,9 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock, MessageCircle, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { waLink, shopeeLink } from "@/lib/links";
+import { shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
+import { parseIdr } from "@/lib/pixels";
+import LeadFormModal from "@/components/LeadFormModal";
 
 interface Course {
   id: string;
@@ -15,11 +20,26 @@ interface Course {
   imageUrl: string;
   benefits: string[];
   shopeeUrl?: string | null;
+  students?: number;
+  isSignature?: boolean;
 }
 
-export default function CourseCardCompact({ course }: { course: Course }) {
+export default function CourseCardCompact({
+  course,
+  featured = false,
+}: {
+  course: Course;
+  featured?: boolean;
+}) {
+  const [showLeadForm, setShowLeadForm] = useState(false);
+
   return (
-    <div className="bg-white rounded-[1.5rem_0.5rem_1.5rem_0.5rem] overflow-hidden shadow-sm border border-butter/30 hover:shadow-md transition-shadow flex flex-col">
+    <div className="bg-white rounded-[1.5rem_0.5rem_1.5rem_0.5rem] overflow-hidden shadow-sm border border-butter/30 hover:shadow-md transition-shadow flex flex-col relative">
+      {featured && (
+        <div className="absolute top-4 left-4 z-10 bg-terracotta text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center">
+          <Star className="w-3 h-3 mr-1.5 fill-current" /> SIGNATURE CLASS
+        </div>
+      )}
       <Link href={`/kursus/${course.slug}`} className="relative w-full aspect-[4/3] block">
         <Image
           src={course.imageUrl || "https://picsum.photos/seed/placeholder/800/600"}
@@ -36,12 +56,30 @@ export default function CourseCardCompact({ course }: { course: Course }) {
             {course.title}
           </h3>
         </Link>
-        <p className="text-charcoal-brown/70 text-sm mb-4 leading-relaxed line-clamp-2">
-          {course.benefits?.[0]}
-        </p>
-        <div className="flex items-center text-charcoal-brown/50 text-xs mb-4">
-          <Clock className="w-3.5 h-3.5 mr-1.5" />
-          {course.duration}
+        {featured ? (
+          <ul className="space-y-1.5 mb-4">
+            {(course.benefits || []).slice(0, 3).map((benefit, i) => (
+              <li key={i} className="text-charcoal-brown/70 text-sm leading-relaxed line-clamp-1">
+                • {benefit}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-charcoal-brown/70 text-sm mb-4 leading-relaxed line-clamp-2">
+            {course.benefits?.[0]}
+          </p>
+        )}
+        <div className="flex items-center gap-4 text-charcoal-brown/50 text-xs mb-4">
+          <div className="flex items-center">
+            <Clock className="w-3.5 h-3.5 mr-1.5" />
+            {course.duration}
+          </div>
+          {featured && typeof course.students === "number" && (
+            <div className="flex items-center">
+              <Users className="w-3.5 h-3.5 mr-1.5" />
+              {course.students.toLocaleString("id-ID")} murid udah gabung
+            </div>
+          )}
         </div>
 
         <div className="mt-auto pt-4 border-t border-butter/30">
@@ -56,13 +94,20 @@ export default function CourseCardCompact({ course }: { course: Course }) {
             </span>
           </div>
           <Button
-            href={waLink(`Halo Cece Lina Chang, saya ingin daftar kursus: ${course.title}\n\nBerikut data diri saya:\n- Email: \n- Nomor WhatsApp: \n- Asal Kota: \n- User TikTok: \n\n(Mohon lampirkan foto bukti transfer di chat ini ya Cece)`)}
-            external
+            type="button"
+            onClick={() => {
+              trackConversion("lead_form_open", course.slug, {
+                contentName: course.title,
+                contentType: "course",
+                value: parseIdr(course.price),
+              });
+              setShowLeadForm(true);
+            }}
             variant="whatsapp"
             size="md"
             fullWidth
           >
-            Chat Cece, Daftar Kelas
+            <MessageCircle className="w-4 h-4 mr-1.5" /> Chat Cece, Daftar Kelas
           </Button>
           {course.shopeeUrl && (
             <Button
@@ -72,7 +117,13 @@ export default function CourseCardCompact({ course }: { course: Course }) {
               size="md"
               fullWidth
               className="mt-2"
-              onClick={() => trackConversion("shopee_open", course.slug)}
+              onClick={() =>
+                trackConversion("shopee_open", course.slug, {
+                  contentName: course.title,
+                  contentType: "course",
+                  value: parseIdr(course.price),
+                })
+              }
             >
               Beli via Shopee
             </Button>
@@ -85,6 +136,15 @@ export default function CourseCardCompact({ course }: { course: Course }) {
           </Link>
         </div>
       </div>
+
+      {showLeadForm && (
+        <LeadFormModal
+          courseSlug={course.slug}
+          courseTitle={course.title}
+          coursePrice={course.price}
+          onClose={() => setShowLeadForm(false)}
+        />
+      )}
     </div>
   );
 }

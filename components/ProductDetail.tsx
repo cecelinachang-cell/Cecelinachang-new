@@ -11,6 +11,8 @@ import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { POLICIES } from '@/lib/policies';
 import { waLink, shopeeLink } from '@/lib/links';
 import { trackConversion } from '@/lib/analytics';
+import { parseIdr } from '@/lib/pixels';
+import { ViewContentPing } from '@/components/ViewContentPing';
 
 interface Product {
   id: string;
@@ -174,6 +176,12 @@ export default function ProductDetail({ slug }: { slug: string }) {
       transition={{ duration: 0.6 }}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     >
+      <ViewContentPing
+        contentId={product.id}
+        contentName={product.name}
+        contentType="product"
+        value={parseIdr(product.price)}
+      />
       <Link href="/toko" className="inline-flex items-center text-terracotta hover:text-rust-ink font-medium mb-8 hover:translate-x-[-4px] transition-transform">
         <ArrowLeft className="w-5 h-5 mr-2" /> Kembali ke Toko
       </Link>
@@ -289,6 +297,14 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 href={waLink(`Halo Admin, saya mau beli ${product.name}`)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackConversion('whatsapp_open', undefined, {
+                    contentId: product.id,
+                    contentName: product.name,
+                    contentType: 'product',
+                    value: parseIdr(product.price),
+                  })
+                }
                 className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
               >
                 <ShoppingBag className="w-6 h-6 mr-3" /> Beli via WhatsApp
@@ -297,7 +313,14 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 href={shopeeLink(product.shopeeUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackConversion('shopee_open')}
+                onClick={() =>
+                  trackConversion('shopee_open', undefined, {
+                    contentId: product.id,
+                    contentName: product.name,
+                    contentType: 'product',
+                    value: parseIdr(product.price),
+                  })
+                }
                 className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-[#EE4D2D] hover:bg-[#d8431f] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
               >
                 <ShoppingBag className="w-6 h-6 mr-3" /> Beli via Shopee

@@ -7,6 +7,7 @@ import { ChatbotWidget } from '@/components/chatbot-widget';
 import { SearchOverlay } from '@/components/SearchOverlay';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
+import { Pixels } from '@/components/Pixels';
 import { supabase } from '@/lib/supabase';
 
 const inter = Inter({
@@ -126,6 +127,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body className="font-sans bg-cream text-charcoal-brown min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <AnalyticsTracker />
+          <Pixels />
           <Navbar />
           <main className="flex-grow">
             {children}

@@ -52,11 +52,12 @@ const nextConfig: NextConfig = {
       // that aborts hydration, leaving the whole app inert (no click
       // handlers fire) any time this repo is run locally. Production never
       // needs eval, so the built bundle stays eval-free either way.
-      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
+      `script-src 'self' 'unsafe-inline' https://analytics.tiktok.com https://connect.facebook.net${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co",
+      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co https://www.facebook.com https://analytics.tiktok.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://yjxvrsmubrasvoipkwvn.supabase.co wss://yjxvrsmubrasvoipkwvn.supabase.co",
+      "connect-src 'self' https://yjxvrsmubrasvoipkwvn.supabase.co wss://yjxvrsmubrasvoipkwvn.supabase.co https://analytics.tiktok.com https://www.facebook.com https://connect.facebook.net",
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

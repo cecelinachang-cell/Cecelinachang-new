@@ -6,6 +6,7 @@ import { POLICIES } from '@/lib/policies';
 import { Button } from '@/components/ui/Button';
 import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
+import { parseIdr } from '@/lib/pixels';
 import { shopeeLink } from '@/lib/links';
 
 interface Course {
@@ -70,7 +71,11 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
       <Button
         type="button"
         onClick={() => {
-          trackConversion('lead_form_open', course.slug);
+          trackConversion('lead_form_open', course.slug, {
+            contentName: course.title,
+            contentType: 'course',
+            value: parseIdr(course.price),
+          });
           setShowLeadForm(true);
         }}
         variant="whatsapp"
@@ -89,7 +94,13 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
           size="lg"
           fullWidth
           className="mb-4"
-          onClick={() => trackConversion('shopee_open', course.slug)}
+          onClick={() =>
+            trackConversion('shopee_open', course.slug, {
+              contentName: course.title,
+              contentType: 'course',
+              value: parseIdr(course.price),
+            })
+          }
         >
           Beli via Shopee
         </Button>
