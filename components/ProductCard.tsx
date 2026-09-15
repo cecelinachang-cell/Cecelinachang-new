@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { Star, ShoppingBag } from "lucide-react";
 import { waLink, shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
@@ -36,16 +35,15 @@ const parseImageUrls = (url: string | undefined): string[] => {
 export default function ProductCard({ product }: { product: Product }) {
   const waHref = waLink(`Halo Admin, saya mau beli ${product.name}`);
   const shopeeHref = shopeeLink(product.shopeeUrl);
+  const pixelExtra = {
+    contentId: product.id,
+    contentName: product.name,
+    contentType: "product" as const,
+    value: parseIdr(product.price),
+  };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.3 }}
-      className="bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
-    >
+    <div className="animate-in fade-in duration-300 bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
       <Link
         href={`/toko/${product.id}`}
         className="block relative aspect-square sm:h-64 bg-stone-50 overflow-hidden"
@@ -57,14 +55,14 @@ export default function ProductCard({ product }: { product: Product }) {
           }
           alt={product.name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           referrerPolicy="no-referrer"
         />
       </Link>
-      <div className="p-4 sm:p-6 flex flex-col flex-grow">
+      <div className="p-3 sm:p-6 flex flex-col flex-grow">
         <Link href={`/toko/${product.id}`}>
-          <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal-brown mb-1 group-hover:text-terracotta transition-colors line-clamp-2">
+          <h3 className="font-serif text-base sm:text-xl font-bold text-charcoal-brown mb-1 group-hover:text-terracotta transition-colors line-clamp-2">
             {product.name}
           </h3>
         </Link>
@@ -78,7 +76,7 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
 
         <div className="mt-auto">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <span className="text-terracotta font-bold text-base sm:text-lg">
               {product.price}
             </span>
@@ -95,44 +93,30 @@ export default function ProductCard({ product }: { product: Product }) {
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() =>
-                  trackConversion("whatsapp_open", undefined, {
-                    contentId: product.id,
-                    contentName: product.name,
-                    contentType: "product",
-                    value: parseIdr(product.price),
-                  })
-                }
-                className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition-colors"
+                onClick={() => trackConversion("whatsapp_open", undefined, pixelExtra)}
+                className="tap-target flex items-center justify-center gap-1.5 w-full px-2 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition-colors"
               >
-                <ShoppingBag className="w-4 h-4" /> Beli via WA
+                <ShoppingBag className="w-4 h-4 shrink-0" /> <span className="truncate">WA</span>
               </a>
               <a
                 href={shopeeHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() =>
-                  trackConversion("shopee_open", undefined, {
-                    contentId: product.id,
-                    contentName: product.name,
-                    contentType: "product",
-                    value: parseIdr(product.price),
-                  })
-                }
-                className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-[#EE4D2D] text-white text-sm font-bold rounded-xl hover:bg-[#d8431f] transition-colors"
+                onClick={() => trackConversion("shopee_open", undefined, pixelExtra)}
+                className="tap-target flex items-center justify-center gap-1.5 w-full px-2 bg-[#EE4D2D] text-white text-sm font-bold rounded-xl hover:bg-[#d8431f] transition-colors"
               >
-                <ShoppingBag className="w-4 h-4" /> Shopee
+                <ShoppingBag className="w-4 h-4 shrink-0" /> <span className="truncate">Shopee</span>
               </a>
             </div>
             <Link
               href={`/toko/${product.id}`}
-              className="tap-target flex items-center justify-center w-full text-center px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"
+              className="hidden sm:flex tap-target items-center justify-center w-full text-center px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"
             >
               Lihat Detail
             </Link>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -13,6 +13,7 @@ import { waLink, shopeeLink } from '@/lib/links';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { ViewContentPing } from '@/components/ViewContentPing';
+import { MobileProductBar } from '@/components/MobileProductBar';
 
 interface Product {
   id: string;
@@ -169,12 +170,14 @@ export default function ProductDetail({ slug }: { slug: string }) {
     notFound();
   }
 
+  const productImages = parseImageUrls(product.imageUrl);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12"
     >
       <ViewContentPing
         contentId={product.id}
@@ -188,19 +191,14 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
         {/* Product Images */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="space-y-4"
-        >
-          <div className="relative aspect-square sm:aspect-auto sm:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-butter/30 bg-white flex items-center justify-center group">
+        <div className="space-y-4">
+          <div className="relative aspect-square sm:aspect-auto sm:h-[500px] rounded-3xl overflow-hidden shadow-lg border border-butter/30 bg-white flex items-center justify-center">
             <Image
               src={selectedImage || 'https://picsum.photos/seed/placeholder/800/800'}
               alt={product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-8 group-hover:scale-110 transition-transform duration-500"
+              className="object-contain p-8"
               referrerPolicy="no-referrer"
             />
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-rust-ink shadow-sm flex items-center">
@@ -208,32 +206,29 @@ export default function ProductDetail({ slug }: { slug: string }) {
               Dipakai di video saya
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-2 sm:gap-4">
-            {parseImageUrls(product.imageUrl).map((imgObj, i) => (
-              <div
-                key={i}
-                onClick={() => setSelectedImage(imgObj)}
-                className={`relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 transition-colors bg-white flex items-center justify-center ${selectedImage === imgObj ? 'border-terracotta' : 'border-transparent hover:border-butter'}`}
-              >
-                <Image
-                  src={imgObj}
-                  alt={`Thumbnail ${i}`}
-                  fill
-                  className="object-contain p-2"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            ))}
-          </div>
-        </motion.div>
+          {productImages.length > 1 && (
+            <div className="grid grid-cols-4 gap-2 sm:gap-4">
+              {productImages.map((imgObj, i) => (
+                <div
+                  key={i}
+                  onClick={() => setSelectedImage(imgObj)}
+                  className={`relative h-20 sm:h-32 rounded-xl overflow-hidden cursor-pointer border-2 transition-colors bg-white flex items-center justify-center ${selectedImage === imgObj ? 'border-terracotta' : 'border-transparent hover:border-butter'}`}
+                >
+                  <Image
+                    src={imgObj}
+                    alt={`Thumbnail ${i}`}
+                    fill
+                    className="object-contain p-2"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Product Info */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col"
-        >
+        <div className="flex flex-col">
           <div className="mb-6">
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-rust-ink mb-4 leading-tight">
               {product.name}
@@ -327,19 +322,23 @@ export default function ProductDetail({ slug }: { slug: string }) {
               </a>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Testimonials */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className="border-t border-butter/30 pt-16"
-      >
+      <div className="border-t border-butter/30 pt-16">
         <TestimonialCarousel />
-      </motion.div>
+      </div>
+
+      <MobileProductBar
+        product={{
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          shopeeUrl: product.shopeeUrl,
+        }}
+      />
     </motion.div>
   );
 }

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+/* Lightweight enter/exit utilities (animate-in, fade-in, slide-in-from-*,
+   duration-*) used in place of framer-motion for simple one-shot mounts
+   (see components/ProductCard.tsx) -- was an unused dependency until now. */
+@import "tw-animate-css";
 
 @theme {
   --color-cream: #FBF6EE;

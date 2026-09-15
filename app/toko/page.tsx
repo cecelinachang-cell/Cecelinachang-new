@@ -4,19 +4,22 @@ import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
 import { supabasePublic, isSupabaseConfigured } from "@/lib/supabase";
 import { products as fallbackProducts } from "@/app/data/products";
-import { AnimatePresence } from "motion/react";
 
 import { ShoppingBag } from "lucide-react";
 import Faq from "@/components/Faq";
 import { Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/links";
 import { Marginalia } from "@/components/Marginalia";
+import { normalizeCategory } from "@/lib/categories";
 import ProductCard, { type Product } from "@/components/ProductCard";
+
+const PAGE_SIZE = 12;
 
 export default function TokoPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -62,15 +65,24 @@ export default function TokoPage() {
   const categories = useMemo(() => {
     const cats = new Set(["Semua"]);
     products.forEach((p) => {
-      if (p.category) cats.add(p.category);
+      const normalized = normalizeCategory(p.category);
+      if (normalized) cats.add(normalized);
     });
     return Array.from(cats);
   }, [products]);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "Semua") return products;
-    return products.filter((p) => p.category === selectedCategory);
+    return products.filter((p) => normalizeCategory(p.category) === selectedCategory);
   }, [products, selectedCategory]);
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+
+  // Reset pagination whenever the visible set changes shape (category
+  // switch or a fresh fetch), so "Muat lagi" always starts from one page.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [selectedCategory, products]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -106,14 +118,14 @@ export default function TokoPage() {
 
       {/* Product Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden animate-pulse flex flex-col"
             >
               <div className="w-full aspect-square sm:h-64 bg-stone-200"></div>
-              <div className="p-4 sm:p-6 flex flex-col flex-grow space-y-3">
+              <div className="p-3 sm:p-6 flex flex-col flex-grow space-y-3">
                 <div className="h-6 bg-stone-200 rounded w-3/4"></div>
                 <div className="h-4 bg-stone-200 rounded w-1/3"></div>
                 <div className="h-6 bg-stone-200 rounded w-1/2 mt-auto"></div>
@@ -124,13 +136,30 @@ export default function TokoPage() {
           ))}
         </div>
       ) : filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product) => (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
+            {visibleProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </AnimatePresence>
-        </div>
+          </div>
+          {visibleCount < filteredProducts.length && (
+            <div className="mt-8 text-center">
+              <Button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                variant="secondary"
+                size="md"
+                fullWidth
+                className="sm:w-fit sm:mx-auto"
+              >
+                Muat {Math.min(PAGE_SIZE, filteredProducts.length - visibleCount)} produk lagi
+              </Button>
+              <p className="text-xs text-charcoal-brown/50 mt-2">
+                Menampilkan {visibleProducts.length} dari {filteredProducts.length} produk
+              </p>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-24 bg-butter/10 rounded-3xl border border-butter/30">
           <div className="w-24 h-24 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
