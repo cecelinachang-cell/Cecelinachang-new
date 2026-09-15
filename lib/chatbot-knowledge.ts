@@ -26,7 +26,7 @@ Brand: Cece Lina Chang menyediakan kursus memasak/baking online, resep gratis, d
 Kontak: WhatsApp admin +62 812-8425-0718, email halo@cecelinachang.com.
 Jam respons WhatsApp: 09.00–17.00.
 Lokasi pengiriman toko: Jakarta Barat, Indonesia. Toko hanya melayani pengiriman online.
-Cara membeli alat: pengunjung memilih produk lalu admin membantu pemesanan melalui WhatsApp.
+Cara membeli alat: pengunjung memilih produk lalu admin membantu pemesanan melalui WhatsApp, atau membeli langsung lewat toko Shopee resmi (tombol "Beli via Shopee" ada di setiap produk).
 Cara mengikuti kelas: pengunjung memilih kelas, mendaftar melalui WhatsApp admin, lalu menerima tautan akses video setelah proses pendaftaran.
 Pengiriman luar kota: paket dilindungi bubble wrap tebal dan kardus khusus.
 Resep pada halaman Resep dapat diakses gratis.

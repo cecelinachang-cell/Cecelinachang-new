@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Star, ShoppingBag } from "lucide-react";
+import { waLink, shopeeLink } from "@/lib/links";
+import { trackConversion } from "@/lib/analytics";
 
 export interface Product {
   id: string;
@@ -16,6 +18,7 @@ export interface Product {
   rating?: number;
   reviews?: number;
   createdAt?: string;
+  shopeeUrl?: string | null;
 }
 
 const parseImageUrls = (url: string | undefined): string[] => {
@@ -30,9 +33,8 @@ const parseImageUrls = (url: string | undefined): string[] => {
 };
 
 export default function ProductCard({ product }: { product: Product }) {
-  const waHref = `https://wa.me/6281284250718?text=${encodeURIComponent(
-    `Halo Admin, saya mau beli ${product.name}`
-  )}`;
+  const waHref = waLink(`Halo Admin, saya mau beli ${product.name}`);
+  const shopeeHref = shopeeLink(product.shopeeUrl);
 
   return (
     <motion.div
@@ -87,14 +89,25 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tap-target flex items-center justify-center gap-2 w-full px-4 bg-green-500 text-white text-sm sm:text-base font-bold rounded-xl hover:bg-green-600 transition-colors"
-            >
-              <ShoppingBag className="w-4 h-4" /> Beli via WA
-            </a>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4" /> Beli via WA
+              </a>
+              <a
+                href={shopeeHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackConversion("shopee_open")}
+                className="tap-target flex items-center justify-center gap-1.5 w-full px-3 bg-[#EE4D2D] text-white text-sm font-bold rounded-xl hover:bg-[#d8431f] transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4" /> Shopee
+              </a>
+            </div>
             <Link
               href={`/toko/${product.id}`}
               className="tap-target flex items-center justify-center w-full text-center px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"

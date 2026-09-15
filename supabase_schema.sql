@@ -18,6 +18,7 @@ CREATE TABLE public.items (
   "imageUrl" TEXT,
   rating NUMERIC DEFAULT 5.0,
   reviews INTEGER DEFAULT 0,
+  "shopeeUrl" TEXT,
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -28,6 +29,7 @@ CREATE TABLE public.courses (
   description TEXT,
   price TEXT,
   "imageUrl" TEXT,
+  "shopeeUrl" TEXT,
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

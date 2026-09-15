@@ -27,6 +27,7 @@ interface Item {
   description: string;
   price: string;
   originalPrice?: string;
+  shopeeUrl?: string | null;
   imageUrl: string;
   category: string;
   createdAt?: string;
@@ -44,6 +45,7 @@ export default function ItemsManager() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
+  const [shopeeUrl, setShopeeUrl] = useState("");
   const [category, setCategory] = useState("Semua Produk");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -123,6 +125,7 @@ export default function ItemsManager() {
       setDescription(item.description);
       setPrice(item.price);
       setOriginalPrice(item.originalPrice || "");
+      setShopeeUrl(item.shopeeUrl || "");
       setCategory(item.category || "Semua Produk");
       setImagePreviews(parseImageUrls(item.imageUrl));
     } else {
@@ -131,6 +134,7 @@ export default function ItemsManager() {
       setDescription("");
       setPrice("");
       setOriginalPrice("");
+      setShopeeUrl("");
       setCategory("Semua Produk");
       setImagePreviews([]);
     }
@@ -263,6 +267,7 @@ export default function ItemsManager() {
         description,
         price,
         // originalPrice is removed because it's not in the supabase items schema
+        shopeeUrl: shopeeUrl.trim() || null,
         category,
         imageUrl: JSON.stringify(finalImages),
       };
@@ -520,6 +525,22 @@ export default function ItemsManager() {
                     className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="e.g. Rp 1.800.000"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
+                    Link Shopee (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={shopeeUrl}
+                    onChange={(e) => setShopeeUrl(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="https://shopee.co.id/product/..."
+                  />
+                  <p className="mt-1 text-xs text-stone-500">
+                    Kosongkan untuk memakai link toko Shopee utama.
+                  </p>
                 </div>
 
                 <div>

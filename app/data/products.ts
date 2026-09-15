@@ -9,6 +9,7 @@ export interface Product {
   imageUrl: string;
   isBundle?: boolean;
   description?: string;
+  shopeeUrl?: string | null;
   createdAt?: any;
   updatedAt?: any;
 }

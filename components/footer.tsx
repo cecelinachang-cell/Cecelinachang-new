@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, ShoppingBag } from 'lucide-react';
+import { SHOPEE_SHOP_URL, waLink } from '@/lib/links';
 
 export function Footer() {
   return (
@@ -22,6 +23,10 @@ export function Footer() {
                 </svg>
                 <span className="sr-only">TikTok</span>
               </a>
+              <a href={SHOPEE_SHOP_URL} target="_blank" rel="noopener noreferrer" className="text-butter/90 hover:text-cream transition-colors">
+                <ShoppingBag className="w-6 h-6" />
+                <span className="sr-only">Shopee</span>
+              </a>
             </div>
           </div>
 
@@ -39,7 +44,8 @@ export function Footer() {
             <ul className="space-y-2">
               <li><Link href="/kontak" className="text-butter/90 hover:text-cream transition-colors">Hubungi Saya</Link></li>
               <li><Link href="/kontak" className="text-butter/90 hover:text-cream transition-colors">FAQ</Link></li>
-              <li><a href="https://wa.me/6281284250718" target="_blank" rel="noopener noreferrer" className="text-butter/90 hover:text-cream transition-colors">WhatsApp Admin</a></li>
+              <li><a href={waLink('Halo Admin')} target="_blank" rel="noopener noreferrer" className="text-butter/90 hover:text-cream transition-colors">WhatsApp Admin</a></li>
+              <li><a href={SHOPEE_SHOP_URL} target="_blank" rel="noopener noreferrer" className="text-butter/90 hover:text-cream transition-colors">Toko Shopee</a></li>
             </ul>
           </div>
         </div>

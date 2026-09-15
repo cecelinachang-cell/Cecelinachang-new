@@ -30,6 +30,7 @@ interface Course {
   imageUrl: string;
   video?: string;
   benefits: string[];
+  shopeeUrl?: string | null;
 }
 
 // Next 15 no longer caches `fetch` by default, and supabase-js's internal

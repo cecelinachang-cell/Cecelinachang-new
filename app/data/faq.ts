@@ -11,7 +11,7 @@ export interface FaqItem {
 export const faqs: FaqItem[] = [
   {
     q: 'Bagaimana cara membeli alat masak?',
-    a: 'Sangat mudah! Anda tinggal klik tombol "Beli Sekarang" di halaman produk, lalu Anda akan langsung diarahkan ke WhatsApp admin kami untuk proses pemesanan tanpa perlu membuat akun.',
+    a: 'Ada dua cara. Klik "Beli via WA" di halaman produk untuk dipandu admin kami lewat WhatsApp tanpa perlu membuat akun, atau klik "Beli via Shopee" untuk checkout sendiri di toko Shopee resmi kami.',
     category: 'general',
   },
   {
@@ -66,7 +66,7 @@ export const faqs: FaqItem[] = [
   },
   {
     q: 'Metode pembayaran apa saja yang tersedia?',
-    a: 'Pembayaran dilakukan via transfer bank, dikonfirmasi langsung oleh admin melalui WhatsApp setelah Anda checkout.',
+    a: 'Untuk pemesanan via WhatsApp, pembayaran dilakukan via transfer bank dan dikonfirmasi langsung oleh admin. Jika Anda membeli lewat Shopee, gunakan metode pembayaran apa pun yang tersedia di Shopee.',
     category: 'general',
   },
 ];

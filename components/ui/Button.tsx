@@ -11,6 +11,7 @@ const buttonStyles = cva(
         primary: "text-white bg-terracotta hover:bg-rust-ink shadow-lg shadow-terracotta/20",
         secondary: "text-charcoal-brown bg-white border border-butter/40 hover:border-terracotta/50 hover:bg-butter/10 shadow-sm",
         whatsapp: "text-white bg-green-500 hover:bg-green-600 shadow-md",
+        shopee: "text-white bg-[#EE4D2D] hover:bg-[#d8431f] shadow-md",
       },
       size: {
         sm: "px-4 py-2 text-sm gap-1.5",

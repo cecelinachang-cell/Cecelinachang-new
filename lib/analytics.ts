@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-export type ConversionType = 'lead_form_open' | 'lead_form_submit' | 'whatsapp_open';
+export type ConversionType = 'lead_form_open' | 'lead_form_submit' | 'whatsapp_open' | 'shopee_open';
 
 export function trackConversion(type: ConversionType, courseSlug?: string) {
   try {

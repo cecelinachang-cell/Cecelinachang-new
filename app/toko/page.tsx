@@ -9,6 +9,7 @@ import { AnimatePresence } from "motion/react";
 import { ShoppingBag } from "lucide-react";
 import Faq from "@/components/Faq";
 import { Button } from "@/components/ui/Button";
+import { waLink } from "@/lib/links";
 import { Marginalia } from "@/components/Marginalia";
 import ProductCard, { type Product } from "@/components/ProductCard";
 
@@ -167,7 +168,7 @@ export default function TokoPage() {
               Anda.
             </p>
             <Button
-              href="https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20butuh%20rekomendasi%20alat%20baking"
+              href={waLink("Halo Admin, saya butuh rekomendasi alat baking")}
               external
               variant="secondary"
               size="lg"

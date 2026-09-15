@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { waLink, shopeeLink } from "@/lib/links";
+import { trackConversion } from "@/lib/analytics";
 
 interface Course {
   id: string;
@@ -12,6 +14,7 @@ interface Course {
   duration: string;
   imageUrl: string;
   benefits: string[];
+  shopeeUrl?: string | null;
 }
 
 export default function CourseCardCompact({ course }: { course: Course }) {
@@ -53,7 +56,7 @@ export default function CourseCardCompact({ course }: { course: Course }) {
             </span>
           </div>
           <Button
-            href={`https://wa.me/6281284250718?text=${encodeURIComponent(`Halo Cece Lina Chang, saya ingin daftar kursus: ${course.title}\n\nBerikut data diri saya:\n- Email: \n- Nomor WhatsApp: \n- Asal Kota: \n- User TikTok: \n\n(Mohon lampirkan foto bukti transfer di chat ini ya Cece)`)}`}
+            href={waLink(`Halo Cece Lina Chang, saya ingin daftar kursus: ${course.title}\n\nBerikut data diri saya:\n- Email: \n- Nomor WhatsApp: \n- Asal Kota: \n- User TikTok: \n\n(Mohon lampirkan foto bukti transfer di chat ini ya Cece)`)}
             external
             variant="whatsapp"
             size="md"
@@ -61,6 +64,19 @@ export default function CourseCardCompact({ course }: { course: Course }) {
           >
             Chat Cece, Daftar Kelas
           </Button>
+          {course.shopeeUrl && (
+            <Button
+              href={shopeeLink(course.shopeeUrl)}
+              external
+              variant="shopee"
+              size="md"
+              fullWidth
+              className="mt-2"
+              onClick={() => trackConversion("shopee_open", course.slug)}
+            >
+              Beli via Shopee
+            </Button>
+          )}
           <Link
             href={`/kursus/${course.slug}`}
             className="tap-target flex items-center justify-center text-center text-terracotta text-sm font-medium mt-1 hover:text-rust-ink transition-colors"

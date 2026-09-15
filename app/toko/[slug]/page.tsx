@@ -18,6 +18,7 @@ interface Product {
   imageUrl: string;
   isBundle?: boolean;
   description?: string;
+  shopeeUrl?: string | null;
 }
 
 const parseImageUrls = (url: string | undefined): string[] => {

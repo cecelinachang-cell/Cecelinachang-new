@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { resend, isResendConfigured, FROM_ADDRESS } from '@/lib/resend';
+import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildReminderEmail } from '@/lib/emails/lead-emails';
 
 export const maxDuration = 60;
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     if (!lead.email) continue;
     const { subject, html } = buildReminderEmail(lead.course_title);
     const { error: sendError } = await resend.emails.send(
-      { from: FROM_ADDRESS, to: [lead.email], subject, html },
+      { from: FROM_ADDRESS, replyTo: REPLY_TO_ADDRESS, to: [lead.email], subject, html },
       { idempotencyKey: `lead-reminder/${lead.id}` },
     );
     if (sendError) {

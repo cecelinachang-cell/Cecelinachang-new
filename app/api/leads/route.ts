@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getClientIp, isRateLimited } from '@/lib/rate-limit';
-import { resend, isResendConfigured, FROM_ADDRESS } from '@/lib/resend';
+import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildWelcomeEmail } from '@/lib/emails/lead-emails';
 
 export async function POST(req: NextRequest) {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     try {
       const { subject, html } = buildWelcomeEmail(courseTitle);
       const { error: sendError } = await resend.emails.send(
-        { from: FROM_ADDRESS, to: [email], subject, html },
+        { from: FROM_ADDRESS, replyTo: REPLY_TO_ADDRESS, to: [email], subject, html },
         { idempotencyKey: `lead-welcome/${data.id}` },
       );
       if (sendError) {

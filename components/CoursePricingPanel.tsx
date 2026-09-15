@@ -6,6 +6,7 @@ import { POLICIES } from '@/lib/policies';
 import { Button } from '@/components/ui/Button';
 import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
+import { shopeeLink } from '@/lib/links';
 
 interface Course {
   slug: string;
@@ -13,6 +14,7 @@ interface Course {
   price: string;
   originalPrice?: string;
   students: number;
+  shopeeUrl?: string | null;
 }
 
 interface CoursePricingPanelProps {
@@ -78,6 +80,20 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
       >
         <MessageCircle className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
       </Button>
+
+      {course.shopeeUrl && (
+        <Button
+          href={shopeeLink(course.shopeeUrl)}
+          external
+          variant="shopee"
+          size="lg"
+          fullWidth
+          className="mb-4"
+          onClick={() => trackConversion('shopee_open', course.slug)}
+        >
+          Beli via Shopee
+        </Button>
+      )}
 
       {!compact && (
         <>

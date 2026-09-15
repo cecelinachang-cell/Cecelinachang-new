@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation';
 import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { POLICIES } from '@/lib/policies';
+import { waLink, shopeeLink } from '@/lib/links';
+import { trackConversion } from '@/lib/analytics';
 
 interface Product {
   id: string;
@@ -21,6 +23,7 @@ interface Product {
   imageUrl: string;
   isBundle?: boolean;
   description?: string;
+  shopeeUrl?: string | null;
 }
 
 const parseImageUrls = (url: string | undefined): string[] => {
@@ -276,19 +279,30 @@ export default function ProductDetail({ slug }: { slug: string }) {
           {/* Buy Action */}
           <div className="mt-auto">
             <p className="text-sm text-stone-500 mb-4 text-center">
-              Pembelian langsung via WhatsApp. Tidak perlu daftar akun.
+              Pembelian langsung via WhatsApp atau lewat toko Shopee kami.
             </p>
             <p className="text-xs text-stone-500 mb-4 text-center">
               {POLICIES.PRODUCT_RETURN_SHORT}
             </p>
-            <a
-              href={`https://wa.me/6281284250718?text=Halo%20Admin,%20saya%20mau%20beli%20${encodeURIComponent(product.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
-            >
-              <ShoppingBag className="w-6 h-6 mr-3" /> Beli Sekarang via WhatsApp
-            </a>
+            <div className="flex flex-col gap-3">
+              <a
+                href={waLink(`Halo Admin, saya mau beli ${product.name}`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
+              >
+                <ShoppingBag className="w-6 h-6 mr-3" /> Beli via WhatsApp
+              </a>
+              <a
+                href={shopeeLink(product.shopeeUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackConversion('shopee_open')}
+                className="w-full flex justify-center items-center px-8 py-5 text-xl font-bold rounded-full text-white bg-[#EE4D2D] hover:bg-[#d8431f] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
+              >
+                <ShoppingBag className="w-6 h-6 mr-3" /> Beli via Shopee
+              </a>
+            </div>
           </div>
         </motion.div>
       </div>

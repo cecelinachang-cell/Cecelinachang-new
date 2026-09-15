@@ -8,3 +8,6 @@ export const isResendConfigured = (): boolean => {
 };
 
 export const FROM_ADDRESS = 'Cece Lina Chang <hello@cecelinachang.com>';
+
+// Replies go to the Zoho mailbox, not the send-only Resend address.
+export const REPLY_TO_ADDRESS = 'halo@cecelinachang.com';

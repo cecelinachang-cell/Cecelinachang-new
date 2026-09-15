@@ -15,14 +15,17 @@ const wrap = (bodyHtml: string) => `
 
 export function buildWelcomeEmail(courseTitle: string) {
   return {
-    subject: `Sudah dapat kelasnya, ${courseTitle} — plus 1 tip anti gagal`,
+    subject: `Sudah dapat kelasnya, ${courseTitle} — plus rahasia bakso kenyal dari Cece`,
     html: wrap(`
       <h1 style="font-size: 22px; margin: 0 0 16px;">Terima kasih sudah tertarik, ya!</h1>
       <p>Data Anda untuk <strong>${courseTitle}</strong> sudah kami terima. Cece akan proses pendaftaran begitu Anda kirim chat WhatsApp yang otomatis terbuka tadi.</p>
-      <p>Sambil menunggu, ini satu tip yang paling sering ditanyakan murid Cece:</p>
+      <p style="background: #FBF6EE; border-left: 3px solid #C4622D; padding: 10px 16px; margin: 20px 0; font-size: 14px;">
+        Cece sudah mengelola pabrik bakso sejak <strong>1998</strong>, dan sudah membantu <strong>4.500+ murid</strong> di seluruh Indonesia bikin bakso sekelas industri dari dapur rumah sendiri.
+      </p>
+      <p>Sambil menunggu, ini satu rahasia dapur yang paling sering ditanyakan murid Cece:</p>
       <div style="background: #FBF6EE; border: 1px solid #E8B86D55; border-radius: 12px; padding: 20px; margin: 20px 0;">
-        <p style="margin: 0; font-weight: bold; color: #C4622D;">Kenapa adonan sering lembek / tidak kenyal?</p>
-        <p style="margin: 8px 0 0;">Kuncinya di suhu bahan. Daging dan air es harus tetap dingin selama diuleni — begitu adonan terasa hangat di tangan, teksturnya sudah mulai rusak. Uleni cepat, istirahatkan di kulkas kalau perlu.</p>
+        <p style="margin: 0; font-weight: bold; color: #C4622D;">Kenapa bakso pabrik garing saat digigit, punya sendiri malah lembek?</p>
+        <p style="margin: 8px 0 0;">Bukan soal tepung lebih banyak — itu justru bikin bakso keras dan berasa tepung. Kuncinya di suhu adonan: daging giling dan air es harus tetap di bawah 4°C selama diuleni. Begitu adonan mulai terasa hangat di tangan, protein daging sudah rusak dan teksturnya tidak akan pernah kenyal lagi walau direbus sempurna. Ini salah satu dari lima teknik yang Cece bongkar tuntas di kelas.</p>
       </div>
       <p>Belum sempat chat WhatsApp Cece? Klik di bawah, lanjutkan dari sini:</p>
       <p style="text-align: center; margin: 24px 0;">

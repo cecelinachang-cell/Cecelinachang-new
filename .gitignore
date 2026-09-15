@@ -8,3 +8,7 @@ coverage/
 .vercel
 *.tsbuildinfo
 graphify-out/
+.playwright-mcp/
+/toko.png
+/detail.png
+/detail2.png
