@@ -110,8 +110,8 @@ export default async function Home() {
             <div className="text-xs sm:text-sm text-charcoal-brown/60">kelas online</div>
           </div>
           <div>
-            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">1998</div>
-            <div className="text-xs sm:text-sm text-charcoal-brown/60">pabrik bakso berdiri</div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">16 thn</div>
+            <div className="text-xs sm:text-sm text-charcoal-brown/60">pengalaman pabrik bakso</div>
           </div>
         </div>
       </section>

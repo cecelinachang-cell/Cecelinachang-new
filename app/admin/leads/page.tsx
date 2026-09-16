@@ -7,7 +7,7 @@ import { Inbox, RefreshCw, MessageSquare, GraduationCap, AlertCircle } from 'luc
 /**
  * Two tables feed this page:
  *  - public.leads             course sign-up forms (app/api/leads/route.ts)
- *  - public.customer_inquiries chatbot follow-up requests (app/api/chatbot/leads/route.ts)
+ *  - public.customer_inquiries contact-form follow-up requests (app/api/contact/route.ts)
  *
  * Both need the admin SELECT policies from
  * supabase/migrations/20260719_analytics_rollups.sql, or this page renders empty.
@@ -39,7 +39,7 @@ type Inquiry = {
   status: string;
 };
 
-type Tab = 'courses' | 'chatbot';
+type Tab = 'courses' | 'inquiries';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'closed'];
 
@@ -132,8 +132,7 @@ export default function LeadsPage() {
           </div>
           <h1 className="text-3xl font-bold text-stone-900">Leads</h1>
           <p className="mt-2 max-w-2xl text-stone-500">
-            Everyone who left their contact details — through a course form or through Lina, the
-            chatbot.
+            Everyone who left their contact details — through a course form or the contact form.
           </p>
         </div>
         <button
@@ -162,10 +161,10 @@ export default function LeadsPage() {
           count={courseLeads.length}
         />
         <TabButton
-          active={tab === 'chatbot'}
-          onClick={() => setTab('chatbot')}
+          active={tab === 'inquiries'}
+          onClick={() => setTab('inquiries')}
           icon={<MessageSquare className="h-4 w-4" />}
-          label="Chatbot inquiries"
+          label="Contact inquiries"
           count={inquiries.length}
           badge={newInquiries > 0 ? newInquiries : undefined}
         />
@@ -229,7 +228,7 @@ export default function LeadsPage() {
             </div>
           )
         ) : inquiries.length === 0 ? (
-          <EmptyState text="No chatbot inquiries yet." />
+          <EmptyState text="No contact inquiries yet." />
         ) : (
           <div className="divide-y divide-stone-100">
             {inquiries.map((inq) => (

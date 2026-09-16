@@ -104,12 +104,10 @@ function ActionButton({ action, variant, size, className }: { action: CtaAction;
 
 /**
  * The one persistent buy CTA on mobile. Renders below `lg` only; adds
- * `body.has-sticky-cta` while mounted, which app/globals.css uses to (a)
- * raise --floating-offset so the chatbot bubble clears the bar and (b)
- * pad <main> so page content doesn't sit underneath it.
+ * `body.has-sticky-cta` while mounted, which app/globals.css uses to pad
+ * <main> so page content doesn't sit underneath it.
  *
- * z-index ladder across the site: navbar 50 -> this bar 60 -> chatbot
- * bubble 60 (lifted above the bar via --floating-offset) -> search
+ * z-index ladder across the site: navbar 50 -> this bar 60 -> search
  * overlay 70 -> lead form modal 100.
  */
 export function StickyCtaBar({ price, originalPrice, caption, primary, secondary, revealAfterId, className }: StickyCtaBarProps) {

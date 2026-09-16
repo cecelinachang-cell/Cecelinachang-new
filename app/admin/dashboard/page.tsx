@@ -289,7 +289,7 @@ export default function Dashboard() {
           delta={percentChange(summary.leads, summary.prev_leads)}
           icon={<Inbox className="w-6 h-6" />}
           tone="green"
-          hint="Course sign-ups plus chatbot follow-up requests."
+          hint="Course sign-ups plus contact-form follow-up requests."
         />
       </div>
 

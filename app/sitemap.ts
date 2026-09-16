@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/resep`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/tentang`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/kontak`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/kebijakan-privasi`, changeFrequency: 'yearly', priority: 0.2 },
   ];
 
   const courseRoutes: MetadataRoute.Sitemap = courses.map((course: any) => ({

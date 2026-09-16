@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { MessageCircle, Package, Search, X } from 'lucide-react';
 import type { SearchResult } from '@/lib/search';
+import { waLink } from '@/lib/links';
 
 export function SearchOverlay() {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,12 +68,6 @@ export function SearchOverlay() {
   function handleChange(value: string) {
     setQuery(value);
     runSearch(value);
-  }
-
-  function askLina() {
-    const trimmed = query.trim();
-    setIsOpen(false);
-    window.dispatchEvent(new CustomEvent('toko:open-chatbot', { detail: { query: trimmed } }));
   }
 
   if (!isOpen) return null;
@@ -142,13 +137,15 @@ export function SearchOverlay() {
               <p className="text-sm text-charcoal-brown/60">
                 Belum ketemu produk atau kelas untuk &quot;{query}&quot;.
               </p>
-              <button
-                type="button"
-                onClick={askLina}
+              <a
+                href={waLink(query.trim() ? `Halo Cece, aku cari "${query.trim()}"` : 'Halo Cece, aku mau tanya')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
                 className="inline-flex items-center gap-2 rounded-full bg-terracotta px-5 py-3 text-sm font-semibold text-white hover:bg-rust-ink"
               >
-                <MessageCircle className="h-4 w-4" /> Tanya Lina
-              </button>
+                <MessageCircle className="h-4 w-4" /> Tanya Lina via WhatsApp
+              </a>
             </div>
           )}
         </div>

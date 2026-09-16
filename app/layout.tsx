@@ -3,8 +3,8 @@ import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { ChatbotWidget } from '@/components/chatbot-widget';
 import { SearchOverlay } from '@/components/SearchOverlay';
+import { CookieNotice } from '@/components/CookieNotice';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { Pixels } from '@/components/Pixels';
@@ -135,8 +135,8 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
               {children}
             </main>
             <Footer />
-            <ChatbotWidget />
             <SearchOverlay />
+            <CookieNotice />
           </MotionProvider>
         </AuthProvider>
       </body>

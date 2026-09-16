@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
-import { shopeeLink } from '@/lib/links';
+import { shopeeLink, waLink } from '@/lib/links';
 
 interface Course {
   slug: string;
@@ -114,19 +114,21 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
           <p className="text-xs text-charcoal-brown/50 text-center mt-2">
             {POLICIES.COURSE_REFUND_SHORT}
           </p>
-          <button
-            type="button"
+          <a
+            href={waLink(`Halo Cece, aku mau tanya soal ${course.title}`)}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent('toko:open-chatbot', {
-                  detail: { query: `Aku mau tanya soal ${course.title}` },
-                }),
-              )
+              trackConversion('whatsapp_open', course.slug, {
+                contentName: course.title,
+                contentType: 'course',
+                value: parseIdr(course.price),
+              })
             }
             className="tap-target flex items-center justify-center w-full text-center text-sm font-medium text-terracotta hover:text-rust-ink transition-colors mt-3"
           >
             Masih bingung? Tanya Lina dulu →
-          </button>
+          </a>
         </>
       )}
 

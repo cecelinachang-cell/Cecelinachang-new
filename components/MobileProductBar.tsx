@@ -39,7 +39,7 @@ export function MobileProductBar({ product }: MobileProductBarProps) {
         // only StickyCtaBar caller with both a price block *and* a
         // secondary button competing for width on a 390px screen --
         // "Beli via WA" wrapped to two lines here and blew the bar past
-        // the fixed 6rem chatbot-clearance offset in globals.css.
+        // its fixed height.
         label: 'WA',
         icon: 'whatsapp',
         href: waLink(`Halo Admin, saya mau beli ${product.name}`),

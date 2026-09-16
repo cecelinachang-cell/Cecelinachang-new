@@ -20,19 +20,17 @@
   --text-fluid-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
 }
 
-:root {
-  --floating-offset: 1.25rem;
-}
-
-/* Nudge floating action buttons (WhatsApp, chatbot) above the mobile
-   sticky course CTA bar — see components/MobileCourseBar.tsx. Scoped to
-   mobile widths since the bar itself is hidden at lg. */
+/* Pad page content clear of the mobile sticky course/product CTA bar —
+   see components/StickyCtaBar.tsx. Scoped to mobile widths since the bar
+   itself is hidden at lg. */
 @media (max-width: 1023px) {
-  body.has-sticky-cta {
-    --floating-offset: 6rem;
-  }
   body.has-sticky-cta main {
     padding-bottom: 6rem;
+  }
+  /* Lift the cookie notice (components/CookieNotice.tsx) clear of the
+     sticky CTA bar when both are visible. */
+  body.has-sticky-cta {
+    --cookie-offset: 6.5rem;
   }
 }
 
