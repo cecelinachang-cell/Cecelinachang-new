@@ -90,7 +90,7 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
   }, [onClose]);
 
   const waUrl = waLink(
-    `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${coursePrice ? `\n- Harga: ${coursePrice}` : ""}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`,
+    `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${coursePrice ? `\n- Harga: ${coursePrice}` : ""}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nAku tertarik ikut kelas ini, boleh info cara daftar dan pembayarannya ya Cece?`,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

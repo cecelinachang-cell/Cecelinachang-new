@@ -1,17 +1,18 @@
 import type { MetadataRoute } from 'next';
 import { courses } from '@/app/data/courses';
 import { products } from '@/app/data/products';
+import { SITE_URL } from '@/lib/links';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://cecelinachang.com';
+  const baseUrl = SITE_URL;
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${baseUrl}/kursus`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/toko`, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/resep`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/tentang`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/kontak`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/syarat-ketentuan`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${baseUrl}/kebijakan-privasi`, changeFrequency: 'yearly', priority: 0.2 },
   ];
 

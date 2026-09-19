@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import type { Metadata } from "next";
 import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
@@ -6,6 +7,15 @@ import Faq from "@/components/Faq";
 import { getAllCourses, type Course } from "@/lib/courses";
 
 export const revalidate = 60; // Cache the page for 60 seconds
+
+export const metadata: Metadata = {
+  title: "Kursus Online Baking | Cece Lina Chang",
+  description:
+    "Kelas baking online step-by-step dari Cece Lina Chang -- bakso, lapis legit, otak-otak, dan lainnya. Akses seumur hidup, konsultasi langsung.",
+  alternates: {
+    canonical: "/kursus",
+  },
+};
 
 const SWEET_KEYWORDS = ["legit", "ogura", "sponge", "cake", "manis"];
 

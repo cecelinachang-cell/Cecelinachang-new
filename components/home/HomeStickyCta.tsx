@@ -5,6 +5,7 @@ import { StickyCtaBar } from '@/components/StickyCtaBar';
 import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
+import { waLink } from '@/lib/links';
 
 interface HomeStickyCtaProps {
   course: { slug: string; title: string; price: string; originalPrice?: string };
@@ -36,6 +37,19 @@ export function HomeStickyCta({ course }: HomeStickyCtaProps) {
             });
             setShowLeadForm(true);
           },
+        }}
+        secondary={{
+          label: 'Tanya Dulu',
+          icon: 'whatsapp',
+          variant: 'secondary',
+          href: waLink(`Halo Cece, aku mau tanya-tanya soal ${course.title} dulu`),
+          external: true,
+          onClick: () =>
+            trackConversion('whatsapp_open', course.slug, {
+              contentName: course.title,
+              contentType: 'course',
+              value: parseIdr(course.price),
+            }),
         }}
       />
       {showLeadForm && (

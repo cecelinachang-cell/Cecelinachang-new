@@ -10,6 +10,7 @@ import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { Pixels } from '@/components/Pixels';
 import { MotionProvider } from '@/components/MotionProvider';
 import { supabase } from '@/lib/supabase';
+import { SITE_URL } from '@/lib/links';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -62,13 +63,17 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    metadataBase: new URL(SITE_URL),
     title,
     description,
     keywords: ['baking for beginners', 'belajar baking dari rumah', 'kursus baking online', 'alat baking premium', 'resep kue', 'Cece Lina Chang'],
+    alternates: {
+      canonical: '/',
+    },
     openGraph: {
       title,
       description,
-      url: 'https://cecelinachang.com',
+      url: SITE_URL,
       siteName: 'Cece Lina Chang',
       images: [
         {
@@ -109,7 +114,7 @@ const jsonLd = {
   '@type': 'Organization',
   name: 'Cece Lina Chang',
   description: 'Belajar baking dari rumah dengan mudah untuk pemula. Kursus baking online dan alat baking premium.',
-  url: 'https://cecelinachang.com',
+  url: SITE_URL,
   logo: 'https://i.postimg.cc/tCXKbMWY/image.png',
   sameAs: [
     'https://instagram.com/cecelinachang'

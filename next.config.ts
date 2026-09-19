@@ -85,6 +85,23 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: '/about', destination: '/tentang', permanent: true },
+      { source: '/courses', destination: '/kursus', permanent: true },
+      { source: '/shop', destination: '/toko', permanent: true },
+      { source: '/privacy', destination: '/kebijakan-privasi', permanent: true },
+      { source: '/terms', destination: '/syarat-ketentuan', permanent: true },
+      { source: '/syarat-dan-ketentuan', destination: '/syarat-ketentuan', permanent: true },
+      // Non-permanent: "kelas" is used throughout the site's own copy
+      // ("Daftar Kelas", "Lihat Semua Kelas") and could become a real route
+      // later; a cached 308 here would be hard to undo.
+      { source: '/kelas', destination: '/kursus', permanent: false },
+      // Non-permanent: no real EN routes exist yet, but they're plausible
+      // later -- same reasoning as /kelas above.
+      { source: '/en', destination: '/', permanent: false },
+    ];
+  },
   output: 'standalone',
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {

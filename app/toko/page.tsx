@@ -1,88 +1,25 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useState, useMemo } from "react";
-import { supabasePublic, isSupabaseConfigured } from "@/lib/supabase";
-import { products as fallbackProducts } from "@/app/data/products";
-
-import { ShoppingBag } from "lucide-react";
+import type { Metadata } from "next";
 import Faq from "@/components/Faq";
 import { Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/links";
 import { Marginalia } from "@/components/Marginalia";
-import { normalizeCategory } from "@/lib/categories";
-import ProductCard, { type Product } from "@/components/ProductCard";
+import { getAllProducts } from "@/lib/products";
+import TokoCatalog from "@/components/toko/TokoCatalog";
 
-const PAGE_SIZE = 12;
+export const revalidate = 60;
 
-export default function TokoPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+export const metadata: Metadata = {
+  title: "Toko Alat Baking Signora | Cece Lina Chang",
+  description:
+    "Belanja alat baking Signora yang beneran dipakai Cece Lina Chang -- mixer, oven, dan perlengkapan baking premium, kirim ke seluruh Indonesia.",
+  alternates: {
+    canonical: "/toko",
+  },
+};
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        if (!isSupabaseConfigured()) {
-          setProducts(fallbackProducts as unknown as Product[]);
-          setLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabasePublic
-          .from("items")
-          .select("*")
-          .order("createdAt", { ascending: false });
-
-        if (error) {
-          const errMsg = error?.message || (error as any)?.toString() || '';
-          if (errMsg.includes("schema cache")) {
-            console.warn("Supabase schema not initialized yet.");
-          } else if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-            console.error("Error fetching items:", errMsg);
-          }
-          setProducts(fallbackProducts as unknown as Product[]);
-        } else if (!data || data.length === 0) {
-          setProducts(fallbackProducts as unknown as Product[]);
-        } else {
-          setProducts(data as Product[]);
-        }
-      } catch (err: any) {
-        const errMsg = err?.message || err?.toString() || '';
-        if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-          console.error("Network or unexpected error fetching products:", err);
-        }
-        setProducts(fallbackProducts as unknown as Product[]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItems();
-  }, []);
-
-  const categories = useMemo(() => {
-    const cats = new Set(["Semua"]);
-    products.forEach((p) => {
-      const normalized = normalizeCategory(p.category);
-      if (normalized) cats.add(normalized);
-    });
-    return Array.from(cats);
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    if (selectedCategory === "Semua") return products;
-    return products.filter((p) => normalizeCategory(p.category) === selectedCategory);
-  }, [products, selectedCategory]);
-
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-
-  // Reset pagination whenever the visible set changes shape (category
-  // switch or a fresh fetch), so "Muat lagi" always starts from one page.
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [selectedCategory, products]);
+export default async function TokoPage() {
+  const products = await getAllProducts();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -99,90 +36,7 @@ export default function TokoPage() {
         </p>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-12 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`tap-target shrink-0 px-5 rounded-full text-sm font-medium transition-all ${
-              selectedCategory === category
-                ? "bg-terracotta text-white shadow-md scale-105"
-                : "bg-white text-charcoal-brown/70 border border-butter/40 hover:border-terracotta/50 hover:text-terracotta"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      {/* Product Grid */}
-      {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden animate-pulse flex flex-col"
-            >
-              <div className="w-full aspect-square sm:h-64 bg-stone-200"></div>
-              <div className="p-3 sm:p-6 flex flex-col flex-grow space-y-3">
-                <div className="h-6 bg-stone-200 rounded w-3/4"></div>
-                <div className="h-4 bg-stone-200 rounded w-1/3"></div>
-                <div className="h-6 bg-stone-200 rounded w-1/2 mt-auto"></div>
-                <div className="h-10 bg-stone-200 rounded-xl w-full"></div>
-                <div className="h-10 bg-stone-200 rounded-xl w-full"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filteredProducts.length > 0 ? (
-        <>
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
-            {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          {visibleCount < filteredProducts.length && (
-            <div className="mt-8 text-center">
-              <Button
-                type="button"
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                variant="secondary"
-                size="md"
-                fullWidth
-                className="sm:w-fit sm:mx-auto"
-              >
-                Muat {Math.min(PAGE_SIZE, filteredProducts.length - visibleCount)} produk lagi
-              </Button>
-              <p className="text-xs text-charcoal-brown/50 mt-2">
-                Menampilkan {visibleProducts.length} dari {filteredProducts.length} produk
-              </p>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="text-center py-24 bg-butter/10 rounded-3xl border border-butter/30">
-          <div className="w-24 h-24 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="w-10 h-10 text-stone-400" />
-          </div>
-          <h2 className="text-2xl font-bold text-charcoal-brown mb-2">
-            Belum Ada Produk
-          </h2>
-          <p className="text-charcoal-brown/60 max-w-md mx-auto">
-            {selectedCategory === "Semua"
-              ? "Produk sedang diperbarui. Kembali lagi sebentar lagi, ya."
-              : `Belum ada produk di kategori "${selectedCategory}".`}
-          </p>
-          {selectedCategory !== "Semua" && (
-            <button
-              onClick={() => setSelectedCategory("Semua")}
-              className="mt-6 px-6 py-2 bg-butter/30 text-rust-ink font-medium rounded-full hover:bg-butter/50 transition-colors"
-            >
-              Lihat Semua Produk
-            </button>
-          )}
-        </div>
-      )}
+      <TokoCatalog products={products} />
 
       {/* Banner Promo */}
       <div className="mt-10 sm:mt-16 bg-rust-ink rounded-3xl overflow-hidden shadow-xl">

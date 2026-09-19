@@ -11,6 +11,10 @@ export interface CtaAction {
   href?: string;
   external?: boolean;
   icon?: 'whatsapp' | 'shopee' | 'arrow';
+  /** Overrides the default variant for this slot (primary is always
+   * 'whatsapp', secondary is always 'shopee' otherwise) -- e.g. a
+   * secondary "ask on WhatsApp" action shouldn't render Shopee orange. */
+  variant?: 'whatsapp' | 'shopee' | 'secondary';
 }
 
 export interface StickyCtaBarProps {
@@ -131,8 +135,8 @@ export function StickyCtaBar({ price, originalPrice, caption, primary, secondary
           </div>
         )}
         <div className="flex flex-1 gap-2">
-          <ActionButton action={primary} variant="whatsapp" size="md" className="flex-1 whitespace-nowrap overflow-hidden" />
-          {secondary && <ActionButton action={secondary} variant="shopee" size="md" className="shrink-0 whitespace-nowrap" />}
+          <ActionButton action={primary} variant={primary.variant || 'whatsapp'} size="md" className="flex-1 whitespace-nowrap overflow-hidden" />
+          {secondary && <ActionButton action={secondary} variant={secondary.variant || 'shopee'} size="md" className="shrink-0 whitespace-nowrap" />}
         </div>
       </div>
     </div>

@@ -6,20 +6,13 @@ import { Star, ShoppingBag } from "lucide-react";
 import { waLink, shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
+import type { Product } from "@/lib/products";
 
-export interface Product {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  imageUrl: string;
-  category?: string;
-  description?: string;
-  rating?: number;
-  reviews?: number;
-  createdAt?: string;
-  shopeeUrl?: string | null;
-}
+// Re-exported so existing `import { type Product } from '@/components/ProductCard'`
+// call sites keep working; the canonical definition now lives in lib/products.ts
+// (a server-safe module) so app/toko/page.tsx can import the type without pulling
+// this 'use client' file's runtime into a server component.
+export type { Product };
 
 const parseImageUrls = (url: string | undefined): string[] => {
   if (!url) return [];

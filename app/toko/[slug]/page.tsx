@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import ProductDetail from '@/components/ProductDetail';
 import { stripHtml } from '@/lib/utils';
+import { SITE_URL } from '@/lib/links';
 
 export const revalidate = 60;
 
@@ -78,10 +79,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
+    alternates: {
+      canonical: `/toko/${product.id}`,
+    },
     openGraph: {
       title,
       description,
-      url: `https://cecelinachang.com/toko/${product.id}`,
+      url: `${SITE_URL}/toko/${product.id}`,
       siteName: 'Cece Lina Chang',
       images: images.length > 0 ? [{ url: images[0], width: 1200, height: 630, alt: product.name }] : undefined,
       locale: 'id_ID',

@@ -14,6 +14,7 @@ import { courseProducts } from '@/app/data/course-products';
 import { products } from '@/app/data/products';
 import { getCourseBySlug } from '@/lib/courses';
 import { parseIdr } from '@/lib/pixels';
+import { SITE_URL } from '@/lib/links';
 
 export const revalidate = 60;
 
@@ -31,10 +32,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
+    alternates: {
+      canonical: `/kursus/${course.slug}`,
+    },
     openGraph: {
       title,
       description,
-      url: `https://cecelinachang.com/kursus/${course.slug}`,
+      url: `${SITE_URL}/kursus/${course.slug}`,
       siteName: 'Cece Lina Chang',
       images: [{ url: course.imageUrl, width: 1200, height: 630, alt: course.title }],
       locale: 'id_ID',

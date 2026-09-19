@@ -69,7 +69,7 @@ export default async function Home() {
                 legit, sampai otak-otak sendiri di rumah.
               </p>
 
-              <Suspense fallback={<HeroCtaFallback featured={featured} />}>
+              <Suspense fallback={<HeroCtaFallback featured={featured} courses={courses} />}>
                 <HeroCta featured={featured} courses={courses} />
               </Suspense>
             </div>

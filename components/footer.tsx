@@ -52,9 +52,12 @@ export function Footer() {
 
         <div className="border-t border-cream/20 mt-8 pt-6 sm:mt-12 sm:pt-8 text-center text-butter/70 text-sm">
           <p>&copy; {new Date().getFullYear()} Cece Lina Chang. All rights reserved.</p>
-          <p className="mt-2">
+          <p className="mt-2 space-x-3">
             <Link href="/kebijakan-privasi" className="hover:text-cream transition-colors underline underline-offset-2">
               Kebijakan Privasi
+            </Link>
+            <Link href="/syarat-ketentuan" className="hover:text-cream transition-colors underline underline-offset-2">
+              Syarat &amp; Ketentuan
             </Link>
           </p>
         </div>
