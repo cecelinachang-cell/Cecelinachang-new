@@ -1,10 +1,17 @@
 import type { MetadataRoute } from 'next';
-import { courses } from '@/app/data/courses';
-import { products } from '@/app/data/products';
+import { getAllCourses } from '@/lib/courses';
+import { getAllProducts } from '@/lib/products';
 import { SITE_URL } from '@/lib/links';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Source routes from the same live-data helpers the pages themselves use
+// (lib/courses.ts, lib/products.ts), not the static app/data/* fallback
+// files. Products in particular have no slug column -- the live catalog
+// uses Supabase UUID ids, while the fallback file uses human-readable ids
+// -- so importing the fallback here silently pointed the sitemap at stale,
+// mismatched /toko/<slug> URLs instead of the real /toko/<uuid> pages.
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL;
+  const [courses, products] = await Promise.all([getAllCourses(), getAllProducts()]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, changeFrequency: 'weekly', priority: 1 },

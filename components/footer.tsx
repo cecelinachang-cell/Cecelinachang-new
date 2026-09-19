@@ -35,6 +35,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li><Link href="/toko" className="text-butter/90 hover:text-cream transition-colors">Toko Alat Masak</Link></li>
               <li><Link href="/kursus" className="text-butter/90 hover:text-cream transition-colors">Kursus Online</Link></li>
+              <li><Link href="/resep" className="text-butter/90 hover:text-cream transition-colors">Resep</Link></li>
               <li><Link href="/tentang" className="text-butter/90 hover:text-cream transition-colors">Tentang Saya</Link></li>
             </ul>
           </div>
