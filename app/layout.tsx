@@ -1,4 +1,5 @@
 import type {Metadata, Viewport} from 'next';
+import Script from 'next/script';
 import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
@@ -7,7 +8,9 @@ import { ChatbotWidget } from '@/components/chatbot-widget';
 import { SearchOverlay } from '@/components/SearchOverlay';
 import { AuthProvider } from '@/context/AuthContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
+import MetaPixel from '@/components/MetaPixel';
 import { supabase } from '@/lib/supabase';
+import { META_PIXEL_ID } from '@/lib/meta-pixel';
 import { SITE_NAME, SITE_URL, DEFAULT_OG_IMAGE, absoluteUrl } from '@/lib/seo';
 
 const inter = Inter({
@@ -181,10 +184,14 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <Script id="meta-pixel" strategy="beforeInteractive">
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');if(location.pathname.indexOf('/admin')!==0)fbq('track','PageView');`}
+        </Script>
       </head>
       <body className="font-sans bg-cream text-charcoal-brown min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <AnalyticsTracker />
+          <MetaPixel />
           <Navbar />
           <main className="flex-grow">
             {children}

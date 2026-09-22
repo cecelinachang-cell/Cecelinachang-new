@@ -32,7 +32,7 @@ export default function PrivacyPage() {
       />
       <LegalPage
         title={PAGE_TITLE}
-        updated="9 September 2026"
+        updated="22 September 2026"
         intro="Kami hanya mengumpulkan data yang benar-benar dibutuhkan untuk memproses pendaftaran kelas, pesanan alat baking, dan konsultasi Anda. Halaman ini menjelaskan data apa yang dikumpulkan dan bagaimana kami menggunakannya."
         sections={[
           {
@@ -47,6 +47,13 @@ export default function PrivacyPage() {
             body: [
               'Data kontak Anda digunakan untuk mengirim link akses kelas, mengonfirmasi pesanan via WhatsApp, membalas pertanyaan, dan follow-up terkait pesanan atau pendaftaran yang belum selesai.',
               'Kami tidak menjual atau menyewakan data pribadi Anda ke pihak ketiga mana pun.',
+            ],
+          },
+          {
+            heading: 'Iklan Meta (Facebook dan Instagram)',
+            body: [
+              'Situs ini memakai Meta Pixel untuk mengukur kunjungan dari iklan Facebook dan Instagram, serta mencatat pengiriman formulir daftar kelas (peristiwa Lead) dan klik lanjut ke WhatsApp (peristiwa Contact). Meta dapat menerima halaman yang dibuka dan cookie peramban. Nama, email, dan nomor WhatsApp tidak dikirim melalui pixel ini.',
+              'Anda dapat membatasi iklan yang dipersonalisasi dari pengaturan iklan di akun Facebook atau Instagram Anda.',
             ],
           },
           {
