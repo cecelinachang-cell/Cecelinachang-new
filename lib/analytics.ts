@@ -1,7 +1,17 @@
 import { supabase } from '@/lib/supabase';
 import { trackPixelEvent, type PixelEvent } from '@/lib/pixels';
 
-export type ConversionType = 'lead_form_open' | 'lead_form_submit' | 'whatsapp_open' | 'shopee_open';
+export type ConversionType =
+  | 'lead_form_open'
+  | 'lead_form_submit'
+  | 'whatsapp_open'
+  | 'shopee_open'
+  // Landing-page funnel (app/lp): recorded first-party only, no pixel event.
+  | 'quiz_start'
+  | 'quiz_complete'
+  | 'video_play'
+  | 'offline_upsell_shown'
+  | 'offline_lead';
 
 export interface ConversionExtra {
   contentId?: string;
@@ -10,7 +20,7 @@ export interface ConversionExtra {
   value?: number;
 }
 
-const PIXEL_EVENT_MAP: Record<ConversionType, PixelEvent> = {
+const PIXEL_EVENT_MAP: Partial<Record<ConversionType, PixelEvent>> = {
   lead_form_open: 'InitiateCheckout',
   lead_form_submit: 'Lead',
   whatsapp_open: 'Contact',
@@ -31,7 +41,9 @@ export function trackConversion(type: ConversionType, courseSlug?: string, extra
       .then(() => {});
   } catch {}
 
-  trackPixelEvent(PIXEL_EVENT_MAP[type], {
+  const pixelEvent = PIXEL_EVENT_MAP[type];
+  if (!pixelEvent) return;
+  trackPixelEvent(pixelEvent, {
     contentId: extra?.contentId ?? courseSlug,
     contentName: extra?.contentName,
     contentType: extra?.contentType,

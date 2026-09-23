@@ -29,6 +29,13 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        // YouTube thumbnails for the /lp course preview (click-to-load player).
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        port: '',
+        pathname: '/vi/**',
+      },
+      {
         protocol: 'https',
         hostname: 'signora.co.id',
         port: '',
@@ -54,7 +61,7 @@ const nextConfig: NextConfig = {
       // needs eval, so the built bundle stays eval-free either way.
       `script-src 'self' 'unsafe-inline' https://analytics.tiktok.com https://connect.facebook.net${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co https://www.facebook.com https://analytics.tiktok.com",
+      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co https://www.facebook.com https://analytics.tiktok.com https://i.ytimg.com",
       "font-src 'self' data:",
       "connect-src 'self' https://yjxvrsmubrasvoipkwvn.supabase.co wss://yjxvrsmubrasvoipkwvn.supabase.co https://analytics.tiktok.com https://www.facebook.com https://connect.facebook.net",
       "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",

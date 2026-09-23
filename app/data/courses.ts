@@ -9,7 +9,7 @@ export const courses = [
     isSignature: true,
     title: "Kelas Bakso Sapi Premium",
     description: "<p><strong>Belajar</strong> langsung dari ahlinya! Dengan pengalaman mengelola pabrik bakso sejak 1998, saya akan membongkar tuntas rahasia dapur membuat bakso sapi premium. Anda akan belajar teknik rahasia menghasilkan bakso yang kenyal, garing saat digigit, dan kaya rasa daging—kualitas standar industri yang kini bisa Anda ciptakan dari dapur rumah sendiri.</p>",
-    price: "Rp 299.000",
+    price: "Rp 399.000",
     students: 4509,
     duration: "40 menit",
     modules: 0,

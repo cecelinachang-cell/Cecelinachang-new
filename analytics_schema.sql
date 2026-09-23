@@ -13,7 +13,7 @@ ALTER TABLE public.page_views ADD COLUMN IF NOT EXISTS duration_seconds INTEGER;
 
 CREATE TABLE IF NOT EXISTS public.conversions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  type TEXT NOT NULL, -- lead_form_open | lead_form_submit | whatsapp_open
+  type TEXT NOT NULL, -- lead_form_open | lead_form_submit | whatsapp_open | shopee_open | quiz_start | quiz_complete | video_play | offline_upsell_shown | offline_lead
   course_slug TEXT,
   path TEXT,
   session_id TEXT,
