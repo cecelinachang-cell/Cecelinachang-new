@@ -17,6 +17,8 @@ import { LandingFaq } from '@/components/landing/LandingFaq';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { StickyQuizBar } from '@/components/landing/StickyQuizBar';
 import { QuizCta } from '@/components/landing/QuizCta';
+import { StudentProof } from '@/components/landing/StudentProof';
+import { QuizQuote } from '@/components/landing/QuizQuote';
 
 export const revalidate = 60;
 // Only slugs with hand-written copy in app/data/landing-pages.ts exist.
@@ -93,6 +95,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         ctaLabel={copy.ctaLabel}
       />
       <FactoryStorySection title={copy.story.title} paragraphs={copy.story.paragraphs} note={copy.story.note} />
+      <StudentProof testimonials={copy.testimonials} />
       <TransformationSection
         beforeAfter={copy.beforeAfter}
         benefits={course.benefits || []}
@@ -114,6 +117,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         riskLine={copy.offerRiskLine}
         ctaLabel={copy.ctaLabel}
       />
+      {copy.quizQuote && <QuizQuote text={copy.quizQuote.text} source={copy.quizQuote.source} />}
       <LandingFaq items={nearQuizFaq} title="Masih ragu?" className="pb-14 sm:pb-20" />
       <CommitmentQuiz
         courseSlug={course.slug}

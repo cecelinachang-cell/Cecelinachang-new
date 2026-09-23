@@ -54,6 +54,13 @@ export interface LandingCopy {
   quizIntro: string;
   quiz: QuizQuestion[];
   resultNoPain: string;
+  /**
+   * Real WhatsApp screenshots from students (public/images/testimonials/<slug>/).
+   * alt is a transcript, so the message is readable without the image.
+   */
+  testimonials: { src: string; alt: string }[];
+  /** One short, verbatim student quote shown right above the quiz. */
+  quizQuote?: { text: string; source: string };
   /** nearQuiz: also shown right above the quiz, where the last doubts come up. */
   faq: { question: string; answer: string; nearQuiz?: boolean }[];
 }
@@ -159,6 +166,21 @@ export const landingPages: Record<string, LandingCopy> = {
     ],
     resultNoPain:
       'Mungkin baksomu sudah lumayan — di kelas ini kamu belajar teknik standar pabrik yang bisa kamu ulang tiap kali masak.',
+
+    testimonials: [
+      {
+        src: '/images/testimonials/bakso-sapi-premium/wa-kenyel.jpg',
+        alt: 'Foto satu wadah bakso buatan murid. Pesan: "Mantap baksonya cee... kenyel kenyel seperti yang saya mau. Baru nyoba langsung jatuh cinta."',
+      },
+      {
+        src: '/images/testimonials/bakso-sapi-premium/wa-ayam-cucu.jpg',
+        alt: 'Pesan WhatsApp: "Sore ce... Makasih ya resep baksonya. Pertama kali coba gagal, kemarin coba lagi... Mantap banget, cuma aku gak pake daging sapi tapi pake ayam. Pokoknya TOP banget lah. Maaf gak sempet posting... Begitu angkat langsung habis sama cucu. Makasih sekali lagi."',
+      },
+    ],
+    quizQuote: {
+      text: 'Kenyel kenyel seperti yang saya mau… baru nyoba langsung jatuh cinta.',
+      source: 'Murid kelas bakso, lewat WhatsApp',
+    },
 
     faq: [
       {
