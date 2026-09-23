@@ -38,6 +38,22 @@ describe("buildWhatsAppMessage", () => {
   it("omits the line when the pain list is empty", () => {
     expect(buildWhatsAppMessage({ ...base, pains: [] })).not.toContain("Kendala saya");
   });
+
+  it("drops the digital-class refund line and asks to confirm a slot for an offline class", () => {
+    const msg = buildWhatsAppMessage({
+      ...base,
+      courseTitle: "Kelas Offline Bakso Sapi (Sabtu, 26 Sept 2026)",
+      coursePrice: "Rp 5.000.000",
+      offline: true,
+    });
+    expect(msg).toContain("saya ingin daftar kursus: Kelas Offline Bakso Sapi (Sabtu, 26 Sept 2026)\n- Harga: Rp 5.000.000");
+    expect(msg).not.toContain("Kelas digital");
+    expect(msg).toContain("konfirmasi slot");
+  });
+
+  it("keeps the refund line for the online class", () => {
+    expect(buildWhatsAppMessage(base)).toContain("Kelas digital: tidak ada refund");
+  });
 });
 
 describe("buildLeadSource", () => {

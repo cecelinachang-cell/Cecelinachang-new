@@ -26,10 +26,19 @@ describe("landingPages", () => {
     expect(products.some((p) => p.id === copy.equipment.recommendedProductId)).toBe(true);
   });
 
-  it.each(entries)("%s has a 4-question quiz with at least one pain question", (_slug, copy) => {
-    expect(copy.quiz).toHaveLength(4);
+  it.each(entries)("%s has a 4–6 question quiz with at least one pain question", (_slug, copy) => {
+    expect(copy.quiz.length).toBeGreaterThanOrEqual(4);
+    expect(copy.quiz.length).toBeLessThanOrEqual(6);
     expect(copy.quiz.some((q) => q.pain)).toBe(true);
     // Saved answers are "<label>: Ya|Tidak"; /api/leads caps each at 200 chars.
     expect(copy.quiz.every((q) => q.label.length + 7 <= 200)).toBe(true);
+  });
+
+  it.each(entries)("%s asks an offline-fit question exactly when it offers an offline class", (_slug, copy) => {
+    const fitQuestions = copy.quiz.filter((q) => q.offlineFit).length;
+    expect(fitQuestions).toBe(copy.offlineClass ? 1 : 0);
+    if (copy.offlineClass?.schedule) {
+      expect(Number.isNaN(new Date(copy.offlineClass.schedule.startsAt).getTime())).toBe(false);
+    }
   });
 });

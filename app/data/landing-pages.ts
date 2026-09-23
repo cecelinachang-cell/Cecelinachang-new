@@ -15,6 +15,26 @@ export interface QuizQuestion {
    * ("siap belajar?") leave it unset.
    */
   pain?: string;
+  /** A "yes" here means the visitor is a fit for the offline class upsell. */
+  offlineFit?: boolean;
+}
+
+/** In-person class offered on the quiz result to visitors who fit it. From the owner's flyer. */
+export interface OfflineClass {
+  title: string;
+  price: string;
+  /** Value of the equipment included in the price. */
+  equipmentValue: string;
+  equipment: string[];
+  learn: string[];
+  perks: string[];
+  duration: string;
+  groupSize: string;
+  location: string;
+  /** Omit when there's no fixed date; the result then says to ask Cece. */
+  schedule?: { label: string; startsAt: string };
+  /** Why it's recommended, shown on the offline option. */
+  fitReason: string;
 }
 
 export interface LandingCopy {
@@ -54,6 +74,7 @@ export interface LandingCopy {
   quizIntro: string;
   quiz: QuizQuestion[];
   resultNoPain: string;
+  offlineClass?: OfflineClass;
   /**
    * Real WhatsApp screenshots from students (public/images/testimonials/<slug>/).
    * alt is a transcript, so the message is readable without the image.
@@ -143,7 +164,7 @@ export const landingPages: Record<string, LandingCopy> = {
     offerValueLine: 'Teknik dari 18 tahun produksi, dipadatkan jadi 40 menit.',
     offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
 
-    quizIntro: 'Jawab 5 pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit.',
+    quizIntro: 'Jawab 6 pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit.',
     quiz: [
       {
         question: 'Apakah baksomu sering keras, lembek, atau pecah?',
@@ -160,12 +181,42 @@ export const landingPages: Record<string, LandingCopy> = {
         label: 'Ingin bakso kenyal & kaya rasa daging',
       },
       {
+        question: 'Apakah kamu berencana jualan bakso?',
+        label: 'Rencana jualan bakso',
+        offlineFit: true,
+      },
+      {
         question: 'Apakah kamu siap luangkan 40 menit untuk belajar tekniknya?',
         label: 'Siap belajar 40 menit',
       },
     ],
     resultNoPain:
       'Mungkin baksomu sudah lumayan — di kelas ini kamu belajar teknik standar pabrik yang bisa kamu ulang tiap kali masak.',
+
+    offlineClass: {
+      title: 'Kelas Offline Bakso Sapi',
+      price: 'Rp 5.000.000',
+      equipmentValue: 'Rp 4.454.000',
+      equipment: [
+        'Signora Food Processor',
+        'Idealife Meat Grinder',
+        'Gold Square Pan',
+        'Rose Gold Strainer',
+        'Gold Measuring Spoon',
+      ],
+      learn: [
+        'Adonan bakso kenyal tanpa pengawet',
+        'Kuah bakso sapi bening & gurih',
+        'Teknik membentuk bakso bulat sempurna',
+        'Tips menyimpan bakso agar tahan lama',
+      ],
+      perks: ['Bahan lengkap disediakan', 'Sertifikat', 'Bawa pulang hasil masakan'],
+      duration: '3 jam',
+      groupSize: 'maks. 5 orang',
+      location: 'CeceLinaChang Store',
+      schedule: { label: 'Sabtu, 26 Sept 2026 · mulai 10.00', startsAt: '2026-09-26T10:00:00+07:00' },
+      fitReason: 'Cocok buat yang mau jualan: praktik langsung bareng Cece, alatnya dibawa pulang.',
+    },
 
     testimonials: [
       {

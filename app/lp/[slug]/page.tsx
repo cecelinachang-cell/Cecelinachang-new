@@ -126,6 +126,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         intro={copy.quizIntro}
         questions={copy.quiz}
         resultNoPain={copy.resultNoPain}
+        onlineSummary={copy.offerIncludes.slice(0, 2).join(', ')}
+        offlineClass={copy.offlineClass}
       />
       <LandingFaq items={faq} />
       <div className="px-4 pb-14 sm:px-6">

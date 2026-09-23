@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, MessageCircle } from "lucide-react";
-import type { QuizQuestion } from "@/app/data/landing-pages";
+import type { OfflineClass, QuizQuestion } from "@/app/data/landing-pages";
 import { trackConversion } from "@/lib/analytics";
 import { buildLeadSource, buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { AGE_RANGES } from "@/lib/leadFields";
+import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
 
 interface CommitmentQuizProps {
   courseSlug: string;
@@ -15,6 +16,9 @@ interface CommitmentQuizProps {
   intro: string;
   questions: QuizQuestion[];
   resultNoPain: string;
+  /** Short description of the online class for the class choice, e.g. "Video 40 menit, akses seumur hidup". */
+  onlineSummary: string;
+  offlineClass?: OfflineClass;
 }
 
 function isGmail(email: string): boolean {
@@ -24,7 +28,16 @@ function isGmail(email: string): boolean {
 const inputClass =
   "w-full min-h-12 px-4 py-3 text-base border border-steel-line rounded-xl bg-white focus:ring-2 focus:ring-sambal/40 focus:border-sambal outline-none transition-colors";
 
-export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, questions, resultNoPain }: CommitmentQuizProps) {
+export function CommitmentQuiz({
+  courseSlug,
+  courseTitle,
+  coursePrice,
+  intro,
+  questions,
+  resultNoPain,
+  onlineSummary,
+  offlineClass,
+}: CommitmentQuizProps) {
   const [answers, setAnswers] = useState<(boolean | undefined)[]>(() => questions.map(() => undefined));
   // Steps: 0..n-1 are the yes/no questions, n is the age question, n+1 is result + form.
   const [step, setStep] = useState(0);
@@ -36,6 +49,8 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
   const [phoneError, setPhoneError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [classChoice, setClassChoice] = useState<"offline" | "online">("offline");
+  const [scheduleLabel, setScheduleLabel] = useState(NEXT_SCHEDULE_LABEL);
   const started = useRef(false);
   const completed = useRef(false);
 
@@ -48,6 +63,15 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
   const done = step > ageStep;
   const pains = questions.flatMap((q, i) => (answers[i] && q.pain ? [q.pain] : []));
   const emailFix = suggestEmailFix(email);
+  // Upsell: only visitors who said yes to the offline-fit question ("mau
+  // jualan?") see the offline class, recommended, next to the online one.
+  const fitIndex = questions.findIndex((q) => q.offlineFit);
+  const offerOffline = Boolean(offlineClass) && fitIndex >= 0 && answers[fitIndex] === true;
+  const isOffline = offerOffline && classChoice === "offline";
+  const scheduleOpen = scheduleLabel !== NEXT_SCHEDULE_LABEL;
+  const selectedTitle =
+    isOffline && offlineClass ? `${offlineClass.title}${scheduleOpen ? ` (${scheduleLabel})` : ""}` : courseTitle;
+  const selectedPrice = isOffline && offlineClass ? offlineClass.price : coursePrice;
 
   function answer(value: boolean) {
     if (!started.current) {
@@ -63,6 +87,11 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
     if (!completed.current) {
       completed.current = true;
       trackConversion("quiz_complete", courseSlug);
+    }
+    if (offlineClass) {
+      // Evaluated now, not at render, so a cached page never shows a past date.
+      setScheduleLabel(offlineScheduleLabel(offlineClass.schedule, new Date()));
+      if (fitIndex >= 0 && answers[fitIndex] === true) trackConversion("offline_upsell_shown", courseSlug);
     }
     setStep(ageStep + 1);
   }
@@ -83,17 +112,20 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
     }
     setSubmitting(true);
 
+    const quizAnswers = questions.map((q, i) => `${q.label}: ${answers[i] ? "Ya" : "Tidak"}`);
+    if (offerOffline) quizAnswers.push(`Pilihan kelas: ${isOffline ? "Offline" : "Online"}`);
     const lead = {
       courseSlug,
-      courseTitle,
-      coursePrice,
+      courseTitle: selectedTitle,
+      coursePrice: selectedPrice,
+      offline: isOffline,
       email,
       phone,
       city,
       ageRange,
       website,
       pains,
-      quizAnswers: questions.map((q, i) => `${q.label}: ${answers[i] ? "Ya" : "Tidak"}`),
+      quizAnswers,
       // Read at submit time rather than via useSearchParams, which would force
       // this prerendered page into a client-side rendering bailout.
       source: buildLeadSource(window.location.search),
@@ -103,6 +135,7 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
     // slow on mobile data. submitLead opens WhatsApp before its first await,
     // keeping the popup attached to this click.
     setWhatsappUrl(buildWhatsAppUrl(lead));
+    if (isOffline) trackConversion("offline_lead", courseSlug);
     await submitLead(lead);
   }
 
@@ -228,9 +261,73 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
                   <p className="leading-relaxed text-kecap">{resultNoPain}</p>
                 )}
                 <p className="mt-3 text-sm text-kecap/75">
-                  Isi datamu, lalu lanjut chat Cece di WhatsApp untuk daftar ({coursePrice}).
+                  {offerOffline
+                    ? "Karena kamu mau jualan, ada dua pilihan kelas. Pilih salah satu, lalu isi datamu."
+                    : `Isi datamu, lalu lanjut chat Cece di WhatsApp untuk daftar (${coursePrice}).`}
                 </p>
               </div>
+
+              {offerOffline && offlineClass && (
+                <fieldset className="mb-6 space-y-3">
+                  <legend className="sr-only">Pilih kelas</legend>
+                  <label className="block cursor-pointer rounded-2xl border-2 border-steel-line p-4 transition-colors has-[:checked]:border-sambal has-[:checked]:bg-sambal/[0.04] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sambal/40">
+                    <input
+                      type="radio"
+                      name="lp-class"
+                      value="offline"
+                      checked={classChoice === "offline"}
+                      onChange={() => setClassChoice("offline")}
+                      className="sr-only"
+                    />
+                    <span className="mb-2 inline-block rounded-md bg-sambal px-2 py-0.5 text-xs font-bold text-white">
+                      Rekomendasi untukmu
+                    </span>
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="font-display text-lg font-extrabold leading-tight">{offlineClass.title}</span>
+                      <RadioDot checked={classChoice === "offline"} />
+                    </span>
+                    <span className="mt-1 block text-sm text-kecap/75">{offlineClass.fitReason}</span>
+                    <span className="mt-3 block font-display text-2xl font-extrabold tracking-[-0.02em]">{offlineClass.price}</span>
+                    <span className="block text-sm font-semibold text-seledri">
+                      Sudah termasuk alat senilai <span className="whitespace-nowrap">{offlineClass.equipmentValue}</span>
+                    </span>
+                    <ul className="mt-3 space-y-1.5 text-sm leading-snug text-kecap/85">
+                      <OfferLine>Praktik langsung {offlineClass.duration}, {offlineClass.groupSize}</OfferLine>
+                      <OfferLine>Alat gratis: {offlineClass.equipment.join(", ")}</OfferLine>
+                      <OfferLine>
+                        {offlineClass.perks.map((p, i) => (i ? p.charAt(0).toLowerCase() + p.slice(1) : p)).join(", ")}
+                      </OfferLine>
+                      <OfferLine>
+                        {scheduleLabel}, {offlineClass.location}
+                      </OfferLine>
+                    </ul>
+                    <details className="mt-3 text-sm">
+                      <summary className="cursor-pointer font-semibold text-sambal">Yang dipelajari</summary>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-kecap/80">
+                        {offlineClass.learn.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  </label>
+                  <label className="block cursor-pointer rounded-2xl border-2 border-steel-line p-4 transition-colors has-[:checked]:border-sambal has-[:checked]:bg-sambal/[0.04] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sambal/40">
+                    <input
+                      type="radio"
+                      name="lp-class"
+                      value="online"
+                      checked={classChoice === "online"}
+                      onChange={() => setClassChoice("online")}
+                      className="sr-only"
+                    />
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="font-display text-lg font-extrabold leading-tight">{courseTitle} (online)</span>
+                      <RadioDot checked={classChoice === "online"} />
+                    </span>
+                    <span className="mt-1 block text-sm text-kecap/75">{onlineSummary}</span>
+                    <span className="mt-2 block font-display text-xl font-extrabold">{coursePrice}</span>
+                  </label>
+                </fieldset>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input
@@ -285,9 +382,11 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
                     <p id="lp-email-hint" className="mt-1.5 text-sm text-steel">
                       {/* Cece shares the video through Google Drive "manage access",
                           which only opens for a Google account with this address. */}
-                      {isGmail(email) || !email.includes("@")
-                        ? "Link video kelas dikirim lewat Google Drive ke email ini. Paling lancar pakai Gmail."
-                        : "Link Google Drive cuma bisa dibuka kalau email ini terdaftar di akun Google. Kalau belum, pakai Gmail saja."}
+                      {isOffline
+                        ? "Untuk data pendaftaran kelas offline."
+                        : isGmail(email) || !email.includes("@")
+                          ? "Link video kelas dikirim lewat Google Drive ke email ini. Paling lancar pakai Gmail."
+                          : "Link Google Drive cuma bisa dibuka kalau email ini terdaftar di akun Google. Kalau belum, pakai Gmail saja."}
                     </p>
                   )}
                 </div>
@@ -321,11 +420,18 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
                   )}
                 </div>
                 <ol className="space-y-2 rounded-2xl border border-steel-line p-4 text-sm leading-snug text-kecap/85">
-                  {[
-                    "WhatsApp terbuka, pesanmu sudah terisi. Tinggal kirim.",
-                    "Cece balas dengan info rekening.",
-                    "Setelah transfer, link video dikirim ke emailmu.",
-                  ].map((step, i) => (
+                  {(isOffline && offlineClass
+                    ? [
+                        "WhatsApp terbuka, pesanmu sudah terisi. Tinggal kirim.",
+                        "Cece balas dengan info rekening dan konfirmasi slot.",
+                        `Datang ke ${offlineClass.location} sesuai jadwal.`,
+                      ]
+                    : [
+                        "WhatsApp terbuka, pesanmu sudah terisi. Tinggal kirim.",
+                        "Cece balas dengan info rekening.",
+                        "Setelah transfer, link video dikirim ke emailmu.",
+                      ]
+                  ).map((step, i) => (
                     <li key={step} className="flex gap-2.5">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-kecap text-[0.7rem] font-bold text-white">
                         {i + 1}
@@ -354,5 +460,27 @@ export function CommitmentQuiz({ courseSlug, courseTitle, coursePrice, intro, qu
         </div>
       </div>
     </section>
+  );
+}
+
+function RadioDot({ checked }: { checked: boolean }) {
+  return (
+    <span
+      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+        checked ? "border-sambal bg-sambal text-white" : "border-steel-line"
+      }`}
+      aria-hidden="true"
+    >
+      {checked && <Check className="h-3.5 w-3.5" strokeWidth={3.5} />}
+    </span>
+  );
+}
+
+function OfferLine({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex gap-2">
+      <Check className="mt-0.5 h-4 w-4 shrink-0 text-seledri" strokeWidth={3} aria-hidden="true" />
+      <span>{children}</span>
+    </li>
   );
 }

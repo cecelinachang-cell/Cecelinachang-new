@@ -20,6 +20,8 @@ export interface LeadInput {
   quizAnswers?: string[];
   /** The pains the visitor said yes to; become the "Kendala saya" line in WhatsApp. */
   pains?: string[];
+  /** Offline (in-person) class: no digital-refund line, and the message asks to confirm a slot. */
+  offline?: boolean;
   /** Where the lead came from, e.g. "lp:tiktok:<video-id>" (see buildLeadSource). */
   source?: string;
 }
@@ -27,7 +29,10 @@ export interface LeadInput {
 export function buildWhatsAppMessage(input: Omit<LeadInput, "website" | "quizAnswers" | "source">): string {
   const priceLine = input.coursePrice ? `\n- Harga: ${input.coursePrice}` : "";
   const painLine = input.pains?.length ? `\n\nKendala saya: ${input.pains.join("; ")}` : "";
-  return `Halo Cece Lina Chang, saya ingin daftar kursus: ${input.courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${input.email}\n- Nomor WhatsApp: ${input.phone}\n- Asal Kota: ${input.city || "-"}${input.ageRange ? `\n- Umur: ${input.ageRange}` : ""}\n- User TikTok: ${input.tiktokHandle || "-"}${painLine}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
+  const closing = input.offline
+    ? "\n\nMohon info rekening tujuan transfer dan konfirmasi slot ya Cece, saya siap kirim bukti bayarnya."
+    : `\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
+  return `Halo Cece Lina Chang, saya ingin daftar kursus: ${input.courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${input.email}\n- Nomor WhatsApp: ${input.phone}\n- Asal Kota: ${input.city || "-"}${input.ageRange ? `\n- Umur: ${input.ageRange}` : ""}\n- User TikTok: ${input.tiktokHandle || "-"}${painLine}${closing}`;
 }
 
 export function buildWhatsAppUrl(input: Parameters<typeof buildWhatsAppMessage>[0]): string {
