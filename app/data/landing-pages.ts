@@ -213,8 +213,8 @@ export const landingPages: Record<string, LandingCopy> = {
       perks: ['Bahan lengkap disediakan', 'Sertifikat', 'Bawa pulang hasil masakan'],
       duration: '3 jam',
       groupSize: 'maks. 5 orang',
-      location: 'CeceLinaChang Store',
-      schedule: { label: 'Sabtu, 26 Sept 2026 · mulai 10.00', startsAt: '2026-09-26T10:00:00+07:00' },
+      location: 'CeceLinaChang Store, Kota Tangerang',
+      schedule: { label: 'Sabtu, 3 Okt 2026 · mulai 10.00', startsAt: '2026-10-03T10:00:00+07:00' },
       fitReason: 'Cocok buat yang mau jualan: praktik langsung bareng Cece, alatnya dibawa pulang.',
     },
 
