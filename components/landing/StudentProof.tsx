@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 interface StudentProofProps {
-  testimonials: { src: string; alt: string }[];
+  testimonials: { src: string; alt: string; width: number; height: number }[];
 }
 
 /**
@@ -31,8 +31,8 @@ export function StudentProof({ testimonials }: StudentProofProps) {
               <Image
                 src={t.src}
                 alt={t.alt}
-                width={514}
-                height={800}
+                width={t.width}
+                height={t.height}
                 sizes="(max-width: 640px) 78vw, 360px"
                 className="h-auto w-full"
               />

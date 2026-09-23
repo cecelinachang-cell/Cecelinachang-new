@@ -80,7 +80,7 @@ export interface LandingCopy {
    * Real WhatsApp screenshots from students (public/images/testimonials/<slug>/).
    * alt is a transcript, so the message is readable without the image.
    */
-  testimonials: { src: string; alt: string }[];
+  testimonials: { src: string; alt: string; width: number; height: number }[];
   /** One short, verbatim student quote shown right above the quiz. */
   quizQuote?: { text: string; source: string };
   /** nearQuiz: also shown right above the quiz, where the last doubts come up. */
@@ -223,11 +223,21 @@ export const landingPages: Record<string, LandingCopy> = {
     testimonials: [
       {
         src: '/images/testimonials/bakso-sapi-premium/wa-kenyel.jpg',
+        width: 514,
+        height: 800,
         alt: 'Foto satu wadah bakso buatan murid. Pesan: "Mantap baksonya cee... kenyel kenyel seperti yang saya mau. Baru nyoba langsung jatuh cinta."',
       },
       {
         src: '/images/testimonials/bakso-sapi-premium/wa-ayam-cucu.jpg',
+        width: 489,
+        height: 800,
         alt: 'Pesan WhatsApp: "Sore ce... Makasih ya resep baksonya. Pertama kali coba gagal, kemarin coba lagi... Mantap banget, cuma aku gak pake daging sapi tapi pake ayam. Pokoknya TOP banget lah. Maaf gak sempet posting... Begitu angkat langsung habis sama cucu. Makasih sekali lagi."',
+      },
+      {
+        src: '/images/testimonials/bakso-sapi-premium/wa-berhasil-enak.jpg',
+        width: 698,
+        height: 700,
+        alt: 'Foto semangkuk bakso buatan murid. Pesan: "Bakso nya berhasil ce, enak 👍"',
       },
     ],
     quizQuote: {
