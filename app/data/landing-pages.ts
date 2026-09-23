@@ -71,6 +71,7 @@ export interface LandingCopy {
   offerIncludes: string[];
   offerValueLine: string;
   offerRiskLine: string;
+  /** "{count}" and "{price}" are filled in by lib/quizCopy.ts. */
   quizIntro: string;
   quiz: QuizQuestion[];
   resultNoPain: string;
@@ -164,7 +165,8 @@ export const landingPages: Record<string, LandingCopy> = {
     offerValueLine: 'Teknik dari 18 tahun produksi, dipadatkan jadi 40 menit.',
     offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
 
-    quizIntro: 'Jawab 6 pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit.',
+    quizIntro:
+      'Jawab {count} pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit. Harga kelasnya {price}, akses seumur hidup.',
     quiz: [
       {
         question: 'Apakah baksomu sering keras, lembek, atau pecah?',

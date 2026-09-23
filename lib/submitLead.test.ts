@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildLeadSource, buildWhatsAppMessage } from "./submitLead";
+import { buildLeadSource, buildWhatsAppMessage, parseLeadSource } from "./submitLead";
 
 const base = {
   courseSlug: "bakso-sapi-premium",
@@ -73,5 +73,24 @@ describe("buildLeadSource", () => {
   it("caps each part so the whole value fits the 120-char column limit", () => {
     const long = "x".repeat(500);
     expect(buildLeadSource(`?utm_source=${long}&utm_content=${long}`).length).toBeLessThanOrEqual(120);
+  });
+});
+
+describe("parseLeadSource", () => {
+  it("reads back what buildLeadSource wrote, even when the video id contains ':'", () => {
+    expect(parseLeadSource(buildLeadSource("?utm_source=tiktok&utm_content=clip:v2:final"))).toEqual({
+      utmSource: "tiktok",
+      utmContent: "clip:v2:final",
+    });
+  });
+
+  it("returns null parts for '-' and for a plain 'lp' source", () => {
+    expect(parseLeadSource("lp:-:vid9")).toEqual({ utmSource: null, utmContent: "vid9" });
+    expect(parseLeadSource("lp")).toEqual({ utmSource: null, utmContent: null });
+  });
+
+  it("returns null for sources that aren't from a landing page", () => {
+    expect(parseLeadSource("kursus")).toBeNull();
+    expect(parseLeadSource(null)).toBeNull();
   });
 });

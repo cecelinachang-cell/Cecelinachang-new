@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, MessageCircle } from "lucide-react";
 import type { OfflineClass, QuizQuestion } from "@/app/data/landing-pages";
 import { trackConversion } from "@/lib/analytics";
-import { buildLeadSource, buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLead";
+import { buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLead";
+import { buildQuizLead, offersOffline, quizPains } from "@/lib/quizLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { AGE_RANGES } from "@/lib/leadFields";
 import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
@@ -61,17 +62,11 @@ export function CommitmentQuiz({
   const ageStep = questions.length;
   const totalSteps = questions.length + 1;
   const done = step > ageStep;
-  const pains = questions.flatMap((q, i) => (answers[i] && q.pain ? [q.pain] : []));
+  const pains = quizPains(questions, answers);
   const emailFix = suggestEmailFix(email);
-  // Upsell: only visitors who said yes to the offline-fit question ("mau
-  // jualan?") see the offline class, recommended, next to the online one.
-  const fitIndex = questions.findIndex((q) => q.offlineFit);
-  const offerOffline = Boolean(offlineClass) && fitIndex >= 0 && answers[fitIndex] === true;
+  // Upsell: sellers see the offline class, recommended, next to the online one.
+  const offerOffline = offersOffline(questions, answers, offlineClass);
   const isOffline = offerOffline && classChoice === "offline";
-  const scheduleOpen = scheduleLabel !== NEXT_SCHEDULE_LABEL;
-  const selectedTitle =
-    isOffline && offlineClass ? `${offlineClass.title}${scheduleOpen ? ` (${scheduleLabel})` : ""}` : courseTitle;
-  const selectedPrice = isOffline && offlineClass ? offlineClass.price : coursePrice;
 
   function answer(value: boolean) {
     if (!started.current) {
@@ -91,7 +86,7 @@ export function CommitmentQuiz({
     if (offlineClass) {
       // Evaluated now, not at render, so a cached page never shows a past date.
       setScheduleLabel(offlineScheduleLabel(offlineClass.schedule, new Date()));
-      if (fitIndex >= 0 && answers[fitIndex] === true) trackConversion("offline_upsell_shown", courseSlug);
+      if (offersOffline(questions, answers, offlineClass)) trackConversion("offline_upsell_shown", courseSlug);
     }
     setStep(ageStep + 1);
   }
@@ -112,24 +107,19 @@ export function CommitmentQuiz({
     }
     setSubmitting(true);
 
-    const quizAnswers = questions.map((q, i) => `${q.label}: ${answers[i] ? "Ya" : "Tidak"}`);
-    if (offerOffline) quizAnswers.push(`Pilihan kelas: ${isOffline ? "Offline" : "Online"}`);
-    const lead = {
-      courseSlug,
-      courseTitle: selectedTitle,
-      coursePrice: selectedPrice,
-      offline: isOffline,
-      email,
-      phone,
-      city,
+    const lead = buildQuizLead({
+      course: { slug: courseSlug, title: courseTitle, price: coursePrice },
+      questions,
+      answers,
       ageRange,
-      website,
-      pains,
-      quizAnswers,
+      contact: { email, phone, city, website },
+      classChoice,
+      offlineClass,
+      scheduleLabel,
       // Read at submit time rather than via useSearchParams, which would force
       // this prerendered page into a client-side rendering bailout.
-      source: buildLeadSource(window.location.search),
-    };
+      search: window.location.search,
+    });
     // Show the fallback "Buka WhatsApp" link right away: in-app browsers
     // (TikTok, Instagram) often ignore window.open, and the save below can be
     // slow on mobile data. submitLead opens WhatsApp before its first await,
@@ -145,9 +135,7 @@ export function CommitmentQuiz({
         <h2 className="mb-2 font-display text-fluid-h2 font-extrabold leading-tight tracking-[-0.015em] text-white">
           Cek dulu, kamu cocok ikut kelas ini?
         </h2>
-        <p className="mb-7 text-white/75">
-          {intro} Harga kelasnya {coursePrice}, akses seumur hidup.
-        </p>
+        <p className="mb-7 text-white/75">{intro}</p>
 
         <div className="rounded-3xl bg-white p-5 shadow-2xl sm:p-8">
           {!done && (

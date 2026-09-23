@@ -8,6 +8,12 @@ describe("isValidIndonesianPhone", () => {
     }
   });
 
+  it("accepts numbers pasted from contacts with brackets or slashes", () => {
+    for (const phone of ["(0812) 3456 7890", "+62(812)34567890", "0812/3456/7890"]) {
+      expect(isValidIndonesianPhone(phone), phone).toBe(true);
+    }
+  });
+
   it("rejects landlines, too-short, too-long and non-numeric input", () => {
     for (const phone of ["0215551234", "08123", "0812842507189999", "abc", "", "+1 415 555 0100"]) {
       expect(isValidIndonesianPhone(phone), phone).toBe(false);

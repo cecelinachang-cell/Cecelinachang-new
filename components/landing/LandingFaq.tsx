@@ -7,6 +7,8 @@ interface LandingFaqProps {
 }
 
 export function LandingFaq({ items, title = 'Pertanyaan yang sering masuk', className = 'py-14 sm:py-20' }: LandingFaqProps) {
+  if (items.length === 0) return null;
+
   return (
     <section className={`px-4 sm:px-6 ${className}`}>
       <div className="mx-auto max-w-3xl">

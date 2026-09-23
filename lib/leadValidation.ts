@@ -1,10 +1,11 @@
 /**
  * Indonesian mobile numbers: 08…, 628… or +628…, 9–13 digits after the "8".
- * Spaces, dashes and dots are ignored. Cece replies on WhatsApp, so a
- * landline or a mistyped number is a lead she can't reach.
+ * Spaces, dashes, dots, brackets and slashes (as pasted from contacts) are
+ * ignored. Cece replies on WhatsApp, so a landline or a mistyped number is a
+ * lead she can't reach.
  */
 export function isValidIndonesianPhone(phone: string): boolean {
-  const digits = phone.replace(/[\s.-]/g, "");
+  const digits = phone.replace(/[\s.()/-]/g, "");
   return /^(?:\+?62|0)8\d{7,11}$/.test(digits);
 }
 

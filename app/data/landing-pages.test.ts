@@ -34,6 +34,12 @@ describe("landingPages", () => {
     expect(copy.quiz.every((q) => q.label.length + 7 <= 200)).toBe(true);
   });
 
+  it.each(entries)("%s lets the quiz intro count its own questions", (_slug, copy) => {
+    // A hand-typed number drifts every time a question is added.
+    expect(copy.quizIntro).toContain("{count}");
+    expect(copy.quizIntro).not.toMatch(/\d+ pertanyaan/);
+  });
+
   it.each(entries)("%s asks an offline-fit question exactly when it offers an offline class", (_slug, copy) => {
     const fitQuestions = copy.quiz.filter((q) => q.offlineFit).length;
     expect(fitQuestions).toBe(copy.offlineClass ? 1 : 0);

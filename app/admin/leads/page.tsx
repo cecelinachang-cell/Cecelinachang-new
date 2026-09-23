@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Inbox, RefreshCw, MessageSquare, GraduationCap, AlertCircle } from 'lucide-react';
+import { parseLeadSource } from '@/lib/submitLead';
 
 /**
  * Two tables feed this page:
@@ -303,13 +304,13 @@ export default function LeadsPage() {
 /** Landing-page sources look like "lp:<utm_source>:<utm_content>" (lib/submitLead.ts). */
 function SourceCell({ source }: { source?: string | null }) {
   if (!source) return <span className="text-stone-300">—</span>;
-  const [kind, utmSource, utmContent] = source.split(':');
-  if (kind !== 'lp') return <span>{source}</span>;
+  const lp = parseLeadSource(source);
+  if (!lp) return <span>{source}</span>;
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5">
       <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">LP</span>
-      {utmSource && utmSource !== '-' && <span>{utmSource}</span>}
-      {utmContent && utmContent !== '-' && <span className="text-xs text-stone-400">{utmContent}</span>}
+      {lp.utmSource && <span>{lp.utmSource}</span>}
+      {lp.utmContent && <span className="text-xs text-stone-400">{lp.utmContent}</span>}
     </span>
   );
 }

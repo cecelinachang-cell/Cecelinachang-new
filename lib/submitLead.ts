@@ -52,6 +52,23 @@ export function buildLeadSource(search: string): string {
   return `lp:${utmSource || "-"}:${utmContent || "-"}`;
 }
 
+/**
+ * Reverse of buildLeadSource, for the admin. Everything after the second ":"
+ * is utm_content, so video ids that contain ":" survive. Returns null for
+ * sources that aren't from a landing page.
+ */
+export function parseLeadSource(
+  source: string | null | undefined,
+): { utmSource: string | null; utmContent: string | null } | null {
+  if (source !== "lp" && !source?.startsWith("lp:")) return null;
+  const [, utmSource = "-", ...content] = source.split(":");
+  const utmContent = content.join(":") || "-";
+  return {
+    utmSource: utmSource === "-" ? null : utmSource,
+    utmContent: utmContent === "-" ? null : utmContent,
+  };
+}
+
 function queuePendingLead(payload: Record<string, unknown>) {
   try {
     const raw = localStorage.getItem(PENDING_LEADS_KEY);

@@ -19,6 +19,7 @@ import { StickyQuizBar } from '@/components/landing/StickyQuizBar';
 import { QuizCta } from '@/components/landing/QuizCta';
 import { StudentProof } from '@/components/landing/StudentProof';
 import { QuizQuote } from '@/components/landing/QuizQuote';
+import { quizIntroText } from '@/lib/quizCopy';
 
 export const revalidate = 60;
 // Only slugs with hand-written copy in app/data/landing-pages.ts exist.
@@ -123,7 +124,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         courseSlug={course.slug}
         courseTitle={course.title}
         coursePrice={course.price}
-        intro={copy.quizIntro}
+        intro={quizIntroText(copy.quizIntro, copy.quiz, course.price)}
         questions={copy.quiz}
         resultNoPain={copy.resultNoPain}
         onlineSummary={copy.offerIncludes.slice(0, 2).join(', ')}

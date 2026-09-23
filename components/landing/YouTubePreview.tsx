@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import { trackConversion } from "@/lib/analytics";
+import { fallbackThumbnail, thumbnailUrl } from "@/lib/youtubeThumbnail";
 
 /**
  * Click-to-load YouTube player. Only the thumbnail loads with the page; the
@@ -12,6 +13,12 @@ import { trackConversion } from "@/lib/analytics";
  */
 export function YouTubePreview({ videoId, title, courseSlug }: { videoId: string; title: string; courseSlug?: string }) {
   const [playing, setPlaying] = useState(false);
+  const [thumbnail, setThumbnail] = useState(() => thumbnailUrl(videoId));
+
+  function tryFallback(img: HTMLImageElement) {
+    const next = fallbackThumbnail(thumbnail, img.naturalWidth);
+    if (next) setThumbnail(next);
+  }
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-kecap shadow-[0_18px_40px_-16px_rgba(34,26,23,0.55)] ring-1 ring-black/5">
@@ -35,7 +42,9 @@ export function YouTubePreview({ videoId, title, courseSlug }: { videoId: string
           aria-label={`Putar video: ${title}`}
         >
           <Image
-            src={`https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`}
+            src={thumbnail}
+            onLoad={(e) => tryFallback(e.currentTarget)}
+            onError={(e) => tryFallback(e.currentTarget)}
             alt=""
             fill
             priority
