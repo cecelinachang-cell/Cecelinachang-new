@@ -1,7 +1,7 @@
 import { trackMeta } from '@/lib/meta-pixel';
 import { supabase } from '@/lib/supabase';
 
-export type ConversionType = 'lead_form_open' | 'lead_form_submit' | 'whatsapp_open';
+export type ConversionType = 'lead_form_open' | 'lead_form_submit' | 'whatsapp_open' | 'quiz_start' | 'quiz_complete' | 'video_play';
 
 export function trackConversion(type: ConversionType, courseSlug?: string) {
   try {

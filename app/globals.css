@@ -11,9 +11,27 @@
 
   --font-hand: var(--font-caveat);
 
+  /* /lp/* landing pages only. */
+  --color-sambal: #C8231B;
+  --color-sambal-deep: #A51A13;
+  --color-kecap: #221A17;
+  --color-steel: #56626A;
+  --color-steel-line: #DADFE2;
+  --color-enamel: #F5F6F4;
+  --color-seledri: #1E7A3A;
+  --color-mie: #F2C230;
+
   --text-fluid-h1: clamp(2rem, 1.5rem + 2.2vw, 4.5rem);
   --text-fluid-h2: clamp(1.5rem, 1.25rem + 1.1vw, 2.5rem);
   --text-fluid-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
+}
+
+/* /lp/* landing page fonts. The variables are only defined inside
+   app/lp/layout.tsx, so "inline" makes the utilities reference them directly
+   instead of resolving them at :root, where they don't exist. */
+@theme inline {
+  --font-display: var(--font-bricolage);
+  --font-lp: var(--font-jakarta);
 }
 
 html,

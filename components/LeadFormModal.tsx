@@ -2,46 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { POLICIES } from "@/lib/policies";
-import { trackConversion } from "@/lib/analytics";
+import { flushPendingLeads, submitLead } from "@/lib/submitLead";
 
 interface LeadFormModalProps {
   courseSlug: string;
   courseTitle: string;
   coursePrice?: string;
   onClose: () => void;
-}
-
-const PENDING_LEADS_KEY = "pending_leads";
-
-function queuePendingLead(payload: Record<string, unknown>) {
-  try {
-    const raw = localStorage.getItem(PENDING_LEADS_KEY);
-    const queue = raw ? JSON.parse(raw) : [];
-    queue.push(payload);
-    localStorage.setItem(PENDING_LEADS_KEY, JSON.stringify(queue));
-  } catch {}
-}
-
-async function flushPendingLeads() {
-  try {
-    const raw = localStorage.getItem(PENDING_LEADS_KEY);
-    if (!raw) return;
-    const queue: Record<string, unknown>[] = JSON.parse(raw);
-    if (!queue.length) return;
-    const remaining: Record<string, unknown>[] = [];
-    for (const payload of queue) {
-      const ok = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then((res) => res.ok)
-        .catch(() => false);
-      if (!ok) remaining.push(payload);
-    }
-    localStorage.setItem(PENDING_LEADS_KEY, JSON.stringify(remaining));
-  } catch {}
 }
 
 export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, onClose }: LeadFormModalProps) {
@@ -61,33 +28,10 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
     if (submitting) return;
     setSubmitting(true);
 
-    const payload = { courseSlug, courseTitle, email, phone, city, tiktokHandle, website };
-    trackConversion("lead_form_submit", courseSlug);
-
-    // Open WhatsApp first (synchronous with the click) so mobile Safari never
-    // blocks the popup while we wait on the network.
-    const priceLine = coursePrice ? `\n- Harga: ${coursePrice}` : "";
-    const message = `Halo Cece Lina Chang, saya ingin daftar kursus: ${courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${email}\n- Nomor WhatsApp: ${phone}\n- Asal Kota: ${city || "-"}\n- User TikTok: ${tiktokHandle || "-"}\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
-    window.open(`https://wa.me/6281284250718?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-    trackConversion("whatsapp_open", courseSlug);
-
-    const sent =
-      typeof navigator.sendBeacon === "function"
-        ? navigator.sendBeacon("/api/leads", new Blob([JSON.stringify(payload)], { type: "application/json" }))
-        : false;
-
-    if (!sent) {
-      const ok = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then((res) => res.ok)
-        .catch(() => false);
-      if (!ok) queuePendingLead(payload);
-    }
-
+    // Close right away; the save finishes (or queues itself) in the background.
+    const saving = submitLead({ courseSlug, courseTitle, coursePrice, email, phone, city, tiktokHandle, website });
     onClose();
+    await saving;
   };
 
   return (

@@ -140,7 +140,7 @@ export function ChatbotWidget() {
   }, [isOpen]);
 
   return (
-    <div className="pb-safe fixed right-4 z-[60] sm:right-6" style={{ bottom: 'var(--floating-offset)' }}>
+    <div data-site-chrome className="pb-safe fixed right-4 z-[60] sm:right-6" style={{ bottom: 'var(--floating-offset)' }}>
       {isOpen && (
         <section
           className="animate-chat-window-in flex w-[calc(100dvw-2rem)] max-w-sm flex-col overflow-hidden rounded-[2rem] border border-butter/45 bg-[#fffaf3] shadow-[0_24px_70px_rgba(95,54,32,0.3)]"

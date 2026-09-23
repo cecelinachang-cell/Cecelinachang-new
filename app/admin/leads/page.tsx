@@ -24,6 +24,10 @@ type CourseLead = {
   tiktok_handle: string | null;
   welcome_email_sent_at: string | null;
   reminder_email_sent_at: string | null;
+  // From supabase/migrations/20260922_lead_quiz_answers.sql; absent until it's applied.
+  quiz_answers?: string[] | null;
+  source?: string | null;
+  age_range?: string | null;
 };
 
 type Inquiry = {
@@ -187,6 +191,8 @@ export default function LeadsPage() {
                     <Th>Phone</Th>
                     <Th>City</Th>
                     <Th>TikTok</Th>
+                    <Th>Source</Th>
+                    <Th>Quiz</Th>
                     <Th>Follow-up</Th>
                     <Th className="text-right">When</Th>
                   </tr>
@@ -209,9 +215,24 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-5 py-3 text-stone-600">
                         {lead.city ?? <span className="text-stone-300">—</span>}
+                        {lead.age_range && <div className="text-xs text-stone-400">Umur {lead.age_range}</div>}
                       </td>
                       <td className="px-5 py-3 text-stone-600">
                         {lead.tiktok_handle ?? <span className="text-stone-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3 text-stone-600">
+                        <SourceCell source={lead.source} />
+                      </td>
+                      <td className="min-w-[14rem] px-5 py-3 text-xs text-stone-600">
+                        {lead.quiz_answers?.length ? (
+                          <ul className="space-y-0.5">
+                            {lead.quiz_answers.map((a) => (
+                              <li key={a}>{a}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="text-stone-300">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3">
                         <FollowupBadge
@@ -276,6 +297,20 @@ export default function LeadsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+/** Landing-page sources look like "lp:<utm_source>:<utm_content>" (lib/submitLead.ts). */
+function SourceCell({ source }: { source?: string | null }) {
+  if (!source) return <span className="text-stone-300">—</span>;
+  const [kind, utmSource, utmContent] = source.split(':');
+  if (kind !== 'lp') return <span>{source}</span>;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">LP</span>
+      {utmSource && utmSource !== '-' && <span>{utmSource}</span>}
+      {utmContent && utmContent !== '-' && <span className="text-xs text-stone-400">{utmContent}</span>}
+    </span>
   );
 }
 

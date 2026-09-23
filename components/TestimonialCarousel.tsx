@@ -34,16 +34,21 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
   }
 ];
 
-export function TestimonialCarousel() {
+/**
+ * `hideFallback`: render nothing instead of FALLBACK_TESTIMONIALS (course food
+ * photos, not proof) when there are no real testimonials. Used on /lp pages.
+ */
+export function TestimonialCarousel({ hideFallback = false }: { hideFallback?: boolean } = {}) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fallback = hideFallback ? [] : FALLBACK_TESTIMONIALS;
     const fetchTestimonials = async () => {
       try {
         if (!isSupabaseConfigured()) {
-          setTestimonials(FALLBACK_TESTIMONIALS);
+          setTestimonials(fallback);
           setLoading(false);
           return;
         }
@@ -69,9 +74,9 @@ export function TestimonialCarousel() {
           } else {
              console.error('Error fetching testimonials:', errMsg);
           }
-          setTestimonials(FALLBACK_TESTIMONIALS);
+          setTestimonials(fallback);
         } else if (!data || data.length === 0) {
-          setTestimonials(FALLBACK_TESTIMONIALS);
+          setTestimonials(fallback);
         } else {
           // Map database field 'imageUrl' to component's 'image' property
           const mapped = data.map((item: any) => ({
@@ -80,7 +85,7 @@ export function TestimonialCarousel() {
             createdAt: item.createdAt || item.created_at
           })).filter(item => item.image !== '');
 
-          setTestimonials(mapped.length > 0 ? mapped : FALLBACK_TESTIMONIALS);
+          setTestimonials(mapped.length > 0 ? mapped : fallback);
         }
       } catch (err: any) {
         if (err.message === 'Failed to fetch' || err.toString().includes('Failed to fetch')) {
@@ -88,14 +93,14 @@ export function TestimonialCarousel() {
         } else {
           console.error('Network or unexpected error fetching testimonials:', err);
         }
-        setTestimonials(FALLBACK_TESTIMONIALS);
+        setTestimonials(fallback);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTestimonials();
-  }, []);
+  }, [hideFallback]);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
@@ -116,6 +121,8 @@ export function TestimonialCarousel() {
   }, [testimonials.length, nextSlide]);
 
   if (loading) {
+    // No skeleton when the carousel may turn out empty: it would only flash.
+    if (hideFallback) return null;
     return (
       <div className="w-full max-w-4xl mx-auto py-12 px-4">
         <div className="animate-pulse flex flex-col items-center space-y-6">

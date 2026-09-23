@@ -2,9 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, PlayCircle, CheckCircle2, Star, Users, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getCourseBySlug } from '@/lib/courses';
 import type { Metadata } from 'next';
 import { stripHtml } from '@/lib/utils';
 import {
@@ -23,22 +22,6 @@ import { courseProducts } from '@/app/data/course-products';
 import { products } from '@/app/data/products';
 
 export const revalidate = 60;
-
-interface Course {
-  id: string;
-  slug: string;
-  isSignature: boolean;
-  title: string;
-  description: string;
-  price: string;
-  originalPrice?: string;
-  students: number;
-  duration: string;
-  modules: number;
-  imageUrl: string;
-  video?: string;
-  benefits: string[];
-}
 
 /**
  * Prerender every known course. Besides being faster, this keeps the page's
@@ -61,47 +44,6 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const { courses: fallbackCourses } = await import('@/app/data/courses');
   return fallbackCourses.map((course: any) => ({ slug: course.slug }));
 }
-
-// Next 15 no longer caches `fetch` by default, and supabase-js's internal
-// fetch doesn't opt in -- so without this, every request re-hits Supabase
-// and the whole route renders dynamically (page.tsx's `revalidate = 60`
-// only caches the render, not the data fetch it depends on).
-//
-// generateMetadata() and the page component both call this, and without
-// React's per-request cache() wrapping unstable_cache, those two calls
-// aren't deduped within a single request -- they race as two independent
-// async streams, which is what was tearing the metadata/body hydration
-// and throwing React error #419 in production (never visible on
-// localhost, where both calls resolve too fast for the race to matter).
-const getCourseBySlug = cache(unstable_cache(
-  async (slug: string): Promise<Course | null> => {
-    try {
-      if (!isSupabaseConfigured()) {
-        const { courses: fallbackCourses } = await import('@/app/data/courses');
-        return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-      }
-      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
-      if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-          console.error('Error fetching course detail:', errMsg);
-        }
-      }
-      if (data) return data as Course;
-      const { courses: fallbackCourses } = await import('@/app/data/courses');
-      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-    } catch (err: any) {
-      const errMsg = err?.message || err?.toString() || '';
-      if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-        console.error('Unexpected error fetching course detail:', err);
-      }
-      const { courses: fallbackCourses } = await import('@/app/data/courses');
-      return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
-    }
-  },
-  ['course-by-slug'],
-  { revalidate: 60 }
-));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
