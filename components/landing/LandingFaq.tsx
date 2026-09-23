@@ -1,11 +1,17 @@
 import { Plus } from 'lucide-react';
 
-export function LandingFaq({ items }: { items: { question: string; answer: string }[] }) {
+interface LandingFaqProps {
+  items: { question: string; answer: string }[];
+  title?: string;
+  className?: string;
+}
+
+export function LandingFaq({ items, title = 'Pertanyaan yang sering masuk', className = 'py-14 sm:py-20' }: LandingFaqProps) {
   return (
-    <section className="px-4 py-14 sm:px-6 sm:py-20">
+    <section className={`px-4 sm:px-6 ${className}`}>
       <div className="mx-auto max-w-3xl">
         <h2 className="mb-6 font-display text-fluid-h2 font-extrabold leading-tight tracking-[-0.015em]">
-          Pertanyaan yang sering masuk
+          {title}
         </h2>
         <div className="divide-y divide-steel-line overflow-hidden rounded-2xl border border-steel-line bg-white">
           {items.map((item) => (

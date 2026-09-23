@@ -65,8 +65,9 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
   }
 
   const recommended = products.find((p) => p.id === copy.equipment.recommendedProductId);
+  const nearQuizFaq = copy.faq.filter((item) => item.nearQuiz);
   const faq = [
-    ...copy.faq,
+    ...copy.faq.filter((item) => !item.nearQuiz),
     { question: 'Kalau sudah bayar, bisa refund?', answer: POLICIES.COURSE_REFUND },
   ];
 
@@ -113,6 +114,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         riskLine={copy.offerRiskLine}
         ctaLabel={copy.ctaLabel}
       />
+      <LandingFaq items={nearQuizFaq} title="Masih ragu?" className="pb-14 sm:pb-20" />
       <CommitmentQuiz
         courseSlug={course.slug}
         courseTitle={course.title}

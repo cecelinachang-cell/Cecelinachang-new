@@ -7,7 +7,7 @@ export function FactoryStorySection({ title, paragraphs, note }: { title: string
         <div className="mb-8 flex items-center gap-4">
           <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-4 ring-sambal sm:h-24 sm:w-24">
             <Image
-              src="/images/lina-avatar.jpeg"
+              src="/images/lina-avatar-240.jpg"
               alt="Cece Lina Chang"
               fill
               sizes="96px"

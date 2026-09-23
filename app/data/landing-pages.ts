@@ -54,7 +54,8 @@ export interface LandingCopy {
   quizIntro: string;
   quiz: QuizQuestion[];
   resultNoPain: string;
-  faq: { question: string; answer: string }[];
+  /** nearQuiz: also shown right above the quiz, where the last doubts come up. */
+  faq: { question: string; answer: string; nearQuiz?: boolean }[];
 }
 
 export const landingPages: Record<string, LandingCopy> = {
@@ -62,7 +63,7 @@ export const landingPages: Record<string, LandingCopy> = {
     hook: 'Bakso bikinanmu keras kayak karet, pecah waktu direbus, atau malah rasa tepung?',
     subhook:
       'Bukan salah tanganmu. Yang kurang cuma teknik pabrik yang nggak pernah ditulis di resep gratisan.',
-    ctaLabel: 'Cek kecocokanmu (30 detik)',
+    ctaLabel: 'Cek kecocokanmu (1 menit)',
     previewVideoId: 's80iBe2H6n8',
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
 
@@ -135,7 +136,7 @@ export const landingPages: Record<string, LandingCopy> = {
     offerValueLine: 'Teknik dari 18 tahun produksi, dipadatkan jadi 40 menit.',
     offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
 
-    quizIntro: 'Jawab 4 pertanyaan singkat. Cuma 30 detik.',
+    quizIntro: 'Jawab 5 pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit.',
     quiz: [
       {
         question: 'Apakah baksomu sering keras, lembek, atau pecah?',
@@ -162,6 +163,7 @@ export const landingPages: Record<string, LandingCopy> = {
     faq: [
       {
         question: 'Saya pemula, bisa ikut?',
+        nearQuiz: true,
         answer:
           'Bisa. Kelasnya dijelaskan dari dasar: suhu, cara menguleni, sampai merebus. Kalau ada yang bingung, kamu bisa konsultasi langsung dengan Cece.',
       },
@@ -172,8 +174,9 @@ export const landingPages: Record<string, LandingCopy> = {
       },
       {
         question: 'Bagaimana cara akses kelasnya?',
+        nearQuiz: true,
         answer:
-          'Setelah daftar dan transfer lewat WhatsApp, Cece kirim link videonya (Google Drive) ke email kamu. Aksesnya seumur hidup, bisa ditonton ulang kapan saja.',
+          'Setelah daftar dan transfer lewat WhatsApp, Cece kirim link videonya lewat Google Drive ke email kamu (paling lancar pakai Gmail). Aksesnya seumur hidup, bisa ditonton ulang kapan saja.',
       },
     ],
   },
