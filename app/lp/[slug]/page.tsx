@@ -4,6 +4,7 @@ import { getCourseBySlug } from '@/lib/courses';
 import { getLandingCopy, landingPages } from '@/app/data/landing-pages';
 import { products } from '@/app/data/products';
 import { POLICIES } from '@/lib/policies';
+import { parseIdr } from '@/lib/pixels';
 import { SITE_URL } from '@/lib/links';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { PainSection } from '@/components/landing/PainSection';
@@ -20,6 +21,7 @@ import { QuizCta } from '@/components/landing/QuizCta';
 import { StudentProof } from '@/components/landing/StudentProof';
 import { QuizQuote } from '@/components/landing/QuizQuote';
 import { quizIntroText } from '@/lib/quizCopy';
+import { ViewContentPing } from '@/components/ViewContentPing';
 
 export const revalidate = 60;
 // Only slugs with hand-written copy in app/data/landing-pages.ts exist.
@@ -76,6 +78,16 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div>
+      {/* Meta/TikTok ViewContent. The pixel scripts themselves load once in
+          the root layout (components/Pixels.tsx) and fire PageView; this is
+          the content-level event ads need to build an audience of people who
+          actually read the landing page. Lead + Contact fire from the quiz. */}
+      <ViewContentPing
+        contentId={course.slug}
+        contentName={course.title}
+        contentType="course"
+        value={parseIdr(course.price)}
+      />
       <LandingHero
         hook={copy.hook}
         subhook={copy.subhook}

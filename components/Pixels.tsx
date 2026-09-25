@@ -58,6 +58,21 @@ export function Pixels() {
           `}
         </Script>
       )}
+      {META_PIXEL_ID && (
+        // Meta's own snippet ships this fallback: it records the PageView when
+        // JavaScript never runs (ad-blockers, in-app browsers with scripting
+        // off). next/image can't be used inside <noscript>.
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            alt=""
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          />
+        </noscript>
+      )}
     </>
   );
 }
