@@ -29,7 +29,12 @@ export const pixelsEnabled = pixelsAllowedHere && Boolean(TIKTOK_PIXEL_ID || MET
 
 declare global {
   interface Window {
-    ttq?: { track: (event: string, params?: Record<string, unknown>) => void; page: () => void };
+    ttq?: {
+      track: (event: string, params?: Record<string, unknown>) => void;
+      page: () => void;
+      /** Advanced matching, see lib/pixelMatch.ts. Hashed values only. */
+      identify?: (data: Record<string, string>) => void;
+    };
     fbq?: (...args: unknown[]) => void;
   }
 }

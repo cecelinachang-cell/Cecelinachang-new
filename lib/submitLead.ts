@@ -1,5 +1,6 @@
 import { POLICIES } from "@/lib/policies";
 import { trackConversion } from "@/lib/analytics";
+import { identifyForPixels } from "@/lib/pixelMatch";
 import { parseIdr } from "@/lib/pixels";
 
 const WHATSAPP_NUMBER = "6281284250718";
@@ -113,11 +114,18 @@ export async function submitLead(input: LeadInput): Promise<void> {
   if (source) payload.source = source;
   if (ageRange) payload.ageRange = ageRange;
 
+  // First statement in the function: the popup has to stay attached to the
+  // click, and the hashing below is an await.
+  window.open(buildWhatsAppUrl(input), "_blank", "noopener,noreferrer");
+
+  // Advanced matching. Awaited because the ad platforms only attach the hashed
+  // contact details to events fired after this, and hashing is local and
+  // sub-millisecond, so it costs the lead nothing.
+  await identifyForPixels({ email, phone });
+
   // Same pixel details as LeadFormModal, so ads can optimise on lead value.
   const pixelExtra = { contentName: courseTitle, contentType: "course" as const, value: parseIdr(input.coursePrice) };
   trackConversion("lead_form_submit", courseSlug, pixelExtra);
-
-  window.open(buildWhatsAppUrl(input), "_blank", "noopener,noreferrer");
   trackConversion("whatsapp_open", courseSlug, pixelExtra);
 
   // fetch with keepalive, not sendBeacon: a beacon reports success as soon as

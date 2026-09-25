@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { POLICIES } from "@/lib/policies";
 import { trackConversion } from "@/lib/analytics";
+import { identifyForPixels } from "@/lib/pixelMatch";
 import { parseIdr } from "@/lib/pixels";
 import { waLink } from "@/lib/links";
 import { Button } from "@/components/ui/Button";
@@ -100,11 +101,16 @@ export default function LeadFormModal({ courseSlug, courseTitle, coursePrice, on
 
     const payload = { courseSlug, courseTitle, email, phone, city, tiktokHandle, website };
     const pixelExtra = { contentName: courseTitle, contentType: "course" as const, value: parseIdr(coursePrice) };
-    trackConversion("lead_form_submit", courseSlug, pixelExtra);
 
     // Open WhatsApp first (synchronous with the click) so mobile Safari never
-    // blocks the popup while we wait on the network.
+    // blocks the popup while we wait on the network or on hashing.
     window.open(waUrl, "_blank", "noopener,noreferrer");
+
+    // Advanced matching, hashed in the browser. Must land before the Lead
+    // event for the platforms to attach it -- see lib/pixelMatch.ts.
+    await identifyForPixels({ email, phone });
+
+    trackConversion("lead_form_submit", courseSlug, pixelExtra);
     trackConversion("whatsapp_open", courseSlug, pixelExtra);
 
     const sent =

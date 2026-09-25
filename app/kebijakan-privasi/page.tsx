@@ -20,6 +20,12 @@ export default function KebijakanPrivasiPage() {
             menghubungimu balik soal kelas, pesanan, atau pertanyaanmu — tidak dijual atau dibagikan ke
             pihak lain di luar itu.
           </p>
+          <p className="mt-3">
+            Satu pengecualian: waktu kamu menekan tombol daftar, email dan nomor WhatsApp-mu diubah dulu
+            jadi kode acak di browser kamu (SHA-256), lalu kode itu saja yang dikirim ke TikTok dan Meta.
+            Gunanya supaya mereka bisa mencocokkan pendaftaranmu dengan iklan yang kamu lihat, jadi iklan
+            kami lebih tepat sasaran. Email dan nomor aslinya nggak pernah kami kirim ke mereka.
+          </p>
         </section>
 
         <section>
@@ -32,8 +38,9 @@ export default function KebijakanPrivasiPage() {
             <li>
               <strong className="text-rust-ink">Cookie analitik &amp; iklan (TikTok Pixel, Meta Pixel).</strong>{' '}
               Membantu kami memahami halaman mana yang kamu kunjungi, dan menampilkan iklan kelas/produk
-              yang lebih relevan buat kamu di TikTok dan Instagram/Facebook. Cookie ini diatur oleh
-              TikTok dan Meta sesuai kebijakan privasi masing-masing.
+              yang lebih relevan buat kamu di TikTok dan Instagram/Facebook. Pixel ini juga menerima
+              versi ter-acak (hashed) dari email dan nomor WhatsApp saat kamu daftar, seperti dijelaskan
+              di atas. Cookie ini diatur oleh TikTok dan Meta sesuai kebijakan privasi masing-masing.
             </li>
           </ul>
         </section>
