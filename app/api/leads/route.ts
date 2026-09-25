@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase-admin';
 import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildWelcomeEmail } from '@/lib/emails/lead-emails';
@@ -55,17 +56,36 @@ export async function POST(req: NextRequest) {
     ...(ageRange ? { age_range: ageRange } : {}),
   };
 
-  let { data, error } = await supabase
-    .from('leads')
-    .insert({ ...baseRow, ...extras })
-    .select('id')
-    .single();
+  // Writes go through the service-role client. public.leads grants anon INSERT
+  // but no SELECT, so `insert().select()` under the anon key is rejected by RLS
+  // (42501) and the lead is lost -- that silently swallowed a month of
+  // sign-ups. Service role bypasses RLS and returns the id the welcome email
+  // needs for its idempotency key.
+  const admin = createAdminClient();
+
+  type InsertResult = {
+    data: { id: string } | null;
+    error: { code?: string; message: string } | null;
+  };
+
+  const insertLead = async (row: Record<string, unknown>): Promise<InsertResult> => {
+    if (admin) {
+      return (await admin.from('leads').insert(row).select('id').single()) as InsertResult;
+    }
+    // No SUPABASE_SERVICE_ROLE_KEY: still capture the lead under the anon key,
+    // just without RETURNING (which RLS denies). No id means no welcome email.
+    console.warn('SUPABASE_SERVICE_ROLE_KEY missing; lead saved without the welcome email.');
+    const { error } = await supabase.from('leads').insert(row);
+    return { data: null, error };
+  };
+
+  let { data, error } = await insertLead({ ...baseRow, ...extras });
 
   // The quiz_answers/source/age_range migration may not be applied yet. Never
   // lose the lead over it: retry with only the original columns.
   if (error && Object.keys(extras).length > 0 && isMissingColumnError(error)) {
     console.warn(`Lead extras skipped (${error.code}); apply supabase/migrations/20260922_lead_quiz_answers.sql`);
-    ({ data, error } = await supabase.from('leads').insert(baseRow).select('id').single());
+    ({ data, error } = await insertLead(baseRow));
   }
 
   if (error) {
@@ -77,7 +97,7 @@ export async function POST(req: NextRequest) {
   // Best-effort: a failed welcome email never fails the lead capture itself.
   // Awaited (not fire-and-forget) so the send completes before the
   // serverless function is torn down after the response is sent.
-  if (data?.id && email && isResendConfigured()) {
+  if (admin && data?.id && email && isResendConfigured()) {
     try {
       const { subject, html } = buildWelcomeEmail(courseTitle);
       const { error: sendError } = await resend.emails.send(
@@ -87,7 +107,7 @@ export async function POST(req: NextRequest) {
       if (sendError) {
         console.error('Error sending welcome email:', sendError.message);
       } else {
-        await supabase
+        await admin
           .from('leads')
           .update({ welcome_email_sent_at: new Date().toISOString() })
           .eq('id', data.id);
