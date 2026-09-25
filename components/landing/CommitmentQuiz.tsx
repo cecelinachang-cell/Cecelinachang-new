@@ -9,6 +9,7 @@ import { buildQuizLead, offersOffline, quizPains } from "@/lib/quizLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { AGE_RANGES } from "@/lib/leadFields";
 import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
+import { parseIdr } from "@/lib/pixels";
 
 interface CommitmentQuizProps {
   courseSlug: string;
@@ -81,7 +82,11 @@ export function CommitmentQuiz({
     setAgeRange(range);
     if (!completed.current) {
       completed.current = true;
-      trackConversion("quiz_complete", courseSlug);
+      trackConversion("quiz_complete", courseSlug, {
+        contentName: courseTitle,
+        contentType: "course",
+        value: parseIdr(coursePrice),
+      });
     }
     if (offlineClass) {
       // Evaluated now, not at render, so a cached page never shows a past date.

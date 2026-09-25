@@ -20,7 +20,12 @@ export interface PixelParams {
 
 export const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || '';
 export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '';
-export const pixelsEnabled = Boolean(TIKTOK_PIXEL_ID || META_PIXEL_ID);
+// A dev server would otherwise feed test clicks into the live pixels and skew
+// what the ad platforms optimise on -- .env.local carries real IDs. Set
+// NEXT_PUBLIC_PIXEL_DEBUG=1 to load them locally when working on tracking.
+const pixelsAllowedHere =
+  process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_PIXEL_DEBUG === '1';
+export const pixelsEnabled = pixelsAllowedHere && Boolean(TIKTOK_PIXEL_ID || META_PIXEL_ID);
 
 declare global {
   interface Window {
