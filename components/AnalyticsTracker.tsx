@@ -44,18 +44,25 @@ export default function AnalyticsTracker() {
 
     // Active usage heartbeat: update duration on the existing row instead of
     // inserting a new one every minute (that was inflating pageview counts).
+    // Early ticks at 10s and 30s, then every minute: most ad visitors leave
+    // inside the first minute, and a minute-only heartbeat can't tell a
+    // 5-second bounce from a 50-second read.
     const startedAt = Date.now();
-    const interval = setInterval(async () => {
-       if (!pageViewId) return;
-       try {
-         await supabase
-           .from('page_views')
-           .update({ duration_seconds: Math.round((Date.now() - startedAt) / 1000) })
-           .eq('id', pageViewId);
-       } catch (e) {}
-    }, 60000); // every minute
+    const delays = [10_000, 20_000, 30_000];
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = async () => {
+      timer = setTimeout(tick, delays.shift() ?? 60_000);
+      if (!pageViewId) return;
+      try {
+        await supabase
+          .from('page_views')
+          .update({ duration_seconds: Math.round((Date.now() - startedAt) / 1000) })
+          .eq('id', pageViewId);
+      } catch (e) {}
+    };
+    timer = setTimeout(tick, delays.shift()!);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
