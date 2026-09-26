@@ -64,10 +64,14 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co https://www.facebook.com https://analytics.tiktok.com https://i.ytimg.com",
       "font-src 'self' data:",
       "connect-src 'self' https://yjxvrsmubrasvoipkwvn.supabase.co wss://yjxvrsmubrasvoipkwvn.supabase.co https://analytics.tiktok.com https://www.facebook.com https://connect.facebook.net",
-      "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
+      // www.facebook.com in frame-src and form-action: once the pixel carries
+      // advanced-matching hashes (lib/pixelMatch.ts) its URL gets too long for
+      // an image GET, so fbevents.js POSTs a form through a hidden iframe
+      // instead. Without these two, every Lead and Contact is blocked here.
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://www.facebook.com",
       "object-src 'none'",
     ].join('; ');
 
