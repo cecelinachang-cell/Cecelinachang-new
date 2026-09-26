@@ -1,4 +1,3 @@
-import { POLICIES } from "@/lib/policies";
 import { trackConversion } from "@/lib/analytics";
 import { identifyForPixels } from "@/lib/pixelMatch";
 import { parseIdr } from "@/lib/pixels";
@@ -10,6 +9,8 @@ export interface LeadInput {
   courseSlug: string;
   courseTitle: string;
   coursePrice?: string;
+  /** Landing-page form only; course sign-ups elsewhere don't ask for it. */
+  name?: string;
   email: string;
   phone: string;
   city: string;
@@ -31,10 +32,13 @@ export interface LeadInput {
 export function buildWhatsAppMessage(input: Omit<LeadInput, "website" | "quizAnswers" | "source">): string {
   const priceLine = input.coursePrice ? `\n- Harga: ${input.coursePrice}` : "";
   const painLine = input.pains?.length ? `\n\nKendala saya: ${input.pains.join("; ")}` : "";
+  // No refund line: the landing page is this draft's only sender, and it
+  // states the policy in its FAQ. Leading a buyer's first message with "no
+  // refund" put it right at the moment they commit.
   const closing = input.offline
     ? "\n\nMohon info rekening tujuan transfer dan konfirmasi slot ya Cece, saya siap kirim bukti bayarnya."
-    : `\n\n${POLICIES.COURSE_REFUND_SHORT}\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.`;
-  return `Halo Cece Lina Chang, saya ingin daftar kursus: ${input.courseTitle}${priceLine}\n\nBerikut data diri saya:\n- Email: ${input.email}\n- Nomor WhatsApp: ${input.phone}\n- Asal Kota: ${input.city || "-"}${input.ageRange ? `\n- Umur: ${input.ageRange}` : ""}\n- User TikTok: ${input.tiktokHandle || "-"}${painLine}${closing}`;
+    : "\n\nMohon info rekening tujuan transfer ya Cece, saya siap kirim bukti bayarnya.";
+  return `Halo Cece Lina Chang, saya ingin daftar kursus: ${input.courseTitle}${priceLine}\n\nBerikut data diri saya:${input.name ? `\n- Nama: ${input.name}` : ""}\n- Email: ${input.email}\n- Nomor WhatsApp: ${input.phone}\n- Asal Kota: ${input.city || "-"}${input.ageRange ? `\n- Umur: ${input.ageRange}` : ""}\n- User TikTok: ${input.tiktokHandle || "-"}${painLine}${closing}`;
 }
 
 export function buildWhatsAppUrl(input: Parameters<typeof buildWhatsAppMessage>[0]): string {
@@ -108,11 +112,12 @@ export async function flushPendingLeads() {
  * to a localStorage queue flushed on the next visit.
  */
 export async function submitLead(input: LeadInput): Promise<void> {
-  const { courseSlug, courseTitle, email, phone, city, tiktokHandle = "", website = "", quizAnswers, source, ageRange } = input;
+  const { courseSlug, courseTitle, name, email, phone, city, tiktokHandle = "", website = "", quizAnswers, source, ageRange } = input;
   const payload: Record<string, unknown> = { courseSlug, courseTitle, email, phone, city, tiktokHandle, website };
   if (quizAnswers?.length) payload.quizAnswers = quizAnswers;
   if (source) payload.source = source;
   if (ageRange) payload.ageRange = ageRange;
+  if (name?.trim()) payload.name = name.trim();
 
   // First statement in the function: the popup has to stay attached to the
   // click, and the hashing below is an await.

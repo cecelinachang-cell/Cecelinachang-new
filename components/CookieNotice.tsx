@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'cookie-notice-dismissed';
@@ -14,19 +15,37 @@ const STORAGE_KEY = 'cookie-notice-dismissed';
  */
 export function CookieNotice() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
+  // On an ad landing page the first screen is the pitch and its button; the
+  // card landed right on top of that button. There it waits until the
+  // visitor scrolls past the first screen.
+  const waitForScroll = pathname.startsWith('/lp/');
 
   useEffect(() => {
-    // queueMicrotask: keeps this a reaction to the localStorage read
-    // rather than an unconditional setState in the effect body (see the
-    // same pattern in components/StickyCtaBar.tsx).
-    queueMicrotask(() => {
-      try {
-        if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
-      } catch {
-        setVisible(true);
-      }
-    });
-  }, []);
+    let dismissed = false;
+    try {
+      dismissed = Boolean(localStorage.getItem(STORAGE_KEY));
+    } catch {
+      // Storage unavailable: show it, as before.
+    }
+    if (dismissed) return;
+
+    if (!waitForScroll) {
+      // queueMicrotask: keeps this a reaction to the localStorage read
+      // rather than an unconditional setState in the effect body (see the
+      // same pattern in components/StickyCtaBar.tsx).
+      queueMicrotask(() => setVisible(true));
+      return;
+    }
+
+    function onScroll() {
+      if (window.scrollY < window.innerHeight) return;
+      setVisible(true);
+      window.removeEventListener('scroll', onScroll);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [waitForScroll]);
 
   function dismiss() {
     setVisible(false);

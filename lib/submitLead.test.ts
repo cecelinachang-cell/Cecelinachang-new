@@ -20,6 +20,11 @@ describe("buildWhatsAppMessage", () => {
     expect(msg).not.toContain("Umur");
   });
 
+  it("puts the name first in the data block when the landing-page form gives one", () => {
+    expect(buildWhatsAppMessage({ ...base, name: "Rina" })).toContain("Berikut data diri saya:\n- Nama: Rina\n- Email: a@b.com");
+    expect(buildWhatsAppMessage(base)).not.toContain("Nama:");
+  });
+
   it("adds an 'Umur' line under the city when an age range is given", () => {
     const msg = buildWhatsAppMessage({ ...base, city: "Medan", ageRange: "35–44" });
     expect(msg).toContain("- Asal Kota: Medan\n- Umur: 35–44\n- User TikTok: -");
@@ -51,8 +56,9 @@ describe("buildWhatsAppMessage", () => {
     expect(msg).toContain("konfirmasi slot");
   });
 
-  it("keeps the refund line for the online class", () => {
-    expect(buildWhatsAppMessage(base)).toContain("Kelas digital: tidak ada refund");
+  it("leaves the refund policy to the landing page FAQ for the online class", () => {
+    expect(buildWhatsAppMessage(base)).not.toContain("refund");
+    expect(buildWhatsAppMessage(base)).toContain("Mohon info rekening tujuan transfer ya Cece");
   });
 });
 

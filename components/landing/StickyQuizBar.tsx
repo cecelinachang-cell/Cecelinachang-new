@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
+import { WhatsAppAsk } from "./WhatsAppAsk";
 
 /**
- * Mobile-only bar that jumps to the quiz. It stays hidden while the hero (which
+ * Mobile-only bar that jumps straight to the sign-up form (skipping the quiz). It stays hidden while the hero (which
  * has its own CTA) or the quiz is on screen, so it never doubles up a button
  * or covers the form's submit button.
  */
-export function StickyQuizBar({ label, price }: { label: string; price: string }) {
+interface StickyQuizBarProps {
+  label: string;
+  price: string;
+  courseSlug: string;
+  courseTitle: string;
+}
+
+export function StickyQuizBar({ label, price, courseSlug, courseTitle }: StickyQuizBarProps) {
   const [heroVisible, setHeroVisible] = useState(true);
   const [quizVisible, setQuizVisible] = useState(false);
   const hidden = heroVisible || quizVisible;
@@ -46,12 +54,13 @@ export function StickyQuizBar({ label, price }: { label: string; price: string }
       <div className="mx-auto flex max-w-3xl items-center gap-3">
         <span className="shrink-0 font-display text-lg font-extrabold">{price}</span>
         <a
-          href="#cek"
+          href="#daftar"
           tabIndex={hidden ? -1 : undefined}
           className="tap-target flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-sambal px-4 py-3 text-center font-bold text-white active:bg-sambal-deep"
         >
           {label} <ArrowDown className="h-5 w-5 shrink-0" aria-hidden="true" />
         </a>
+        <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} variant="icon" tabIndex={hidden ? -1 : undefined} />
       </div>
     </div>
   );

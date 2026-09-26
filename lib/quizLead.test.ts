@@ -19,7 +19,7 @@ const base = {
   course: { slug: "bakso-sapi-premium", title: "Kelas Bakso Sapi Premium", price: "Rp 399.000" },
   questions,
   ageRange: "35–44",
-  contact: { email: "a@gmail.com", phone: "081234567890", city: "Medan", website: "" },
+  contact: { name: "Rina", email: "a@gmail.com", phone: "081234567890", city: "Medan", website: "" },
   search: "?utm_source=tiktok&utm_content=v1",
   scheduleLabel: "Sabtu, 3 Okt 2026 · mulai 10.00",
   offlineClass,
@@ -49,6 +49,7 @@ describe("buildQuizLead", () => {
       courseTitle: "Kelas Bakso Sapi Premium",
       coursePrice: "Rp 399.000",
       offline: false,
+      name: "Rina",
       email: "a@gmail.com",
       phone: "081234567890",
       city: "Medan",
@@ -62,6 +63,14 @@ describe("buildQuizLead", () => {
       "Rencana jualan: Tidak",
       "Siap belajar: Ya",
     ]);
+  });
+
+  it("records a 'Daftar' skip as such, not as a row of 'Tidak', and stays online", () => {
+    const lead = buildQuizLead({ ...base, answers: [undefined, undefined, undefined, undefined], classChoice: "offline" });
+    expect(lead.quizAnswers).toEqual(["Langsung daftar, tanpa kuis"]);
+    expect(lead.offline).toBe(false);
+    expect(lead.coursePrice).toBe("Rp 399.000");
+    expect(lead.pains).toEqual([]);
   });
 
   it("builds a dated offline lead when a seller keeps the offline class", () => {

@@ -1,17 +1,18 @@
 import Image from 'next/image';
 import { QuizCta } from './QuizCta';
 import { YouTubePreview } from './YouTubePreview';
+import { WhatsAppAsk } from './WhatsAppAsk';
 
 interface LandingHeroProps {
   hook: string;
   subhook: string;
-  ctaLabel: string;
   proofPoints: string[];
   students: number;
   imageUrl: string;
   courseTitle: string;
   videoId?: string;
   courseSlug: string;
+  price: string;
 }
 
 // Red pinstripe band: the striped apron Cece wears in her videos.
@@ -21,7 +22,7 @@ const apronStripes = {
     'repeating-linear-gradient(90deg, transparent 0 13px, rgba(255,255,255,0.09) 13px 15px)',
 };
 
-export function LandingHero({ hook, subhook, ctaLabel, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug }: LandingHeroProps) {
+export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price }: LandingHeroProps) {
   const proof = [...proofPoints, `${students.toLocaleString('id-ID')} murid`];
 
   return (
@@ -52,10 +53,18 @@ export function LandingHero({ hook, subhook, ctaLabel, proofPoints, students, im
             </div>
           )}
 
-          {/* CTA before the proof badges: in TikTok/Instagram in-app browsers only
-              ~650px is visible, and the button has to fit in it. */}
+          {/* Buttons straight under the video, subhook after: in TikTok and
+              Instagram in-app browsers as little as ~560px is visible, and the
+              Daftar button has to fit in it. Three ways in, most decided
+              first: buy (price in the label, so nobody is surprised in
+              WhatsApp), check fit, or ask Cece. */}
+          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="mt-4 w-full sm:w-auto" />
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:flex">
+            {/* Short label: at half width on a phone the full quiz label wraps. */}
+            <QuizCta variant="secondary" label="Cek kecocokan" className="gap-1.5 px-2 text-sm sm:px-4 sm:text-base" />
+            <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="gap-1.5 px-2 text-sm sm:px-4 sm:text-base" />
+          </div>
           <p className="mt-5 text-lg leading-relaxed text-kecap/80 sm:text-xl">{subhook}</p>
-          <QuizCta label={ctaLabel} className="mt-5 w-full sm:w-auto" />
           <ul className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-kecap">
             {proof.map((item) => (
               <li key={item} className="rounded-full border border-steel-line bg-white px-3 py-1.5">

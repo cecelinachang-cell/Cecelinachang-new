@@ -19,32 +19,18 @@ beforeEach(() => {
 });
 
 describe("trackConversion pixel mapping", () => {
-  it("reports a finished landing-page quiz as InitiateCheckout, with the course value", () => {
-    // The landing page has no lead_form_open step, so without this the ad
-    // platforms see nothing between ViewContent and a completed Lead.
-    trackConversion("quiz_complete", "bakso-sapi-premium", {
-      contentName: "Kelas Bakso Sapi Premium",
-      contentType: "course",
-      value: 399000,
-    });
-
-    expect(pixelCalls).toEqual([
-      [
-        "InitiateCheckout",
-        {
-          contentId: "bakso-sapi-premium",
-          contentName: "Kelas Bakso Sapi Premium",
-          contentType: "course",
-          value: 399000,
-        },
-      ],
-    ]);
-  });
-
-  it("keeps quiz_start first-party only", () => {
+  it("keeps the quiz steps first-party only, so the ads learn from Lead", () => {
     trackConversion("quiz_start", "bakso-sapi-premium");
+    trackConversion("quiz_complete", "bakso-sapi-premium");
+    trackConversion("quiz_skip", "bakso-sapi-premium");
 
     expect(pixelCalls).toEqual([]);
+  });
+
+  it("reports the landing page's direct WhatsApp tap as Contact", () => {
+    trackConversion("whatsapp_direct", "bakso-sapi-premium", { value: 399000 });
+
+    expect(pixelCalls[0]?.[0]).toBe("Contact");
   });
 
   it("still maps a submitted lead form to Lead", () => {

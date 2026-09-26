@@ -9,9 +9,13 @@ export type ConversionType =
   // Landing-page funnel (app/lp).
   | 'quiz_start'
   | 'quiz_complete'
+  // A "Daftar" button that skips the quiz straight to the form.
+  | 'quiz_skip'
   | 'video_play'
   | 'offline_upsell_shown'
-  | 'offline_lead';
+  | 'offline_lead'
+  // Landing-page "ask first" WhatsApp button, which skips the quiz.
+  | 'whatsapp_direct';
 
 export interface ConversionExtra {
   contentId?: string;
@@ -22,13 +26,11 @@ export interface ConversionExtra {
 
 const PIXEL_EVENT_MAP: Partial<Record<ConversionType, PixelEvent>> = {
   lead_form_open: 'InitiateCheckout',
-  // The landing page has no "open the form" step: finishing the quiz is what
-  // puts someone in front of it, so it carries the same mid-funnel signal.
-  // Without this the ad platforms only see ViewContent, then nothing until a
-  // completed Lead -- too sparse to optimise a cold audience on.
-  quiz_complete: 'InitiateCheckout',
   lead_form_submit: 'Lead',
   whatsapp_open: 'Contact',
+  // Same ad signal as the quiz's WhatsApp hand-off; the separate type keeps
+  // the two paths apart in the conversions table.
+  whatsapp_direct: 'Contact',
   shopee_open: 'AddToCart',
 };
 

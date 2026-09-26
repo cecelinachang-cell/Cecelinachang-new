@@ -21,6 +21,7 @@ describe("CommitmentQuiz", () => {
   it("starts on the first question with the step count", () => {
     const html = renderToStaticMarkup(<CommitmentQuiz {...props} intro="-" />);
     expect(html).toContain("Pernah gagal?");
-    expect(html).toContain("1/2");
+    // No age step any more: the count is the yes/no questions alone.
+    expect(html).toContain("1/1");
   });
 });

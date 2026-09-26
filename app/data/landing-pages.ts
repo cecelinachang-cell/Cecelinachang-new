@@ -166,7 +166,7 @@ export const landingPages: Record<string, LandingCopy> = {
     offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
 
     quizIntro:
-      'Jawab {count} pertanyaan singkat, lalu isi 3 data. Kurang dari 1 menit. Harga kelasnya {price}, akses seumur hidup.',
+      'Jawab {count} pertanyaan singkat, lalu isi nama, email & WhatsApp. Kurang dari 1 menit. Harga kelasnya {price}, akses seumur hidup.',
     quiz: [
       {
         question: 'Apakah baksomu sering keras, lembek, atau pecah?',
@@ -179,17 +179,9 @@ export const landingPages: Record<string, LandingCopy> = {
         pain: 'sudah coba resep internet tapi hasilnya beda-beda terus',
       },
       {
-        question: 'Apakah kamu ingin bakso buatanmu kenyal & kaya rasa daging seperti bakso premium?',
-        label: 'Ingin bakso kenyal & kaya rasa daging',
-      },
-      {
         question: 'Apakah kamu berencana jualan bakso?',
         label: 'Rencana jualan bakso',
         offlineFit: true,
-      },
-      {
-        question: 'Apakah kamu siap luangkan 40 menit untuk belajar tekniknya?',
-        label: 'Siap belajar 40 menit',
       },
     ],
     resultNoPain:

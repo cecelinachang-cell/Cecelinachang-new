@@ -19,6 +19,12 @@ export function sanitizeAgeRange(value: unknown): string | null {
   return (AGE_RANGES as readonly string[]).includes(range) ? range : null;
 }
 
+/** Free text from the landing-page form; trimmed, capped, empty means absent. */
+export function sanitizeName(value: unknown): string | null {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  return value.trim().slice(0, 100);
+}
+
 export function sanitizeSource(value: unknown): string | null {
   if (typeof value !== 'string' || value.trim() === '') return null;
   return value.trim().slice(0, 120);

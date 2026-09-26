@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildWelcomeEmail } from '@/lib/emails/lead-emails';
-import { isMissingColumnError, sanitizeAgeRange, sanitizeQuizAnswers, sanitizeSource } from '@/lib/leadFields';
+import { isMissingColumnError, sanitizeAgeRange, sanitizeName, sanitizeQuizAnswers, sanitizeSource } from '@/lib/leadFields';
 
 export async function POST(req: NextRequest) {
   // 20/min: Indonesian mobile carriers put many users behind one IP (CGNAT),
@@ -50,7 +50,9 @@ export async function POST(req: NextRequest) {
   const quizAnswers = sanitizeQuizAnswers(body.quizAnswers);
   const source = sanitizeSource(body.source);
   const ageRange = sanitizeAgeRange(body.ageRange);
+  const name = sanitizeName(body.name);
   const extras = {
+    ...(name ? { name } : {}),
     ...(quizAnswers ? { quiz_answers: quizAnswers } : {}),
     ...(source ? { source } : {}),
     ...(ageRange ? { age_range: ageRange } : {}),
@@ -81,7 +83,7 @@ export async function POST(req: NextRequest) {
 
   let { data, error } = await insertLead({ ...baseRow, ...extras });
 
-  // The quiz_answers/source/age_range migration may not be applied yet. Never
+  // The quiz_answers/source/age_range/name migrations may not be applied yet. Never
   // lose the lead over it: retry with only the original columns.
   if (error && Object.keys(extras).length > 0 && isMissingColumnError(error)) {
     console.warn(`Lead extras skipped (${error.code}); apply supabase/migrations/20260922_lead_quiz_answers.sql`);

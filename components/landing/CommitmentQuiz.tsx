@@ -7,9 +7,7 @@ import { trackConversion } from "@/lib/analytics";
 import { buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLead";
 import { buildQuizLead, offersOffline, quizPains } from "@/lib/quizLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
-import { AGE_RANGES } from "@/lib/leadFields";
 import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
-import { parseIdr } from "@/lib/pixels";
 
 interface CommitmentQuizProps {
   courseSlug: string;
@@ -41,59 +39,91 @@ export function CommitmentQuiz({
   offlineClass,
 }: CommitmentQuizProps) {
   const [answers, setAnswers] = useState<(boolean | undefined)[]>(() => questions.map(() => undefined));
-  // Steps: 0..n-1 are the yes/no questions, n is the age question, n+1 is result + form.
+  // Steps: 0..n-1 are the yes/no questions, n is result + form.
   const [step, setStep] = useState(0);
+  // Came in through a "Daftar" button: straight to the form, no questions.
+  const [skipped, setSkipped] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
-  const [ageRange, setAgeRange] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [phoneError, setPhoneError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
-  const [classChoice, setClassChoice] = useState<"offline" | "online">("offline");
+  // Online first: this page is sold on the Rp 399.000 class, and a seller who
+  // wants the offline one picks it on purpose.
+  const [classChoice, setClassChoice] = useState<"offline" | "online">("online");
   const [scheduleLabel, setScheduleLabel] = useState(NEXT_SCHEDULE_LABEL);
   const started = useRef(false);
   const completed = useRef(false);
+
+  const totalSteps = questions.length;
+  const done = step >= totalSteps;
+  const pains = quizPains(questions, answers);
+  const emailFix = suggestEmailFix(email);
+  // Upsell: sellers also see the offline class, second, next to the online one.
+  const offerOffline = offersOffline(questions, answers, offlineClass);
+  const isOffline = offerOffline && classChoice === "offline";
 
   useEffect(() => {
     flushPendingLeads();
   }, []);
 
-  const ageStep = questions.length;
-  const totalSteps = questions.length + 1;
-  const done = step > ageStep;
-  const pains = quizPains(questions, answers);
-  const emailFix = suggestEmailFix(email);
-  // Upsell: sellers see the offline class, recommended, next to the online one.
-  const offerOffline = offersOffline(questions, answers, offlineClass);
-  const isOffline = offerOffline && classChoice === "offline";
+  // Every "Daftar" button on the page is a plain <a href="#daftar">, so it
+  // works before hydration too (it just scrolls). Once hydrated, a tap also
+  // skips the questions and opens the form. A page opened at #daftar does
+  // the same.
+  const stepRef = useRef(step);
+  useEffect(() => {
+    stepRef.current = step;
+  }, [step]);
+
+  useEffect(() => {
+    function openForm() {
+      // Someone who already answered keeps their answers and result.
+      if (stepRef.current >= totalSteps) return;
+      setSkipped(true);
+      setStep(totalSteps);
+      trackConversion("quiz_skip", courseSlug);
+    }
+    function onClick(e: MouseEvent) {
+      if ((e.target as Element | null)?.closest?.('a[href="#daftar"]')) openForm();
+    }
+    if (window.location.hash === "#daftar") queueMicrotask(openForm);
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [courseSlug, totalSteps]);
 
   function answer(value: boolean) {
     if (!started.current) {
       started.current = true;
       trackConversion("quiz_start", courseSlug);
     }
-    setAnswers((prev) => prev.map((a, i) => (i === step ? value : a)));
+    const next = answers.map((a, i) => (i === step ? value : a));
+    setAnswers(next);
+    if (step + 1 >= totalSteps) finishQuiz(next);
     setStep(step + 1);
   }
 
-  function chooseAge(range: string) {
-    setAgeRange(range);
+  function finishQuiz(finalAnswers: (boolean | undefined)[]) {
     if (!completed.current) {
       completed.current = true;
-      trackConversion("quiz_complete", courseSlug, {
-        contentName: courseTitle,
-        contentType: "course",
-        value: parseIdr(coursePrice),
-      });
+      // First-party only: the ads optimise on Lead (the form submit), so
+      // finishing the questions is no longer sent to the pixels.
+      trackConversion("quiz_complete", courseSlug);
     }
     if (offlineClass) {
       // Evaluated now, not at render, so a cached page never shows a past date.
       setScheduleLabel(offlineScheduleLabel(offlineClass.schedule, new Date()));
-      if (offersOffline(questions, answers, offlineClass)) trackConversion("offline_upsell_shown", courseSlug);
+      if (offersOffline(questions, finalAnswers, offlineClass)) trackConversion("offline_upsell_shown", courseSlug);
     }
-    setStep(ageStep + 1);
+  }
+
+  function restartQuiz() {
+    setSkipped(false);
+    setAnswers(questions.map(() => undefined));
+    setStep(0);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -105,19 +135,14 @@ export function CommitmentQuiz({
       document.getElementById("lp-phone")?.focus();
       return;
     }
-    // Age is answered in the quiz; this only guards a state that shouldn't happen.
-    if (!ageRange) {
-      setStep(ageStep);
-      return;
-    }
     setSubmitting(true);
 
     const lead = buildQuizLead({
       course: { slug: courseSlug, title: courseTitle, price: coursePrice },
       questions,
       answers,
-      ageRange,
-      contact: { email, phone, city, website },
+      // City only matters for the offline class; the online form doesn't ask.
+      contact: { name, email, phone, city: isOffline ? city : "", website },
       classChoice,
       offlineClass,
       scheduleLabel,
@@ -142,7 +167,7 @@ export function CommitmentQuiz({
         </h2>
         <p className="mb-7 text-white/75">{intro}</p>
 
-        <div className="rounded-3xl bg-white p-5 shadow-2xl sm:p-8">
+        <div id="daftar" className="scroll-mt-4 rounded-3xl bg-white p-5 shadow-2xl sm:p-8">
           {!done && (
             <div>
               <div className="mb-6 flex items-center gap-3">
@@ -163,54 +188,25 @@ export function CommitmentQuiz({
                   {step + 1}/{totalSteps}
                 </span>
               </div>
-              {step < ageStep ? (
-                <>
-                  <p className="mb-7 min-h-[5.5rem] font-display text-[1.4rem] font-bold leading-snug text-kecap sm:text-2xl" aria-live="polite">
-                    {questions[step].question}
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => answer(true)}
-                      className="tap-target min-h-14 rounded-xl bg-sambal px-6 py-4 text-lg font-bold text-white shadow-[0_5px_0_0_var(--color-sambal-deep)] transition-[transform,box-shadow] duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_var(--color-sambal-deep)] motion-reduce:transition-none"
-                    >
-                      Ya
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => answer(false)}
-                      className="tap-target min-h-14 rounded-xl border-2 border-steel-line bg-white px-6 py-4 text-lg font-bold text-kecap transition-colors hover:border-steel active:bg-enamel"
-                    >
-                      Tidak
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Asked here rather than in the form: one more tap in a tapping
-                      flow costs less than one more form field. */}
-                  <p className="mb-5 font-display text-[1.4rem] font-bold leading-snug text-kecap sm:text-2xl" aria-live="polite">
-                    Terakhir: berapa umurmu?
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {AGE_RANGES.map((range, i) => (
-                      <button
-                        key={range}
-                        type="button"
-                        onClick={() => chooseAge(range)}
-                        aria-pressed={ageRange === range}
-                        className={`tap-target min-h-14 rounded-xl border-2 px-4 py-3 text-base font-bold transition-colors ${
-                          ageRange === range
-                            ? "border-kecap bg-kecap text-white"
-                            : "border-steel-line bg-white text-kecap hover:border-steel active:bg-enamel"
-                        } ${i === AGE_RANGES.length - 1 ? "col-span-2" : ""}`}
-                      >
-                        {range}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              <p className="mb-7 min-h-[5.5rem] font-display text-[1.4rem] font-bold leading-snug text-kecap sm:text-2xl" aria-live="polite">
+                {questions[step].question}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => answer(true)}
+                  className="tap-target min-h-14 rounded-xl bg-sambal px-6 py-4 text-lg font-bold text-white shadow-[0_5px_0_0_var(--color-sambal-deep)] transition-[transform,box-shadow] duration-150 active:translate-y-[3px] active:shadow-[0_2px_0_0_var(--color-sambal-deep)] motion-reduce:transition-none"
+                >
+                  Ya
+                </button>
+                <button
+                  type="button"
+                  onClick={() => answer(false)}
+                  className="tap-target min-h-14 rounded-xl border-2 border-steel-line bg-white px-6 py-4 text-lg font-bold text-kecap transition-colors hover:border-steel active:bg-enamel"
+                >
+                  Tidak
+                </button>
+              </div>
               {step > 0 && (
                 <button
                   type="button"
@@ -246,7 +242,11 @@ export function CommitmentQuiz({
           {done && !whatsappUrl && (
             <div>
               <div className="mb-6 rounded-2xl bg-mie/25 p-4 sm:p-5" aria-live="polite">
-                {pains.length > 0 ? (
+                {skipped ? (
+                  <p className="font-display text-xl font-extrabold leading-snug text-kecap">
+                    Daftar {courseTitle} · {coursePrice}
+                  </p>
+                ) : pains.length > 0 ? (
                   <p className="leading-relaxed text-kecap">
                     Kamu bilang <strong>{pains.join(" dan ")}</strong> — ini persis yang dibongkar di kelas ini.
                   </p>
@@ -255,7 +255,7 @@ export function CommitmentQuiz({
                 )}
                 <p className="mt-3 text-sm text-kecap/75">
                   {offerOffline
-                    ? "Karena kamu mau jualan, ada dua pilihan kelas. Pilih salah satu, lalu isi datamu."
+                    ? "Karena kamu mau jualan, ada juga kelas offline. Pilih salah satu, lalu isi datamu."
                     : `Isi datamu, lalu lanjut chat Cece di WhatsApp untuk daftar (${coursePrice}).`}
                 </p>
               </div>
@@ -267,14 +267,27 @@ export function CommitmentQuiz({
                     <input
                       type="radio"
                       name="lp-class"
+                      value="online"
+                      checked={classChoice === "online"}
+                      onChange={() => setClassChoice("online")}
+                      className="sr-only"
+                    />
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="font-display text-lg font-extrabold leading-tight">{courseTitle} (online)</span>
+                      <RadioDot checked={classChoice === "online"} />
+                    </span>
+                    <span className="mt-1 block text-sm text-kecap/75">{onlineSummary}</span>
+                    <span className="mt-2 block font-display text-xl font-extrabold">{coursePrice}</span>
+                  </label>
+                  <label className="block cursor-pointer rounded-2xl border-2 border-steel-line p-4 transition-colors has-[:checked]:border-sambal has-[:checked]:bg-sambal/[0.04] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sambal/40">
+                    <input
+                      type="radio"
+                      name="lp-class"
                       value="offline"
                       checked={classChoice === "offline"}
                       onChange={() => setClassChoice("offline")}
                       className="sr-only"
                     />
-                    <span className="mb-2 inline-block rounded-md bg-sambal px-2 py-0.5 text-xs font-bold text-white">
-                      Rekomendasi untukmu
-                    </span>
                     <span className="flex items-start justify-between gap-3">
                       <span className="font-display text-lg font-extrabold leading-tight">{offlineClass.title}</span>
                       <RadioDot checked={classChoice === "offline"} />
@@ -303,22 +316,6 @@ export function CommitmentQuiz({
                       </ul>
                     </details>
                   </label>
-                  <label className="block cursor-pointer rounded-2xl border-2 border-steel-line p-4 transition-colors has-[:checked]:border-sambal has-[:checked]:bg-sambal/[0.04] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sambal/40">
-                    <input
-                      type="radio"
-                      name="lp-class"
-                      value="online"
-                      checked={classChoice === "online"}
-                      onChange={() => setClassChoice("online")}
-                      className="sr-only"
-                    />
-                    <span className="flex items-start justify-between gap-3">
-                      <span className="font-display text-lg font-extrabold leading-tight">{courseTitle} (online)</span>
-                      <RadioDot checked={classChoice === "online"} />
-                    </span>
-                    <span className="mt-1 block text-sm text-kecap/75">{onlineSummary}</span>
-                    <span className="mt-2 block font-display text-xl font-extrabold">{coursePrice}</span>
-                  </label>
                 </fieldset>
               )}
 
@@ -333,18 +330,33 @@ export function CommitmentQuiz({
                   onChange={(e) => setWebsite(e.target.value)}
                 />
                 <div>
-                  <label htmlFor="lp-city" className="mb-1.5 block text-sm font-semibold text-kecap">Asal Kota</label>
+                  <label htmlFor="lp-name" className="mb-1.5 block text-sm font-semibold text-kecap">Nama</label>
                   <input
-                    id="lp-city"
+                    id="lp-name"
                     type="text"
                     required
-                    autoComplete="address-level2"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className={inputClass}
-                    placeholder="Jakarta"
+                    placeholder="Nama panggilanmu"
                   />
                 </div>
+                {isOffline && (
+                  <div>
+                    <label htmlFor="lp-city" className="mb-1.5 block text-sm font-semibold text-kecap">Asal Kota</label>
+                    <input
+                      id="lp-city"
+                      type="text"
+                      required
+                      autoComplete="address-level2"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className={inputClass}
+                      placeholder="Jakarta"
+                    />
+                  </div>
+                )}
                 <div>
                   <label htmlFor="lp-email" className="mb-1.5 block text-sm font-semibold text-kecap">Email</label>
                   <input
@@ -441,13 +453,23 @@ export function CommitmentQuiz({
                   <MessageCircle className="h-5 w-5" aria-hidden="true" /> Lanjut ke WhatsApp
                 </button>
               </form>
-              <button
-                type="button"
-                onClick={() => setStep(ageStep)}
-                className="tap-target mt-4 inline-flex items-center gap-1 text-sm font-medium text-steel hover:text-sambal"
-              >
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Ubah jawaban
-              </button>
+              {skipped ? (
+                <button
+                  type="button"
+                  onClick={restartQuiz}
+                  className="tap-target mt-4 inline-flex items-center gap-1 text-sm font-medium text-steel hover:text-sambal"
+                >
+                  Belum yakin? Jawab {totalSteps} pertanyaan singkat dulu
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setStep(totalSteps - 1)}
+                  className="tap-target mt-4 inline-flex items-center gap-1 text-sm font-medium text-steel hover:text-sambal"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Ubah jawaban
+                </button>
+              )}
             </div>
           )}
         </div>

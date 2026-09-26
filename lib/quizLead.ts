@@ -22,8 +22,9 @@ interface QuizLeadInput {
   course: { slug: string; title: string; price: string };
   questions: readonly QuizQuestion[];
   answers: Answers;
-  ageRange: string;
-  contact: { email: string; phone: string; city: string; website: string };
+  /** No longer asked on the landing page; kept for callers that have one. */
+  ageRange?: string;
+  contact: { name: string; email: string; phone: string; city: string; website: string };
   classChoice: "offline" | "online";
   offlineClass?: OfflineClass;
   /** From offlineScheduleLabel(); NEXT_SCHEDULE_LABEL means no date to show. */
@@ -38,7 +39,11 @@ export function buildQuizLead(input: QuizLeadInput): LeadInput {
   const offered = offersOffline(questions, answers, offlineClass);
   const offline = offered && input.classChoice === "offline" && offlineClass !== undefined;
 
-  const quizAnswers = questions.map((q, i) => `${q.label}: ${answers[i] ? "Ya" : "Tidak"}`);
+  // A "Daftar" tap skips the questions; say so rather than record a row of "Tidak".
+  const skipped = answers.every((a) => a === undefined);
+  const quizAnswers = skipped
+    ? ["Langsung daftar, tanpa kuis"]
+    : questions.map((q, i) => `${q.label}: ${answers[i] ? "Ya" : "Tidak"}`);
   if (offered) quizAnswers.push(`Pilihan kelas: ${offline ? "Offline" : "Online"}`);
 
   const dated = scheduleLabel !== NEXT_SCHEDULE_LABEL;

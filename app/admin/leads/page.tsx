@@ -29,6 +29,8 @@ type CourseLead = {
   quiz_answers?: string[] | null;
   source?: string | null;
   age_range?: string | null;
+  // From supabase/migrations/20260926_lead_name_page_view_duration.sql.
+  name?: string | null;
 };
 
 type Inquiry = {
@@ -202,6 +204,7 @@ export default function LeadsPage() {
                     <tr key={lead.id} className="transition-colors hover:bg-stone-50">
                       <td className="px-5 py-3 font-medium text-stone-900">{lead.course_title}</td>
                       <td className="px-5 py-3 text-stone-600">
+                        {lead.name && <div className="font-semibold text-stone-900">{lead.name}</div>}
                         {lead.email ? (
                           <a href={`mailto:${lead.email}`} className="hover:text-orange-600">
                             {lead.email}

@@ -18,6 +18,7 @@ import { LandingFaq } from '@/components/landing/LandingFaq';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { StickyQuizBar } from '@/components/landing/StickyQuizBar';
 import { QuizCta } from '@/components/landing/QuizCta';
+import { WhatsAppAsk } from '@/components/landing/WhatsAppAsk';
 import { StudentProof } from '@/components/landing/StudentProof';
 import { QuizQuote } from '@/components/landing/QuizQuote';
 import { quizIntroText } from '@/lib/quizCopy';
@@ -81,7 +82,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       {/* Meta/TikTok ViewContent. The pixel scripts themselves load once in
           the root layout (components/Pixels.tsx) and fire PageView; this is
           the content-level event ads need to build an audience of people who
-          actually read the landing page. Lead + Contact fire from the quiz. */}
+          actually read the landing page. Lead + Contact fire from the quiz,
+          Contact also from the direct WhatsApp buttons. */}
       <ViewContentPing
         contentId={course.slug}
         contentName={course.title}
@@ -91,37 +93,20 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <LandingHero
         hook={copy.hook}
         subhook={copy.subhook}
-        ctaLabel={copy.ctaLabel}
         proofPoints={copy.proofPoints}
         students={course.students}
         imageUrl={course.imageUrl}
         courseTitle={course.title}
         videoId={copy.previewVideoId}
         courseSlug={course.slug}
+        price={course.price}
       />
+      {/* Offer and quiz sit right after the pain and the proof: ad traffic
+          reads two or three screens, and at the bottom of the long version
+          the quiz got 1 start from ~1,400 visits. The deeper sections follow
+          for anyone who wants more before deciding. */}
       <PainSection title={copy.painTitle} pains={copy.pains} close={copy.painClose} />
-      <RootCauseSection
-        title={copy.rootCauseTitle}
-        intro={copy.rootCauseIntro}
-        causes={copy.rootCauses}
-        line={copy.rootCauseLine}
-        ctaLabel={copy.ctaLabel}
-      />
-      <FactoryStorySection title={copy.story.title} paragraphs={copy.story.paragraphs} note={copy.story.note} />
       <StudentProof testimonials={copy.testimonials} />
-      <TransformationSection
-        beforeAfter={copy.beforeAfter}
-        benefits={course.benefits || []}
-        benefitsNote={copy.benefitsNote}
-        studentResults={copy.studentResults}
-        students={course.students}
-      />
-      <EquipmentSection
-        title={copy.equipment.title}
-        answer={copy.equipment.answer}
-        body={copy.equipment.body}
-        product={recommended}
-      />
       <OfferStack
         courseTitle={course.title}
         price={course.price}
@@ -142,14 +127,36 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         onlineSummary={copy.offerIncludes.slice(0, 2).join(', ')}
         offlineClass={copy.offlineClass}
       />
+      <RootCauseSection
+        title={copy.rootCauseTitle}
+        intro={copy.rootCauseIntro}
+        causes={copy.rootCauses}
+        line={copy.rootCauseLine}
+        ctaLabel={copy.ctaLabel}
+      />
+      <FactoryStorySection title={copy.story.title} paragraphs={copy.story.paragraphs} note={copy.story.note} />
+      <TransformationSection
+        beforeAfter={copy.beforeAfter}
+        benefits={course.benefits || []}
+        benefitsNote={copy.benefitsNote}
+        studentResults={copy.studentResults}
+        students={course.students}
+      />
+      <EquipmentSection
+        title={copy.equipment.title}
+        answer={copy.equipment.answer}
+        body={copy.equipment.body}
+        product={recommended}
+      />
       <LandingFaq items={faq} />
       <div className="px-4 pb-14 sm:px-6">
-        <div className="mx-auto max-w-3xl">
-        <QuizCta label={copy.ctaLabel} className="w-full sm:w-auto" />
+        <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row">
+          <QuizCta href="#daftar" label={`Daftar kelasnya · ${course.price}`} className="w-full sm:w-auto" />
+          <WhatsAppAsk courseSlug={course.slug} courseTitle={course.title} price={course.price} className="w-full sm:w-auto" />
         </div>
       </div>
       <LandingFooter />
-      <StickyQuizBar label="Cek kecocokanmu" price={course.price} />
+      <StickyQuizBar label="Daftar sekarang" price={course.price} courseSlug={course.slug} courseTitle={course.title} />
     </div>
   );
 }

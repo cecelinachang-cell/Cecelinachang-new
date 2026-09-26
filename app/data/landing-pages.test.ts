@@ -26,9 +26,11 @@ describe("landingPages", () => {
     expect(products.some((p) => p.id === copy.equipment.recommendedProductId)).toBe(true);
   });
 
-  it.each(entries)("%s has a 4–6 question quiz with at least one pain question", (_slug, copy) => {
-    expect(copy.quiz.length).toBeGreaterThanOrEqual(4);
-    expect(copy.quiz.length).toBeLessThanOrEqual(6);
+  // Kept short on purpose: every question is a tap between an ad visitor and
+  // WhatsApp, and the 5-question version got 1 start from ~1,400 visits.
+  it.each(entries)("%s has a 2–4 question quiz with at least one pain question", (_slug, copy) => {
+    expect(copy.quiz.length).toBeGreaterThanOrEqual(2);
+    expect(copy.quiz.length).toBeLessThanOrEqual(4);
     expect(copy.quiz.some((q) => q.pain)).toBe(true);
     // Saved answers are "<label>: Ya|Tidak"; /api/leads caps each at 200 chars.
     expect(copy.quiz.every((q) => q.label.length + 7 <= 200)).toBe(true);

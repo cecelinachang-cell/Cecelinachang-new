@@ -1,13 +1,30 @@
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/** Every CTA on a landing page is a plain anchor to the quiz at #cek. */
-export function QuizCta({ label, className }: { label: string; className?: string }) {
+/**
+ * Landing-page CTAs are plain anchors. "#cek" goes to the quiz; "#daftar"
+ * goes to the same card but skips the questions (see CommitmentQuiz), so a
+ * visitor who already wants the class reaches the form in one tap.
+ */
+export function QuizCta({
+  label,
+  className,
+  href = '#cek',
+  variant = 'primary',
+}: {
+  label: string;
+  className?: string;
+  href?: '#cek' | '#daftar';
+  variant?: 'primary' | 'secondary';
+}) {
   return (
     <a
-      href="#cek"
+      href={href}
       className={cn(
-        'tap-target inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sambal px-6 py-4 text-center text-base font-bold text-white shadow-[0_6px_0_0_var(--color-sambal-deep)] transition-[transform,box-shadow] duration-150 active:translate-y-[3px] active:shadow-[0_3px_0_0_var(--color-sambal-deep)] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-mie motion-reduce:transition-none sm:text-lg',
+        'tap-target inline-flex items-center justify-center gap-2 rounded-xl text-center font-bold transition-[transform,box-shadow] duration-150 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-mie motion-reduce:transition-none',
+        variant === 'primary'
+          ? 'min-h-14 bg-sambal px-6 py-4 text-base text-white shadow-[0_6px_0_0_var(--color-sambal-deep)] active:translate-y-[3px] active:shadow-[0_3px_0_0_var(--color-sambal-deep)] sm:text-lg'
+          : 'min-h-12 border-2 border-sambal bg-white px-4 py-3 text-sambal active:bg-sambal/5',
         className,
       )}
     >

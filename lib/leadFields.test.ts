@@ -1,5 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { AGE_RANGES, isMissingColumnError, sanitizeAgeRange, sanitizeQuizAnswers, sanitizeSource } from "./leadFields";
+import { AGE_RANGES, isMissingColumnError, sanitizeAgeRange, sanitizeName, sanitizeQuizAnswers, sanitizeSource } from "./leadFields";
+
+describe("sanitizeName", () => {
+  it("trims and caps the name, and treats blanks and non-strings as absent", () => {
+    expect(sanitizeName("  Rina ")).toBe("Rina");
+    expect(sanitizeName("n".repeat(300))).toHaveLength(100);
+    expect(sanitizeName("   ")).toBeNull();
+    expect(sanitizeName(undefined)).toBeNull();
+    expect(sanitizeName(7)).toBeNull();
+  });
+});
 
 describe("sanitizeQuizAnswers", () => {
   it("keeps up to 10 strings of up to 200 chars", () => {

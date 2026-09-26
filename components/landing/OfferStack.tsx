@@ -30,7 +30,8 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
             <p className="mb-1 text-kecap/70">{valueLine}</p>
             <p className="font-display text-4xl font-extrabold tracking-[-0.02em]">{price}</p>
           </div>
-          <QuizCta label={ctaLabel} className="w-full" />
+          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full" />
+          <QuizCta variant="secondary" label={ctaLabel} className="mt-3 w-full" />
           <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-kecap/70">
             <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-seledri" aria-hidden="true" />
             <span>{riskLine}</span>
