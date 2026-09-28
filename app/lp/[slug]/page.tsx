@@ -100,6 +100,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         videoId={copy.previewVideoId}
         courseSlug={course.slug}
         price={course.price}
+        included={copy.offerIncludes}
+        nextStep={copy.heroNext}
       />
       {/* Offer and quiz sit right after the pain and the proof: ad traffic
           reads two or three screens, and at the bottom of the long version

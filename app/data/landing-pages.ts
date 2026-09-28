@@ -45,6 +45,11 @@ export interface LandingCopy {
   previewVideoId?: string;
   /** Short facts shown under the hero video; the live student count is appended. */
   proofPoints: string[];
+  /**
+   * One line under the first button. Says what happens after Daftar, using
+   * only the steps the form and FAQ already promise.
+   */
+  heroNext: string;
   painTitle: string;
   pains: string[];
   painClose: string;
@@ -95,6 +100,8 @@ export const landingPages: Record<string, LandingCopy> = {
     ctaLabel: 'Cek kecocokanmu (1 menit)',
     previewVideoId: 's80iBe2H6n8',
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
+    heroNext:
+      'Isi nama, email, dan WhatsApp. Chat terbuka sendiri. Link video masuk ke email setelah transfer.',
 
     painTitle: 'Kalau kamu pernah ngalamin ini…',
     pains: [
