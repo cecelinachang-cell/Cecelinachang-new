@@ -24,7 +24,7 @@ const jakarta = Plus_Jakarta_Sans({
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <style>{'[data-site-chrome]{display:none!important}body{background:#F5F6F4}'}</style>
+      <style>{'[data-site-chrome]{display:none!important}body{background:#F5F6F4}::selection{background:#F2C230;color:#221A17}'}</style>
       <div className={`${bricolage.variable} ${jakarta.variable} bg-enamel font-lp tracking-[0.005em] text-kecap antialiased [word-spacing:0.03em]`}>
         {children}
       </div>

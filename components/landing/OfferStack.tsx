@@ -1,4 +1,5 @@
 import { Check, MessageCircle } from 'lucide-react';
+import { Marginalia } from '@/components/Marginalia';
 import { QuizCta } from './QuizCta';
 import { WhatsAppAsk } from './WhatsAppAsk';
 
@@ -30,7 +31,9 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
           </ul>
           <div className="mb-6 border-t border-dashed border-steel-line pt-5">
             <p className="mb-1 text-kecap/70">{valueLine}</p>
-            <p className="mb-1 text-sm font-semibold text-kecap/70">{students.toLocaleString('id-ID')} murid sudah belajar</p>
+            <Marginalia rotate={-1} className="mb-2 text-rust-ink">
+              {students.toLocaleString('id-ID')} murid sudah belajar
+            </Marginalia>
             <p className="font-display text-4xl font-extrabold tracking-[-0.02em]">{price}</p>
           </div>
           <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full" />

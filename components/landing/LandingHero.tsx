@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Check } from 'lucide-react';
+import { Marginalia } from '@/components/Marginalia';
 import { QuizCta } from './QuizCta';
 import { YouTubePreview } from './YouTubePreview';
 import { WhatsAppAsk } from './WhatsAppAsk';
@@ -25,7 +25,7 @@ interface LandingHeroProps {
 const apronStripes = {
   backgroundColor: 'var(--color-sambal)',
   backgroundImage:
-    'repeating-linear-gradient(90deg, transparent 0 13px, rgba(255,255,255,0.09) 13px 15px)',
+    'repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,0.08) 14px 16px)',
 };
 
 export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
@@ -33,63 +33,56 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
 
   return (
     <section id="lp-hero">
-      <div style={apronStripes} className="px-4 pb-28 pt-5 text-white sm:px-6 sm:pb-40 sm:pt-12">
+      <div style={apronStripes} className="px-4 pb-5 pt-5 text-white sm:px-6 sm:pb-8 sm:pt-8">
         <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-[0.95rem] font-semibold text-white/85">
-            {courseTitle} · {students.toLocaleString('id-ID')} murid
-          </p>
-          <h1 className="font-display text-[2rem] font-extrabold leading-[1.04] tracking-[-0.02em] text-balance sm:text-5xl lg:text-6xl">
+          <h1 className="max-w-[20rem] font-display text-[2.05rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-balance sm:max-w-[34rem] sm:text-5xl sm:leading-[1.08]">
             {hook}
           </h1>
+          <Marginalia rotate={-2} className="mt-2 text-mie">
+            {students.toLocaleString('id-ID')} murid sudah belajar
+          </Marginalia>
+          <div className="mt-5">
+            {videoId ? (
+              <YouTubePreview videoId={videoId} title={`Cuplikan ${courseTitle}`} courseSlug={courseSlug} />
+            ) : (
+              <div className="relative aspect-video overflow-hidden rounded-2xl shadow-[0_18px_40px_-16px_rgba(34,26,23,0.55)]">
+                <Image
+                  src={imageUrl}
+                  alt={courseTitle}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 720px"
+                  className="object-cover"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="-mt-24 px-4 sm:-mt-32 sm:px-6">
+      <div className="px-4 pt-5 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          {videoId ? (
-            <YouTubePreview videoId={videoId} title={`Cuplikan ${courseTitle}`} courseSlug={courseSlug} />
-          ) : (
-            <div className="relative aspect-video overflow-hidden rounded-2xl shadow-[0_18px_40px_-16px_rgba(34,26,23,0.55)]">
-              <Image
-                src={imageUrl}
-                alt={courseTitle}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 720px"
-                className="object-cover"
-              />
-            </div>
-          )}
-
-          {/* Buttons straight under the video, subhook after: in TikTok and
-              Instagram in-app browsers as little as ~560px is visible, and the
-              Daftar button has to fit in it. The decided visitor buys (price
-              in the label, so nobody is surprised in WhatsApp). The quiz stays
-              further down the page. */}
-          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="mt-4 w-full sm:w-auto" />
+          {/* The buy button sits directly under the bowl. In TikTok and
+              Instagram as little as ~560px shows, and this has to fit. */}
+          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full sm:w-auto" />
           <WhatsAppAsk
             courseSlug={courseSlug}
             courseTitle={courseTitle}
             price={price}
-            className="mt-3 w-full sm:w-auto"
+            className="mt-3 w-full border-0 bg-transparent px-1 text-base text-seledri underline decoration-seledri/40 underline-offset-4 sm:w-auto"
           />
-          <ul className="mt-4 space-y-1.5">
-            {included.map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm font-semibold leading-snug text-kecap">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-seledri" strokeWidth={3} aria-hidden="true" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-sm leading-relaxed text-kecap/70">{nextStep}</p>
-          <p className="mt-5 text-lg leading-relaxed text-kecap/80 sm:text-xl">{subhook}</p>
+          <p className="mt-5 max-w-[42ch] text-base leading-relaxed text-kecap/80">{included.join('. ')}.</p>
+          <p className="mt-2 max-w-[42ch] text-base leading-relaxed text-kecap/70">{nextStep}</p>
+          <p className="mt-6 max-w-[38ch] font-display text-2xl font-extrabold leading-snug tracking-[-0.02em] sm:text-3xl">{subhook}</p>
           {quote && (
-            <figure className="mt-5 border-l-4 border-sambal pl-4">
-              <blockquote className="font-display text-lg font-bold leading-snug">“{quote.text}”</blockquote>
-              <figcaption className="mt-1 text-sm text-kecap/60">{quote.source}</figcaption>
+            <figure className="mt-4">
+              <Marginalia rotate={-1} className="text-rust-ink">
+                “{quote.text}”
+              </Marginalia>
+              <figcaption className="mt-1 text-sm text-steel">{quote.source}</figcaption>
             </figure>
           )}
-          <ul className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-kecap">
+          <ul className="mt-6 flex flex-wrap gap-2 text-sm font-semibold text-kecap">
             {proof.map((item) => (
               <li key={item} className="rounded-full border border-steel-line bg-white px-3 py-1.5">
                 {item}
