@@ -7,6 +7,7 @@ import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
 import { SITE_URL } from '@/lib/links';
 import { LandingHero } from '@/components/landing/LandingHero';
+import { MateriSection } from '@/components/landing/MateriSection';
 import { PainSection } from '@/components/landing/PainSection';
 import { RootCauseSection } from '@/components/landing/RootCauseSection';
 import { FactoryStorySection } from '@/components/landing/FactoryStorySection';
@@ -102,6 +103,16 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         price={course.price}
         included={copy.offerIncludes}
         nextStep={copy.heroNext}
+        quote={copy.quizQuote}
+      />
+      <MateriSection
+        title={copy.materiTitle}
+        items={course.benefits || []}
+        whyTitle={copy.whyTitle}
+        why={copy.why}
+        price={course.price}
+        courseSlug={course.slug}
+        courseTitle={course.title}
       />
       {/* Offer and quiz sit right after the pain and the proof: ad traffic
           reads two or three screens, and at the bottom of the long version
@@ -115,7 +126,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         includes={copy.offerIncludes}
         valueLine={copy.offerValueLine}
         riskLine={copy.offerRiskLine}
-        ctaLabel={copy.ctaLabel}
+        students={course.students}
+        courseSlug={course.slug}
       />
       {copy.quizQuote && <QuizQuote text={copy.quizQuote.text} source={copy.quizQuote.source} />}
       <LandingFaq items={nearQuizFaq} title="Masih ragu?" className="pb-14 sm:pb-20" />
@@ -134,7 +146,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         intro={copy.rootCauseIntro}
         causes={copy.rootCauses}
         line={copy.rootCauseLine}
-        ctaLabel={copy.ctaLabel}
+        ctaLabel={`Daftar kelasnya · ${course.price}`}
+        ctaHref="#daftar"
       />
       <FactoryStorySection title={copy.story.title} paragraphs={copy.story.paragraphs} note={copy.story.note} />
       <TransformationSection

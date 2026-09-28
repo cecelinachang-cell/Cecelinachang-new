@@ -18,6 +18,7 @@ interface LandingHeroProps {
   included: string[];
   /** What happens after Daftar. */
   nextStep: string;
+  quote?: { text: string; source: string };
 }
 
 // Red pinstripe band: the striped apron Cece wears in her videos.
@@ -27,14 +28,16 @@ const apronStripes = {
     'repeating-linear-gradient(90deg, transparent 0 13px, rgba(255,255,255,0.09) 13px 15px)',
 };
 
-export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price, included, nextStep }: LandingHeroProps) {
+export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
   const proof = [...proofPoints, `${students.toLocaleString('id-ID')} murid`];
 
   return (
     <section id="lp-hero">
       <div style={apronStripes} className="px-4 pb-28 pt-5 text-white sm:px-6 sm:pb-40 sm:pt-12">
         <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-[0.95rem] font-semibold text-white/85">{courseTitle} · kelas online</p>
+          <p className="mb-3 text-[0.95rem] font-semibold text-white/85">
+            {courseTitle} · {students.toLocaleString('id-ID')} murid
+          </p>
           <h1 className="font-display text-[2rem] font-extrabold leading-[1.04] tracking-[-0.02em] text-balance sm:text-5xl lg:text-6xl">
             {hook}
           </h1>
@@ -80,6 +83,12 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
           </ul>
           <p className="mt-3 text-sm leading-relaxed text-kecap/70">{nextStep}</p>
           <p className="mt-5 text-lg leading-relaxed text-kecap/80 sm:text-xl">{subhook}</p>
+          {quote && (
+            <figure className="mt-5 border-l-4 border-sambal pl-4">
+              <blockquote className="font-display text-lg font-bold leading-snug">“{quote.text}”</blockquote>
+              <figcaption className="mt-1 text-sm text-kecap/60">{quote.source}</figcaption>
+            </figure>
+          )}
           <ul className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-kecap">
             {proof.map((item) => (
               <li key={item} className="rounded-full border border-steel-line bg-white px-3 py-1.5">

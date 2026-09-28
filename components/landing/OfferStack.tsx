@@ -1,5 +1,6 @@
 import { Check, MessageCircle } from 'lucide-react';
 import { QuizCta } from './QuizCta';
+import { WhatsAppAsk } from './WhatsAppAsk';
 
 interface OfferStackProps {
   courseTitle: string;
@@ -7,10 +8,11 @@ interface OfferStackProps {
   includes: string[];
   valueLine: string;
   riskLine: string;
-  ctaLabel: string;
+  students: number;
+  courseSlug: string;
 }
 
-export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, ctaLabel }: OfferStackProps) {
+export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, students, courseSlug }: OfferStackProps) {
   return (
     <section className="px-4 py-14 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-xl overflow-hidden rounded-3xl border border-steel-line bg-white shadow-[0_24px_48px_-28px_rgba(34,26,23,0.45)]">
@@ -28,10 +30,11 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
           </ul>
           <div className="mb-6 border-t border-dashed border-steel-line pt-5">
             <p className="mb-1 text-kecap/70">{valueLine}</p>
+            <p className="mb-1 text-sm font-semibold text-kecap/70">{students.toLocaleString('id-ID')} murid sudah belajar</p>
             <p className="font-display text-4xl font-extrabold tracking-[-0.02em]">{price}</p>
           </div>
           <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full" />
-          <QuizCta variant="secondary" label={ctaLabel} className="mt-3 w-full" />
+          <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="mt-3 w-full" />
           <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-kecap/70">
             <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-seledri" aria-hidden="true" />
             <span>{riskLine}</span>

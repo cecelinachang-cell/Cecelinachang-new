@@ -50,6 +50,11 @@ export interface LandingCopy {
    * only the steps the form and FAQ already promise.
    */
   heroNext: string;
+  /** Syllabus heading, the "materi yang didapatkan" block. */
+  materiTitle: string;
+  whyTitle: string;
+  /** Reasons to join. Every line has to be a fact already on this page. */
+  why: string[];
   painTitle: string;
   pains: string[];
   painClose: string;
@@ -96,8 +101,16 @@ export const landingPages: Record<string, LandingCopy> = {
   'bakso-sapi-premium': {
     hook: 'Bakso bikinanmu keras kayak karet, pecah waktu direbus, atau malah rasa tepung?',
     subhook:
-      'Bukan salah tanganmu. Yang kurang cuma teknik pabrik yang nggak pernah ditulis di resep gratisan.',
-    ctaLabel: 'Cek kecocokanmu (1 menit)',
+      'Nggak harus jago dulu. Bukan salah tanganmu. Yang kurang cuma teknik pabrik yang nggak pernah ditulis di resep gratisan.',
+    ctaLabel: 'Daftar kelasnya',
+    materiTitle: 'Materi yang didapatkan',
+    whyTitle: 'Kenapa ikut kelas ini',
+    why: [
+      'Nggak harus jago dulu. Dijelaskan dari dasar: suhu daging, cara menguleni, sampai merebus.',
+      'Video 40 menit, ditonton kapan saja. Tidak harus standby di jam tertentu. Akses seumur hidup.',
+      'Ini kelas video, bukan cuma resep tulisan. E-book resep dan konsultasi dengan Cece sudah termasuk.',
+      'Bisa untuk keluarga. Ada murid yang berhasil di percobaan pertama, ada yang sekarang jualan baksonya sendiri.',
+    ],
     previewVideoId: 's80iBe2H6n8',
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
     heroNext:
@@ -249,7 +262,19 @@ export const landingPages: Record<string, LandingCopy> = {
         question: 'Saya pemula, bisa ikut?',
         nearQuiz: true,
         answer:
-          'Bisa. Kelasnya dijelaskan dari dasar: suhu, cara menguleni, sampai merebus. Kalau ada yang bingung, kamu bisa konsultasi langsung dengan Cece.',
+          'Bisa. Nggak harus jago dulu. Kelasnya dijelaskan dari dasar: suhu, cara menguleni, sampai merebus. Kalau ada yang bingung, kamu bisa konsultasi langsung dengan Cece.',
+      },
+      {
+        question: 'Harus standby di jam tertentu?',
+        nearQuiz: true,
+        answer:
+          'Tidak. Videonya 40 menit dan bisa ditonton kapan saja, diulang kapan saja. Aksesnya seumur hidup.',
+      },
+      {
+        question: 'Ini cuma e-book?',
+        nearQuiz: true,
+        answer:
+          'Bukan. Kamu dapat video kelas, e-book resep, dan bisa tanya Cece langsung. Link videonya dikirim ke email setelah transfer.',
       },
       {
         question: 'Alat apa yang dibutuhkan?',
