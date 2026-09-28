@@ -55,15 +55,16 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
 
           {/* Buttons straight under the video, subhook after: in TikTok and
               Instagram in-app browsers as little as ~560px is visible, and the
-              Daftar button has to fit in it. Three ways in, most decided
-              first: buy (price in the label, so nobody is surprised in
-              WhatsApp), check fit, or ask Cece. */}
+              Daftar button has to fit in it. The decided visitor buys (price
+              in the label, so nobody is surprised in WhatsApp). The quiz stays
+              further down the page. */}
           <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="mt-4 w-full sm:w-auto" />
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:flex">
-            {/* Short label: at half width on a phone the full quiz label wraps. */}
-            <QuizCta variant="secondary" label="Cek kecocokan" className="gap-1.5 px-2 text-sm sm:px-4 sm:text-base" />
-            <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="gap-1.5 px-2 text-sm sm:px-4 sm:text-base" />
-          </div>
+          <WhatsAppAsk
+            courseSlug={courseSlug}
+            courseTitle={courseTitle}
+            price={price}
+            className="mt-3 w-full sm:w-auto"
+          />
           <p className="mt-5 text-lg leading-relaxed text-kecap/80 sm:text-xl">{subhook}</p>
           <ul className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-kecap">
             {proof.map((item) => (

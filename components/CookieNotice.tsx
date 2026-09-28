@@ -12,9 +12,16 @@ const STORAGE_KEY = 'cookie-notice-dismissed';
  * Law and Meta/TikTok's own pixel terms. Positioned above the mobile
  * sticky CTA bar via --cookie-offset (app/globals.css) so it never
  * overlaps it.
+ *
+ * On /lp the card also stays hidden while the quiz/sign-up section is on
+ * screen. "Daftar" scrolls that section up, and the card was landing on
+ * top of "Lanjut ke WhatsApp".
  */
 export function CookieNotice() {
-  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [pastFirstScreen, setPastFirstScreen] = useState(false);
+  const [quizInView, setQuizInView] = useState(false);
   const pathname = usePathname();
   // On an ad landing page the first screen is the pitch and its button; the
   // card landed right on top of that button. There it waits until the
@@ -22,33 +29,48 @@ export function CookieNotice() {
   const waitForScroll = pathname.startsWith('/lp/');
 
   useEffect(() => {
-    let dismissed = false;
+    let stored = false;
     try {
-      dismissed = Boolean(localStorage.getItem(STORAGE_KEY));
+      stored = Boolean(localStorage.getItem(STORAGE_KEY));
     } catch {
       // Storage unavailable: show it, as before.
     }
-    if (dismissed) return;
-
-    if (!waitForScroll) {
-      // queueMicrotask: keeps this a reaction to the localStorage read
-      // rather than an unconditional setState in the effect body (see the
-      // same pattern in components/StickyCtaBar.tsx).
-      queueMicrotask(() => setVisible(true));
+    if (stored) {
+      queueMicrotask(() => setDismissed(true));
       return;
     }
+    queueMicrotask(() => setReady(true));
+  }, []);
+
+  useEffect(() => {
+    if (!ready || dismissed || !waitForScroll) return;
 
     function onScroll() {
       if (window.scrollY < window.innerHeight) return;
-      setVisible(true);
+      setPastFirstScreen(true);
       window.removeEventListener('scroll', onScroll);
     }
+    if (window.scrollY >= window.innerHeight) queueMicrotask(() => setPastFirstScreen(true));
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [waitForScroll]);
+  }, [ready, dismissed, waitForScroll]);
+
+  useEffect(() => {
+    if (!ready || dismissed || !waitForScroll) return;
+    const quiz = document.getElementById('cek');
+    if (!quiz) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setQuizInView(entry.isIntersecting),
+      { threshold: 0.05 },
+    );
+    observer.observe(quiz);
+    return () => observer.disconnect();
+  }, [ready, dismissed, waitForScroll]);
+
+  const visible = ready && !dismissed && (!waitForScroll || (pastFirstScreen && !quizInView));
 
   function dismiss() {
-    setVisible(false);
+    setDismissed(true);
     try {
       localStorage.setItem(STORAGE_KEY, '1');
     } catch {
