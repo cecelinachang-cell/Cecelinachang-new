@@ -6,6 +6,7 @@ import { Star, ShoppingBag } from "lucide-react";
 import { waLink, shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
+import { productPublicPath } from "@/lib/productSlug";
 import type { Product } from "@/lib/products";
 
 // Re-exported so existing `import { type Product } from '@/components/ProductCard'`
@@ -26,6 +27,7 @@ const parseImageUrls = (url: string | undefined): string[] => {
 };
 
 export default function ProductCard({ product }: { product: Product }) {
+  const href = productPublicPath(product);
   const waHref = waLink(`Halo Admin, saya mau beli ${product.name}`);
   const shopeeHref = shopeeLink(product.shopeeUrl);
   const pixelExtra = {
@@ -38,7 +40,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="animate-in fade-in duration-300 bg-white rounded-[1.25rem_0.5rem_1.25rem_0.5rem] shadow-sm border border-butter/30 overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
       <Link
-        href={`/toko/${product.id}`}
+        href={href}
         className="block relative aspect-square sm:h-64 bg-stone-50 overflow-hidden"
       >
         <Image
@@ -54,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
         />
       </Link>
       <div className="p-3 sm:p-6 flex flex-col flex-grow">
-        <Link href={`/toko/${product.id}`}>
+        <Link href={href}>
           <h3 className="font-serif text-base sm:text-xl font-bold text-charcoal-brown mb-1 group-hover:text-terracotta transition-colors line-clamp-2">
             {product.name}
           </h3>
@@ -102,7 +104,7 @@ export default function ProductCard({ product }: { product: Product }) {
               </a>
             </div>
             <Link
-              href={`/toko/${product.id}`}
+              href={href}
               className="hidden sm:flex tap-target items-center justify-center w-full text-center px-4 bg-butter/20 text-rust-ink text-sm font-medium rounded-xl hover:bg-butter/35 transition-colors"
             >
               Lihat Detail

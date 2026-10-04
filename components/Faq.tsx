@@ -3,12 +3,14 @@ import { faqs, type FaqCategory } from '@/app/data/faq';
 
 export default function Faq({
   categories,
+  items,
   title = 'Pertanyaan yang Sering Diajukan (FAQ)',
 }: {
-  categories: FaqCategory[];
+  categories?: FaqCategory[];
+  items?: { q: string; a: string }[];
   title?: string;
 }) {
-  const filtered = faqs.filter((f) => categories.includes(f.category));
+  const filtered = items ?? faqs.filter((f) => categories?.includes(f.category));
 
   return (
     <div className="mt-12 sm:mt-24 max-w-3xl mx-auto">

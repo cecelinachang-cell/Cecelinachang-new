@@ -1,5 +1,6 @@
 import { products as fallbackProducts } from '@/app/data/products';
 import { courses as fallbackCourses } from '@/app/data/courses';
+import { assignProductSlugs } from '@/lib/productSlug';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export type SearchResult = {
@@ -68,6 +69,7 @@ export function searchCatalog(
   const q = query.trim().toLowerCase();
   if (!q) return [];
 
+  const productSlugs = assignProductSlugs(data.products);
   const productMatches: SearchResult[] = data.products
     .filter((p) =>
       p.name?.toLowerCase().includes(q) ||
@@ -77,7 +79,7 @@ export function searchCatalog(
     .map((p) => ({
       type: 'product' as const,
       id: p.id,
-      slug: p.id,
+      slug: productSlugs.get(p.id) ?? p.id,
       title: p.name,
       price: p.price ?? null,
       image: firstImage(p.imageUrl),

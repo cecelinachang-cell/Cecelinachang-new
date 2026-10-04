@@ -155,10 +155,20 @@ export default async function Home() {
             Kelas Lainnya
           </h2>
           <CourseScroller courses={otherCourses} />
-          <div className="text-center sm:text-left mt-4">
-            <Link href="/toko" className="text-sm text-terracotta font-medium hover:text-rust-ink">
+          <div className="text-center sm:text-left mt-4 space-y-2">
+            <Link href="/toko" className="block text-sm text-terracotta font-medium hover:text-rust-ink">
               Cari alat baking yang aku pakai? Lihat Toko →
             </Link>
+            <p className="text-sm text-charcoal-brown/70">
+              Toko di Kota Tangerang:{" "}
+              <Link href="/toko/oven" className="text-terracotta font-medium hover:text-rust-ink">oven</Link>
+              {", "}
+              <Link href="/toko/signora" className="text-terracotta font-medium hover:text-rust-ink">Signora</Link>
+              {", "}
+              <Link href="/toko/peralatan-masak" className="text-terracotta font-medium hover:text-rust-ink">peralatan masak</Link>
+              {", dan "}
+              <Link href="/kelas-masak-tangerang" className="text-terracotta font-medium hover:text-rust-ink">kelas masak</Link>.
+            </p>
           </div>
         </section>
       )}
