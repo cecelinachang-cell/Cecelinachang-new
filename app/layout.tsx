@@ -11,6 +11,7 @@ import { Pixels } from '@/components/Pixels';
 import { MotionProvider } from '@/components/MotionProvider';
 import { supabase } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/links';
+import { STORE } from '@/lib/localStore';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -112,13 +113,21 @@ export async function generateMetadata(): Promise<Metadata> {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Cece Lina Chang',
-  description: 'Belajar baking dari rumah dengan mudah untuk pemula. Kursus baking online dan alat baking premium.',
+  name: STORE.brand,
+  description: 'Kelas masak dan toko peralatan masak Signora di Kota Tangerang. Belajar dari rumah, atau lihat unitnya di toko.',
   url: SITE_URL,
   logo: 'https://i.postimg.cc/tCXKbMWY/image.png',
-  sameAs: [
-    'https://instagram.com/cecelinachang'
-  ]
+  telephone: STORE.telephone,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: STORE.street,
+    addressLocality: STORE.locality,
+    addressRegion: STORE.region,
+    postalCode: STORE.postalCode,
+    addressCountry: STORE.country,
+  },
+  areaServed: 'Tangerang',
+  sameAs: [STORE.instagram, STORE.tiktok],
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {

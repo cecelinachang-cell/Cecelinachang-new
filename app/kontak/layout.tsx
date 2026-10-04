@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Kontak | Cece Lina Chang",
   description:
-    "Ada pertanyaan soal kelas baking atau alat Signora? Hubungi Cece Lina Chang lewat WhatsApp atau form kontak di sini.",
+    "Toko Cece Lina Chang di Kota Tangerang. Tanya kelas masak atau alat Signora lewat WhatsApp, atau datang lihat unit dengan janji.",
   alternates: {
     canonical: "/kontak",
   },

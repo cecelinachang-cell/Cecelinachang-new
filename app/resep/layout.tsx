@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 
-// Covers /resep and /resep/[slug] in one file. noindex: the six recipes here
-// are hardcoded placeholders and every /resep/<slug> currently renders the
-// same "Roti Sobek" content regardless of slug -- indexing it would put junk
-// with dead detail links in search results. Flip index: true once the
-// content is real.
+// No recipe catalog exists. The old /resep pages were six placeholder recipes,
+// and every /resep/<slug> rendered the same invented "Roti Sobek". Keep this
+// route noindex until Cece publishes recipes she actually teaches.
 export const metadata: Metadata = {
-  title: "Koleksi Resep Baking | Cece Lina Chang",
+  title: "Resep | Cece Lina Chang",
   description:
-    "Resep baking langkah demi langkah dari Cece Lina Chang -- roti, kue, cookies, dan resep favorit Indonesia, ditulis buat pemula.",
+    "Resep yang Cece ajarkan ada di dalam kelas, lengkap dengan video. Website ini tidak menaruh katalog resep terpisah.",
   alternates: {
     canonical: "/resep",
   },

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import Faq from "@/components/Faq";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +13,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Toko Alat Baking Signora | Cece Lina Chang",
   description:
-    "Belanja alat baking Signora yang beneran dipakai Cece Lina Chang -- mixer, oven, dan perlengkapan baking premium, kirim ke seluruh Indonesia.",
+    "Toko peralatan masak dan alat baking Signora di Kota Tangerang. Mixer, oven, panci, dan perlengkapan yang Cece pakai sendiri. Bisa lihat unit atau dikirim.",
   alternates: {
     canonical: "/toko",
   },
@@ -32,7 +33,14 @@ export default async function TokoPage() {
         </Marginalia>
         <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
           Alat yang saya pakai sendiri di setiap video, biar hasil baking Anda
-          anti gagal juga.
+          anti gagal juga. Tokonya di Kota Tangerang. Bisa lihat unitnya, atau kami kirim.
+        </p>
+        <p className="text-sm text-charcoal-brown/70 max-w-2xl mx-auto mt-4">
+          <Link href="/toko/oven" className="text-terracotta font-medium hover:text-rust-ink">Toko oven</Link>
+          {" · "}
+          <Link href="/toko/signora" className="text-terracotta font-medium hover:text-rust-ink">Signora</Link>
+          {" · "}
+          <Link href="/toko/peralatan-masak" className="text-terracotta font-medium hover:text-rust-ink">Peralatan masak</Link>
         </p>
       </div>
 

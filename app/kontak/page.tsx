@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { MessageCircle, Mail, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import Faq from '@/components/Faq';
+import { STORE } from '@/lib/localStore';
 
 export default function KontakPage() {
   const [name, setName] = useState('');
@@ -77,8 +78,11 @@ export default function KontakPage() {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="font-bold text-charcoal-brown mb-1">Lokasi Pengiriman Toko</div>
-                  <div className="text-charcoal-brown/70">Jakarta Barat, Indonesia<br/>(Hanya melayani pengiriman online)</div>
+                  <div className="font-bold text-charcoal-brown mb-1">{STORE.name}</div>
+                  <a href={STORE.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-charcoal-brown/70 hover:text-terracotta transition-colors">
+                    {STORE.addressLine}
+                  </a>
+                  <div className="text-charcoal-brown/70 mt-2">Sabtu 10.00–13.30. Minggu tutup. Senin buka pukul 10.00.<br/>Bisa lihat unit, janji dulu lewat WhatsApp. Pengiriman ke seluruh Indonesia.</div>
                 </div>
               </div>
             </div>

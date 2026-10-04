@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Instagram, Youtube, ShoppingBag } from 'lucide-react';
 import { SHOPEE_SHOP_URL, waLink } from '@/lib/links';
+import { STORE } from '@/lib/localStore';
 
 export function Footer() {
   return (
@@ -9,8 +10,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
           <div className="col-span-1 md:col-span-2">
             <span className="font-hand text-3xl mb-3 sm:mb-4 block">Cece Lina Chang</span>
-            <p className="text-butter/90 mb-6 max-w-sm">
+            <p className="text-butter/90 mb-3 max-w-sm">
               Belajar baking dari rumah dengan mudah. Misi saya adalah membantu ibu-ibu Indonesia menciptakan kebahagiaan dari dapur sendiri.
+            </p>
+            <p className="text-butter/80 text-sm mb-6 max-w-sm">
+              <a href={STORE.mapsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-cream">
+                {STORE.name}<br />
+                {STORE.addressLine}
+              </a>
             </p>
             <div className="flex">
               <a href="https://instagram.com/cecelinachang" target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center text-butter/90 hover:text-cream transition-colors">
@@ -34,8 +41,11 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-white">Menu Cepat</h3>
             <ul className="space-y-2">
               <li><Link href="/toko" className="text-butter/90 hover:text-cream transition-colors">Toko Alat Masak</Link></li>
+              <li><Link href="/toko/oven" className="text-butter/90 hover:text-cream transition-colors">Toko Oven</Link></li>
+              <li><Link href="/toko/signora" className="text-butter/90 hover:text-cream transition-colors">Signora</Link></li>
+              <li><Link href="/toko/peralatan-masak" className="text-butter/90 hover:text-cream transition-colors">Peralatan Masak</Link></li>
+              <li><Link href="/kelas-masak-tangerang" className="text-butter/90 hover:text-cream transition-colors">Kelas Masak</Link></li>
               <li><Link href="/kursus" className="text-butter/90 hover:text-cream transition-colors">Kursus Online</Link></li>
-              <li><Link href="/resep" className="text-butter/90 hover:text-cream transition-colors">Resep</Link></li>
               <li><Link href="/tentang" className="text-butter/90 hover:text-cream transition-colors">Tentang Saya</Link></li>
             </ul>
           </div>

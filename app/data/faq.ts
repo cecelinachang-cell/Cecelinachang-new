@@ -25,8 +25,8 @@ export const faqs: FaqItem[] = [
     category: 'course',
   },
   {
-    q: 'Apakah resep di website ini gratis?',
-    a: 'Ya, semua resep yang ada di halaman Resep bisa Anda akses secara gratis kapan saja.',
+    q: 'Di mana saya bisa mendapat resepnya?',
+    a: 'Resep yang saya ajarkan ada di dalam kelas, lengkap dengan video. Website ini tidak punya katalog resep terpisah. Pilih kelas di halaman Kursus, lalu admin membantu pendaftaran lewat WhatsApp.',
     category: 'general',
   },
   {

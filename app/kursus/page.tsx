@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
@@ -69,6 +70,12 @@ export default async function KursusPage() {
           Belajar langsung dari ahlinya melalui video tutorial yang jelas,
           detail, dan mudah diikuti. Akses seumur hidup dan konsultasi langsung
           dengan cece lina chang.
+        </p>
+        <p className="text-sm text-charcoal-brown/70 max-w-2xl mx-auto mt-4">
+          Tinggal di Tangerang?{" "}
+          <Link href="/kelas-masak-tangerang" className="text-terracotta font-medium hover:text-rust-ink">
+            Kelas masak, online atau praktik di toko.
+          </Link>
         </p>
       </div>
 

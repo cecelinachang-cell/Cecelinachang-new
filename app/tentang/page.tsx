@@ -119,7 +119,7 @@ export default function TentangPage() {
               </Marginalia>
             </div>
             <p>
-              Melalui website ini, saya mengumpulkan semua resep andalan, merekomendasikan alat yang benar-benar saya pakai dan terbukti bagus, serta membuka kelas online dengan bahasa yang sangat sederhana agar mudah dipahami oleh pemula sekalipun.
+              Melalui website ini, saya merekomendasikan alat yang benar-benar saya pakai dan terbukti bagus, serta membuka kelas online dengan bahasa yang sangat sederhana agar mudah dipahami oleh pemula sekalipun. Resep yang saya ajarkan ada di dalam kelas.
             </p>
             <p>
               Mari kita ciptakan aroma harum kue dari dapur rumah kita sendiri, dan bagikan kebahagiaan itu kepada orang-orang tercinta.

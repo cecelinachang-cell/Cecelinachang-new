@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
+import { productPublicPath } from '@/lib/productSlug';
 
 interface EquipmentSectionProps {
   title: string;
@@ -30,7 +31,7 @@ export function EquipmentSection({ title, answer, body, product }: EquipmentSect
 
         {product && (
           <Link
-            href={`/toko/${product.id}`}
+            href={productPublicPath(product)}
             target="_blank"
             rel="noopener"
             className="mt-8 flex items-center gap-4 rounded-2xl border border-steel-line bg-enamel p-3 pr-4 transition-colors hover:border-steel"

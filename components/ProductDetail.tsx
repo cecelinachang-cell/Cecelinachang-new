@@ -12,6 +12,7 @@ import { POLICIES } from '@/lib/policies';
 import { waLink, shopeeLink } from '@/lib/links';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
+import { stripHtml } from '@/lib/utils';
 import { ViewContentPing } from '@/components/ViewContentPing';
 import { MobileProductBar } from '@/components/MobileProductBar';
 
@@ -20,7 +21,7 @@ interface Product {
   name: string;
   price: string;
   originalPrice?: string;
-  category: string;
+  category?: string;
   rating?: number;
   reviews?: number;
   imageUrl: string;
@@ -42,14 +43,22 @@ const parseImageUrls = (url: string | undefined): string[] => {
 
 import DOMPurify from 'dompurify';
 
-export default function ProductDetail({ slug }: { slug: string }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function ProductDetail({ slug, initialProduct }: { slug: string; initialProduct?: Product | null }) {
+  const [product, setProduct] = useState<Product | null>(initialProduct ?? null);
+  const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState(false);
   const [sanitizedDescription, setSanitizedDescription] = useState<string>('');
-  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<string>(() => parseImageUrls(initialProduct?.imageUrl)[0] || '');
 
   useEffect(() => {
+    if (initialProduct) {
+      if (initialProduct.description) {
+        setSanitizedDescription(DOMPurify.sanitize(initialProduct.description));
+      }
+      setLoading(false);
+      return;
+    }
+
     const fetchProduct = async () => {
       try {
         if (!isSupabaseConfigured()) {
@@ -132,7 +141,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
     };
 
     fetchProduct();
-  }, [slug]);
+  }, [slug, initialProduct]);
 
   if (loading) {
     return (
@@ -262,6 +271,8 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div className="bg-butter/15 rounded-2xl p-6 sm:p-8 border border-butter/30 mb-8 text-stone-700 space-y-4">
             {sanitizedDescription ? (
               <div dangerouslySetInnerHTML={{ __html: sanitizedDescription }} className="prose prose-stone max-w-none" />
+            ) : product.description ? (
+              <p>{stripHtml(product.description)}</p>
             ) : (
               <p>Deskripsi produk belum tersedia.</p>
             )}
