@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Settings, LogOut, BookOpen, MessageSquareQuote, Image, Inbox } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, BookOpen, MessageSquareQuote, Image, Inbox, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -24,6 +24,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Leads', href: '/admin/leads', icon: Inbox },
+    { name: 'Orders', href: '/admin/orders', icon: Wallet },
     { name: 'Banner & Assets', href: '/admin/assets', icon: Image },
     { name: 'Items', href: '/admin/items', icon: Package },
     { name: 'Courses', href: '/admin/courses', icon: BookOpen },

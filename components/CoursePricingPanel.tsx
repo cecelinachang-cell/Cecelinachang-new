@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from 'react';
-import { CheckCircle2, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Lock, MessageCircle } from 'lucide-react';
 import { POLICIES } from '@/lib/policies';
 import { Button } from '@/components/ui/Button';
 import LeadFormModal from '@/components/LeadFormModal';
+import CheckoutModal from '@/components/CheckoutModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { shopeeLink, waLink } from '@/lib/links';
@@ -23,8 +24,13 @@ interface CoursePricingPanelProps {
   compact?: boolean;
 }
 
+// Online payment (Tripay) stays hidden until the merchant account is
+// approved and the TRIPAY_* server keys are set; WhatsApp sign-up is always on.
+const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_TRIPAY_ENABLED === 'true';
+
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   return (
     <div className={`bg-white rounded-3xl shadow-xl border border-butter/30 ${compact ? 'p-5' : 'p-8'}`}>
@@ -68,6 +74,25 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         </div>
       )}
 
+      {PAYMENTS_ENABLED && (
+        <Button
+          type="button"
+          onClick={() => {
+            trackConversion('checkout_open', course.slug, {
+              contentName: course.title,
+              contentType: 'course',
+              value: parseIdr(course.price),
+            });
+            setShowCheckout(true);
+          }}
+          size="lg"
+          fullWidth
+          className="mb-4"
+        >
+          <Lock className="w-5 h-5 mr-2" /> Bayar Sekarang
+        </Button>
+      )}
+
       <Button
         type="button"
         onClick={() => {
@@ -78,12 +103,12 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
           });
           setShowLeadForm(true);
         }}
-        variant="whatsapp"
+        variant={PAYMENTS_ENABLED ? 'secondary' : 'whatsapp'}
         size="lg"
         fullWidth
         className="mb-4"
       >
-        <MessageCircle className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
+        <MessageCircle className="w-5 h-5 mr-2" /> {PAYMENTS_ENABLED ? 'Daftar via WhatsApp' : 'Chat Cece, Daftar Kelas'}
       </Button>
 
       {course.shopeeUrl && (
@@ -109,7 +134,9 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
       {!compact && (
         <>
           <p className="text-xs text-charcoal-brown/50 text-center">
-            Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.
+            {PAYMENTS_ENABLED
+              ? 'Bayar via QRIS, Virtual Account, atau e-wallet. Tidak perlu membuat akun di website.'
+              : 'Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.'}
           </p>
           <p className="text-xs text-charcoal-brown/50 text-center mt-2">
             {POLICIES.COURSE_REFUND_SHORT}
@@ -130,6 +157,15 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
             Masih bingung? Tanya Lina dulu →
           </a>
         </>
+      )}
+
+      {showCheckout && (
+        <CheckoutModal
+          courseSlug={course.slug}
+          courseTitle={course.title}
+          coursePrice={course.price}
+          onClose={() => setShowCheckout(false)}
+        />
       )}
 
       {showLeadForm && (

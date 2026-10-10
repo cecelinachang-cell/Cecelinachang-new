@@ -6,6 +6,9 @@ export type ConversionType =
   | 'lead_form_submit'
   | 'whatsapp_open'
   | 'shopee_open'
+  // Online payment (components/CheckoutModal.tsx -> Tripay).
+  | 'checkout_open'
+  | 'checkout_submit'
   // Landing-page funnel (app/lp).
   | 'quiz_start'
   | 'quiz_complete'
@@ -26,6 +29,7 @@ export interface ConversionExtra {
 
 const PIXEL_EVENT_MAP: Partial<Record<ConversionType, PixelEvent>> = {
   lead_form_open: 'InitiateCheckout',
+  checkout_open: 'InitiateCheckout',
   lead_form_submit: 'Lead',
   whatsapp_open: 'Contact',
   // Same ad signal as the quiz's WhatsApp hand-off; the separate type keeps
