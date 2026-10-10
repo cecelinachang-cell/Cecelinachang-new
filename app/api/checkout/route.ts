@@ -4,11 +4,11 @@ import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 import { getCourseBySlug } from '@/lib/courses';
 import { parseIdr } from '@/lib/pixels';
 import { parseCheckoutBody } from '@/lib/checkout';
-import { createTransaction, getTripayConfig, newMerchantRef } from '@/lib/tripay';
+import { createSnapTransaction, getMidtransConfig, newMerchantRef } from '@/lib/midtrans';
 
-// Unpaid VA numbers / QR codes expire after this long; Tripay then sends an
-// EXPIRED callback and the buyer can simply start a new checkout.
-const PAYMENT_WINDOW_SECONDS = 24 * 60 * 60;
+// Unpaid VA numbers / QR codes expire after this long; Midtrans then sends an
+// "expire" notification and the buyer can simply start a new checkout.
+const PAYMENT_WINDOW_HOURS = 24;
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(`checkout:${getClientIp(req)}`, 10, 60_000)) {
@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: input.error }, { status: 400 });
   }
 
-  const tripay = getTripayConfig();
+  const midtrans = getMidtransConfig();
   const admin = createAdminClient();
-  if (!tripay || !admin) {
-    console.error('Checkout unavailable: TRIPAY_* or SUPABASE_SERVICE_ROLE_KEY not set.');
+  if (!midtrans || !admin) {
+    console.error('Checkout unavailable: MIDTRANS_SERVER_KEY or SUPABASE_SERVICE_ROLE_KEY not set.');
     return NextResponse.json(
       { ok: false, error: 'Pembayaran online belum aktif. Silakan daftar lewat WhatsApp.' },
       { status: 503 },
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   const merchantRef = newMerchantRef();
   const origin = req.nextUrl.origin;
 
-  // Save the order before calling Tripay, so even an abandoned or failed
+  // Save the order before calling Midtrans, so even an abandoned or failed
   // checkout leaves the buyer's contact details behind for a follow-up.
   const { error: insertError } = await admin.from('orders').insert({
     merchant_ref: merchantRef,
@@ -50,39 +50,37 @@ export async function POST(req: NextRequest) {
     customer_name: input.name,
     customer_email: input.email,
     customer_phone: input.phone,
-    payment_method: input.method,
   });
   if (insertError) {
     console.error('Error inserting order:', insertError.message);
     return NextResponse.json({ ok: false, error: 'Gagal membuat pesanan, coba lagi.' }, { status: 500 });
   }
 
-  const result = await createTransaction(tripay, {
-    method: input.method,
-    merchantRef,
+  const result = await createSnapTransaction(midtrans, {
+    orderId: merchantRef,
     amount,
     customerName: input.name,
     customerEmail: input.email,
     customerPhone: input.phone,
-    item: { sku: course.slug, name: course.title, price: amount },
-    returnUrl: `${origin}/pembayaran/${merchantRef}`,
-    callbackUrl: `${origin}/api/tripay/callback`,
-    expiresInSeconds: PAYMENT_WINDOW_SECONDS,
+    item: { id: course.slug, name: course.title, price: amount },
+    finishUrl: `${origin}/pembayaran/${merchantRef}`,
+    notificationUrl: `${origin}/api/midtrans/notification`,
+    expiryHours: PAYMENT_WINDOW_HOURS,
   });
 
   if (!result.ok) {
-    console.error(`Tripay transaction failed for ${merchantRef}:`, result.message);
+    console.error(`Midtrans transaction failed for ${merchantRef}:`, result.message);
     await admin.from('orders').update({ status: 'FAILED', updated_at: new Date().toISOString() }).eq('merchant_ref', merchantRef);
     return NextResponse.json(
-      { ok: false, error: 'Metode pembayaran ini sedang tidak tersedia. Coba metode lain.' },
+      { ok: false, error: 'Pembayaran sedang tidak tersedia. Coba lagi sebentar, atau daftar lewat WhatsApp.' },
       { status: 502 },
     );
   }
 
   await admin
     .from('orders')
-    .update({ tripay_reference: result.reference, checkout_url: result.checkoutUrl, updated_at: new Date().toISOString() })
+    .update({ checkout_url: result.redirectUrl, updated_at: new Date().toISOString() })
     .eq('merchant_ref', merchantRef);
 
-  return NextResponse.json({ ok: true, checkoutUrl: result.checkoutUrl, merchantRef });
+  return NextResponse.json({ ok: true, checkoutUrl: result.redirectUrl, merchantRef });
 }

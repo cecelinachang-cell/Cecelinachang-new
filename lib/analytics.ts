@@ -6,7 +6,7 @@ export type ConversionType =
   | 'lead_form_submit'
   | 'whatsapp_open'
   | 'shopee_open'
-  // Online payment (components/CheckoutModal.tsx -> Tripay).
+  // Online payment (components/CheckoutModal.tsx -> Midtrans).
   | 'checkout_open'
   | 'checkout_submit'
   // Landing-page funnel (app/lp).

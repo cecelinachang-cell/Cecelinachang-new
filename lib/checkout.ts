@@ -1,20 +1,18 @@
 import { isValidIndonesianPhone } from '@/lib/leadValidation';
-import { isPaymentChannel, type PaymentChannelCode } from '@/lib/paymentChannels';
 
 // Pure parsing of the /api/checkout body, kept out of the route so it can be
-// unit tested without a request, Supabase or Tripay.
+// unit tested without a request, Supabase or Midtrans.
 
 export type CheckoutInput = {
   courseSlug: string;
   name: string;
   email: string;
   phone: string;
-  method: PaymentChannelCode;
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** 0812…, 62812… and +62812… all become 0812…, the form Tripay shows the buyer. */
+/** 0812…, 62812… and +62812… all become 0812…, the form the buyer typed it in. */
 export function normalizePhone(phone: string): string {
   const digits = phone.replace(/[\s.()/-]/g, '').replace(/^\+/, '');
   return digits.startsWith('62') ? `0${digits.slice(2)}` : digits;
@@ -33,7 +31,6 @@ export function parseCheckoutBody(body: unknown): CheckoutInput | { error: strin
   if (name.length < 2) return { error: 'Nama wajib diisi.' };
   if (!EMAIL_RE.test(email)) return { error: 'Format email belum benar.' };
   if (!isValidIndonesianPhone(phone)) return { error: 'Nomor WhatsApp belum benar (contoh: 0812xxxxxxx).' };
-  if (!isPaymentChannel(b.method)) return { error: 'Pilih metode pembayaran.' };
 
-  return { courseSlug, name, email, phone: normalizePhone(phone), method: b.method };
+  return { courseSlug, name, email, phone: normalizePhone(phone) };
 }

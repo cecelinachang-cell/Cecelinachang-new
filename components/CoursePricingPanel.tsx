@@ -24,9 +24,9 @@ interface CoursePricingPanelProps {
   compact?: boolean;
 }
 
-// Online payment (Tripay) stays hidden until the merchant account is
-// approved and the TRIPAY_* server keys are set; WhatsApp sign-up is always on.
-const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_TRIPAY_ENABLED === 'true';
+// Online payment (Midtrans) stays hidden until the merchant account is
+// approved and MIDTRANS_SERVER_KEY is set; WhatsApp sign-up is always on.
+const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
@@ -135,7 +135,7 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         <>
           <p className="text-xs text-charcoal-brown/50 text-center">
             {PAYMENTS_ENABLED
-              ? 'Bayar via QRIS, Virtual Account, atau e-wallet. Tidak perlu membuat akun di website.'
+              ? 'Bayar via QRIS, GoPay, ShopeePay, atau Virtual Account. Tidak perlu membuat akun di website.'
               : 'Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.'}
           </p>
           <p className="text-xs text-charcoal-brown/50 text-center mt-2">

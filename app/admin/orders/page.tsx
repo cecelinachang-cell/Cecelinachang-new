@@ -6,7 +6,7 @@ import { Wallet, RefreshCw, AlertCircle } from 'lucide-react';
 
 /**
  * Online course payments (public.orders), written by app/api/checkout and
- * app/api/tripay/callback. Needs supabase/migrations/20261010_course_orders.sql.
+ * app/api/midtrans/notification. Needs supabase/migrations/20261010_course_orders.sql.
  * The only thing an admin changes here is "Akses dikirim", ticked once the
  * Google Drive class access has been shared with the buyer.
  */
@@ -20,7 +20,7 @@ type Order = {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
-  payment_method: string;
+  payment_method: string | null;
   status: 'UNPAID' | 'PAID' | 'EXPIRED' | 'FAILED' | 'REFUND';
   paid_at: string | null;
   access_sent_at: string | null;
@@ -108,7 +108,7 @@ export default function OrdersPage() {
         <div>
           <div className="mb-2 flex items-center gap-2 text-orange-600">
             <Wallet className="h-5 w-5" />
-            <span className="text-sm font-semibold">Tripay payments</span>
+            <span className="text-sm font-semibold">Midtrans payments</span>
           </div>
           <h1 className="text-3xl font-bold text-stone-900">Orders</h1>
           <p className="mt-2 max-w-2xl text-stone-500">

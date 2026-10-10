@@ -6,7 +6,6 @@ const valid = {
   name: 'Siti',
   email: ' Siti@Gmail.com ',
   phone: '+62 812-3456-7890',
-  method: 'QRIS',
 };
 
 describe('parseCheckoutBody', () => {
@@ -16,7 +15,6 @@ describe('parseCheckoutBody', () => {
       name: 'Siti',
       email: 'siti@gmail.com',
       phone: '081234567890',
-      method: 'QRIS',
     });
   });
 
@@ -26,7 +24,6 @@ describe('parseCheckoutBody', () => {
     expect(parseCheckoutBody({ ...valid, name: 'S' })).toHaveProperty('error');
     expect(parseCheckoutBody({ ...valid, email: 'siti@' })).toHaveProperty('error');
     expect(parseCheckoutBody({ ...valid, phone: '021555123' })).toHaveProperty('error');
-    expect(parseCheckoutBody({ ...valid, method: 'CREDITCARD' })).toHaveProperty('error');
   });
 
   it('ignores a client-sent price', () => {

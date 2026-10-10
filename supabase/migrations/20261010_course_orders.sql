@@ -1,7 +1,7 @@
--- Online course payments via Tripay (lib/tripay.ts).
+-- Online course payments via Midtrans Snap (lib/midtrans.ts).
 --
 -- Rows are written only by the server with the service-role key:
--- app/api/checkout creates them as UNPAID, app/api/tripay/callback moves them
+-- app/api/checkout creates them as UNPAID, app/api/midtrans/notification moves them
 -- to PAID/EXPIRED/FAILED/REFUND. The public never reads this table directly
 -- (it holds buyer emails and phone numbers), so RLS is on with no anon/
 -- authenticated policies at all; admins read it through is_admin().
@@ -10,15 +10,18 @@ create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  -- Our id, sent to Midtrans as order_id.
   merchant_ref text not null unique,
-  tripay_reference text unique,
+  -- Midtrans transaction_id, from the first notification.
+  gateway_transaction_id text,
   course_slug text not null,
   course_title text not null,
   amount integer not null check (amount > 0),
   customer_name text not null,
   customer_email text not null,
   customer_phone text not null,
-  payment_method text not null,
+  -- Chosen on the Midtrans page, so only known once a notification arrives.
+  payment_method text,
   checkout_url text,
   status text not null default 'UNPAID'
     check (status in ('UNPAID', 'PAID', 'EXPIRED', 'FAILED', 'REFUND')),

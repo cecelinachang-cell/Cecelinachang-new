@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Tripay sends the buyer back here as soon as they pay, often a few seconds
-// before its callback has marked the order PAID. Re-render the server page
+// Midtrans sends the buyer back here as soon as they pay, often a few seconds
+// before its notification has marked the order PAID. Re-render the server page
 // for a couple of minutes so the status flips without a manual reload.
 export function RefreshWhileUnpaid() {
   const router = useRouter();

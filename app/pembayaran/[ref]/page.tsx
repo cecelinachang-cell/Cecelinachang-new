@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { RefreshWhileUnpaid } from './RefreshWhileUnpaid';
 
-// Tripay's return_url (app/api/checkout). The merchant_ref in the URL is
+// Midtrans' finish URL (app/api/checkout). The merchant_ref in the URL is
 // random, so it acts as the buyer's private link to their own order.
 export const dynamic = 'force-dynamic';
 

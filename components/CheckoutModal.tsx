@@ -8,7 +8,6 @@ import { identifyForPixels } from "@/lib/pixelMatch";
 import { parseIdr } from "@/lib/pixels";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
-import { PAYMENT_CHANNELS } from "@/lib/paymentChannels";
 
 interface CheckoutModalProps {
   courseSlug: string;
@@ -24,7 +23,6 @@ export default function CheckoutModal({ courseSlug, courseTitle, coursePrice, on
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [method, setMethod] = useState("QRIS");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -65,12 +63,12 @@ export default function CheckoutModal({ courseSlug, courseTitle, coursePrice, on
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courseSlug, name, email, phone, method }),
+      body: JSON.stringify({ courseSlug, name, email, phone }),
     }).catch(() => null);
     const json = (await res?.json().catch(() => null)) as { ok?: boolean; checkoutUrl?: string; error?: string } | null;
 
     if (json?.ok && json.checkoutUrl) {
-      // Same tab: Tripay's payment page sends the buyer back to /pembayaran/<ref>.
+      // Same tab: the Midtrans payment page sends the buyer back to /pembayaran/<ref>.
       window.location.href = json.checkoutUrl;
       return;
     }
@@ -169,24 +167,6 @@ export default function CheckoutModal({ courseSlug, courseTitle, coursePrice, on
               placeholder="0812xxxxxxx"
             />
           </div>
-          <div>
-            <label htmlFor="checkout-method" className="block text-sm font-medium text-charcoal-brown mb-1">
-              Metode pembayaran
-            </label>
-            <select
-              id="checkout-method"
-              value={method}
-              onChange={(e) => setMethod(e.target.value)}
-              className={`${inputClass} bg-white`}
-            >
-              {PAYMENT_CHANNELS.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {error && (
             <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl p-3">
               {error}
@@ -202,7 +182,7 @@ export default function CheckoutModal({ courseSlug, courseTitle, coursePrice, on
             {submitting ? "Menyiapkan pembayaran…" : `Bayar ${coursePrice}`}
           </button>
           <p className="text-xs text-charcoal-brown/50 text-center">
-            Pembayaran diproses aman oleh Tripay. {POLICIES.COURSE_REFUND_SHORT}
+            Pilih QRIS, GoPay, ShopeePay atau Virtual Account di halaman berikutnya. Pembayaran diproses aman oleh Midtrans. {POLICIES.COURSE_REFUND_SHORT}
           </p>
         </form>
       </div>
