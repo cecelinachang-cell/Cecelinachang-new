@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Users, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { stripHtml } from '@/lib/utils';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
 import { CoursePricingPanel } from '@/components/CoursePricingPanel';
 import { MobileCourseBar } from '@/components/MobileCourseBar';
@@ -15,6 +14,8 @@ import { products } from '@/app/data/products';
 import { getCourseBySlug } from '@/lib/courses';
 import { parseIdr } from '@/lib/pixels';
 import { SITE_URL } from '@/lib/links';
+import { courseJsonLd, courseSeoDescription, courseSeoTitle } from '@/lib/courseSeo';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 60;
 
@@ -26,8 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: 'Kelas Tidak Ditemukan | Cece Lina Chang' };
   }
 
-  const title = `${course.title} | Cece Lina Chang`;
-  const description = stripHtml(course.description).slice(0, 155);
+  const title = courseSeoTitle(course);
+  const description = courseSeoDescription(course);
 
   return {
     title,
@@ -61,12 +62,14 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
     notFound();
   }
 
+  const structuredData = courseJsonLd(course);
   const usedProducts = (courseProducts[course.slug] || [])
     .map((id) => products.find((p) => p.id === id))
     .filter((p): p is (typeof products)[number] => Boolean(p));
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {structuredData && <JsonLd data={structuredData} />}
       <ViewContentPing
         contentId={course.slug}
         contentName={course.title}

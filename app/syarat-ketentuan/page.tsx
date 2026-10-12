@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
+import { pageSocialMetadata } from '@/lib/seo';
 import { POLICIES } from '@/lib/policies';
 
+const TITLE = 'Syarat & Ketentuan | Cece Lina Chang';
+const DESCRIPTION =
+  'Ketentuan pemesanan, pembayaran, pengiriman, garansi, dan refund di cecelinachang.com.';
+
 export const metadata: Metadata = {
-  title: 'Syarat & Ketentuan | Cece Lina Chang',
-  description: 'Ketentuan pemesanan, pembayaran, pengiriman, garansi, dan refund di cecelinachang.com.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: {
     canonical: '/syarat-ketentuan',
   },
+  ...pageSocialMetadata(TITLE, DESCRIPTION, '/syarat-ketentuan'),
 };
 
 export default function SyaratKetentuanPage() {

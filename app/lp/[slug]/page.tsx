@@ -49,6 +49,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: course.title,
     description: copy.subhook,
     robots,
+    // Its own URL, not the homepage canonical inherited from the root layout.
+    alternates: { canonical: `/lp/${slug}` },
     openGraph: {
       title: copy.hook,
       description: copy.subhook,

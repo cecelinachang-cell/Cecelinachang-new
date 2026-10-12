@@ -12,6 +12,7 @@ import { MotionProvider } from '@/components/MotionProvider';
 import { supabase } from '@/lib/supabase';
 import { SITE_URL } from '@/lib/links';
 import { STORE } from '@/lib/localStore';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -39,9 +40,9 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  let title = 'Cece Lina Chang | Belajar Baking dari Rumah';
-  let description = 'Belajar baking dari rumah dengan mudah untuk pemula. Temukan alat masak premium dan kursus baking online bersama Cece Lina Chang.';
-  let ogImage = 'https://i.postimg.cc/tCXKbMWY/image.png';
+  let title = 'Cece Lina Chang: Kelas Masak & Baking Online';
+  let description = 'Kelas masak & baking online bareng Cece Lina Chang: bakso, dimsum, lapis legit, ogura. Video step-by-step, akses seumur hidup. Toko Signora di Tangerang.';
+  let ogImage = DEFAULT_OG_IMAGE;
 
   try {
     const { data: settings } = await supabase.from('settings').select('*').in('id', ['general', 'hero_image']);
@@ -67,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     title,
     description,
-    keywords: ['baking for beginners', 'belajar baking dari rumah', 'kursus baking online', 'alat baking premium', 'resep kue', 'Cece Lina Chang'],
+    keywords: ['kelas masak online', 'kelas bakso online', 'kursus baking online', 'kelas masak tangerang', 'alat masak Signora', 'Cece Lina Chang'],
     alternates: {
       canonical: '/',
     },
@@ -81,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: 'Cece Lina Chang Baking',
+          alt: 'Kelas masak & baking Cece Lina Chang',
         },
       ],
       locale: 'id_ID',

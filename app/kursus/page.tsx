@@ -1,6 +1,7 @@
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageSocialMetadata } from "@/lib/seo";
 import CourseCard from "@/components/CourseCard";
 import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
@@ -9,13 +10,17 @@ import { getAllCourses, type Course } from "@/lib/courses";
 
 export const revalidate = 60; // Cache the page for 60 seconds
 
+const TITLE = "Kursus Masak & Baking Online | Cece Lina Chang";
+const DESCRIPTION =
+  "Kelas masak dan baking online dari Cece Lina Chang: bakso sapi, fu kian, otak-otak, lapis legit, ogura. Akses seumur hidup, konsultasi langsung.";
+
 export const metadata: Metadata = {
-  title: "Kursus Online Baking | Cece Lina Chang",
-  description:
-    "Kelas baking online step-by-step dari Cece Lina Chang -- bakso, lapis legit, otak-otak, dan lainnya. Akses seumur hidup, konsultasi langsung.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: {
     canonical: "/kursus",
   },
+  ...pageSocialMetadata(TITLE, DESCRIPTION, "/kursus"),
 };
 
 const SWEET_KEYWORDS = ["legit", "ogura", "sponge", "cake", "manis"];
@@ -61,7 +66,7 @@ export default async function KursusPage() {
           <BookOpen className="w-5 h-5" /> Belajar Bersama Cece Lina
         </div>
         <h1 className="text-fluid-h1 font-serif font-bold text-rust-ink mb-3 sm:mb-4">
-          Kursus Online
+          Kursus Masak & Baking Online
         </h1>
         <Marginalia rotate={-2} className="block mb-3 sm:mb-4">
           kenapa aku bikin kelas ini? biar kamu nggak perlu gagal berkali-kali kayak aku dulu.

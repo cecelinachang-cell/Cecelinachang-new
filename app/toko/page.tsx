@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageSocialMetadata } from "@/lib/seo";
 import Faq from "@/components/Faq";
 import { Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/links";
@@ -10,13 +11,17 @@ import TokoCatalog from "@/components/toko/TokoCatalog";
 
 export const revalidate = 60;
 
+const TITLE = "Toko Alat Baking Signora | Cece Lina Chang";
+const DESCRIPTION =
+  "Toko peralatan masak dan alat baking Signora di Kota Tangerang. Mixer, oven, panci, dan perlengkapan yang Cece pakai sendiri. Bisa lihat unit atau dikirim.";
+
 export const metadata: Metadata = {
-  title: "Toko Alat Baking Signora | Cece Lina Chang",
-  description:
-    "Toko peralatan masak dan alat baking Signora di Kota Tangerang. Mixer, oven, panci, dan perlengkapan yang Cece pakai sendiri. Bisa lihat unit atau dikirim.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: {
     canonical: "/toko",
   },
+  ...pageSocialMetadata(TITLE, DESCRIPTION, "/toko"),
 };
 
 export default async function TokoPage() {

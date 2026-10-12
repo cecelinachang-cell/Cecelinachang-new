@@ -13,7 +13,7 @@ function headlineContent(topic: string | null) {
   }
   return (
     <>
-      Belajar Baking <br />
+      Belajar Masak & Baking <br />
       <span className="text-terracotta italic font-normal">Anti Gagal</span>
     </>
   );

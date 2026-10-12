@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
+import { pageSocialMetadata } from '@/lib/seo';
+
+const TITLE = 'Kebijakan Privasi | Cece Lina Chang';
+const DESCRIPTION =
+  'Informasi tentang data dan cookie yang dipakai di cecelinachang.com.';
 
 export const metadata: Metadata = {
-  title: 'Kebijakan Privasi | Cece Lina Chang',
-  description: 'Informasi tentang data dan cookie yang dipakai di cecelinachang.com.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: '/kebijakan-privasi',
+  },
+  ...pageSocialMetadata(TITLE, DESCRIPTION, '/kebijakan-privasi'),
 };
 
 export default function KebijakanPrivasiPage() {
