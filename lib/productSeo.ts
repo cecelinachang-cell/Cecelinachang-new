@@ -31,7 +31,16 @@ export function productSeoDescription(product: ProductLike): string {
     .replace(/\s+/g, ' ')
     .replace(/ ([.,!?;:])/g, '$1')
     .trim();
-  const lead = body || `${product.name.trim()} dari toko Cece Lina Chang di Tangerang.`;
+  const name = product.name.trim();
+  // Sibling products often share catalog copy word for word (six Signora
+  // loyang start identically), so the snippet leads with the name unless the
+  // copy already says which product it is.
+  const model = name.replace(/^signora\s+/i, '').toLowerCase();
+  const lead = !body
+    ? `${name} dari toko Cece Lina Chang di Tangerang.`
+    : body.toLowerCase().includes(model)
+      ? body
+      : `${name}: ${body}`;
   // One space before the tail, and room for a closing period.
   const room = DESCRIPTION_MAX - DESCRIPTION_TAIL.length - 2;
   const trimmed = lead.length <= room ? lead : lastSentence(lead, room) ?? trimAtWord(lead, room);

@@ -38,7 +38,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Menu Cepat</h3>
+            <p className="text-lg font-semibold mb-4 text-white">Menu Cepat</p>
             <ul className="space-y-2">
               <li><Link href="/toko" className="text-butter/90 hover:text-cream transition-colors">Toko Alat Masak</Link></li>
               <li><Link href="/toko/oven" className="text-butter/90 hover:text-cream transition-colors">Toko Oven</Link></li>
@@ -51,7 +51,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Bantuan</h3>
+            <p className="text-lg font-semibold mb-4 text-white">Bantuan</p>
             <ul className="space-y-2">
               <li><Link href="/kontak" className="text-butter/90 hover:text-cream transition-colors">Hubungi Saya</Link></li>
               <li><Link href="/kontak" className="text-butter/90 hover:text-cream transition-colors">FAQ</Link></li>

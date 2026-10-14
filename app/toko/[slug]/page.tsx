@@ -5,6 +5,7 @@ import ProductDetail from '@/components/ProductDetail';
 import JsonLd from '@/components/seo/JsonLd';
 import { SITE_URL } from '@/lib/links';
 import { productJsonLd } from '@/lib/productSchema';
+import { breadcrumbJsonLd } from '@/lib/localStore';
 import { findProductForParam, type SlugProduct } from '@/lib/productSlug';
 import { getAllProducts, type Product } from '@/lib/products';
 import { productSeoDescription, productSeoTitle } from '@/lib/productSeo';
@@ -90,6 +91,16 @@ export default async function TokoDetailPage({ params }: { params: Promise<{ slu
   return (
     <>
       {schema ? <JsonLd data={schema} /> : null}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          ...breadcrumbJsonLd([
+            { name: 'Beranda', path: '/' },
+            { name: 'Toko', path: '/toko' },
+            { name: match.product.name, path: `/toko/${match.slug}` },
+          ]),
+        }}
+      />
       <ProductDetail slug={match.product.id} initialProduct={match.product} />
     </>
   );

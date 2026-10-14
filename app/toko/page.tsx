@@ -50,6 +50,8 @@ export default async function TokoPage() {
         </p>
       </div>
 
+      {/* Product card titles are h3s; this keeps the outline h1 > h2 > h3. */}
+      <h2 className="sr-only">Katalog Produk</h2>
       <TokoCatalog products={products} />
 
       {/* Banner Promo */}

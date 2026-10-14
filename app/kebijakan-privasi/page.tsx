@@ -3,7 +3,7 @@ import { pageSocialMetadata } from '@/lib/seo';
 
 const TITLE = 'Kebijakan Privasi | Cece Lina Chang';
 const DESCRIPTION =
-  'Informasi tentang data dan cookie yang dipakai di cecelinachang.com.';
+  'Data apa yang disimpan cecelinachang.com saat kamu daftar kelas, isi form kontak, atau chat WhatsApp, cookie yang dipakai, dan cara mengontrolnya.';
 
 export const metadata: Metadata = {
   title: TITLE,

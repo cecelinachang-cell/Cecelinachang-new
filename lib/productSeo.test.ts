@@ -37,11 +37,20 @@ describe('productSeoDescription', () => {
 
   it('strips HTML and handles an empty description', () => {
     expect(productSeoDescription({ name: 'Signora Skillet', description: '<p>Wajan <b>besi</b>.</p>' })).toBe(
-      'Wajan besi. Garansi resmi 1 tahun, kirim ke seluruh Indonesia.',
+      'Signora Skillet: Wajan besi. Garansi resmi 1 tahun, kirim ke seluruh Indonesia.',
     );
     expect(productSeoDescription({ name: 'Signora Skillet' })).toBe(
       'Signora Skillet dari toko Cece Lina Chang di Tangerang. Garansi resmi 1 tahun, kirim ke seluruh Indonesia.',
     );
+  });
+
+  it('gives every catalog product its own description, even where the copy is shared', () => {
+    const seen = new Map<string, string>();
+    for (const product of products) {
+      const description = productSeoDescription(product);
+      expect(seen.get(description), `${product.name} duplicates ${seen.get(description)}`).toBeUndefined();
+      seen.set(description, product.name);
+    }
   });
 
   it('keeps every catalog product inside Google display limits', () => {

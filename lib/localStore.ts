@@ -54,7 +54,20 @@ export function findProductByName(products: Product[], needle: string): Product 
   return products.find((product) => product.name.toLowerCase().includes(query));
 }
 
-type Crumb = { name: string; path: string };
+export type Crumb = { name: string; path: string };
+
+/** schema.org BreadcrumbList; add '@context' when used as a standalone block. */
+export function breadcrumbJsonLd(crumbs: Crumb[]): Record<string, unknown> {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: absoluteUrl(crumb.path),
+    })),
+  };
+}
 
 type Faq = { q: string; a: string };
 
@@ -112,15 +125,7 @@ export function localPageJsonLd({
       about: { '@id': STORE.id },
       isPartOf: { '@type': 'WebSite', name: STORE.brand, url: SITE_URL },
     },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: crumbs.map((crumb, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: crumb.name,
-        item: absoluteUrl(crumb.path),
-      })),
-    },
+    breadcrumbJsonLd(crumbs),
     {
       '@type': 'FAQPage',
       mainEntity: faqs.map((faq) => ({

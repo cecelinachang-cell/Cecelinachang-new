@@ -125,3 +125,18 @@ export function courseJsonLd(course: CourseLike): Record<string, unknown> | null
     },
   };
 }
+
+/** ItemList of course detail URLs for the /kursus listing (Google's course carousel). */
+export function courseListJsonLd(courses: Pick<CourseLike, 'slug' | 'title'>[]): Record<string, unknown> | null {
+  if (courses.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: courses.map((course, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: absoluteUrl(`/kursus/${course.slug}`),
+      name: course.title,
+    })),
+  };
+}

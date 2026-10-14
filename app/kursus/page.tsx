@@ -7,6 +7,8 @@ import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
 import Faq from "@/components/Faq";
 import { getAllCourses, type Course } from "@/lib/courses";
+import { courseListJsonLd } from "@/lib/courseSeo";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const revalidate = 60; // Cache the page for 60 seconds
 
@@ -59,8 +61,11 @@ export default async function KursusPage() {
   const savoryCourses = restCourses.filter((c) => !isSweet(c));
   const sweetCourses = restCourses.filter((c) => isSweet(c));
 
+  const listSchema = courseListJsonLd(finalCourses);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {listSchema && <JsonLd data={listSchema} />}
       <div className="text-center mb-10 sm:mb-16">
         <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-4 sm:mb-6">
           <BookOpen className="w-5 h-5" /> Belajar Bersama Cece Lina

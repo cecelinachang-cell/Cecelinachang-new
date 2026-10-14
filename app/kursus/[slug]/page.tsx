@@ -16,6 +16,7 @@ import { parseIdr } from '@/lib/pixels';
 import { SITE_URL } from '@/lib/links';
 import { courseJsonLd, courseSeoDescription, courseSeoTitle } from '@/lib/courseSeo';
 import JsonLd from '@/components/seo/JsonLd';
+import { breadcrumbJsonLd } from '@/lib/localStore';
 
 export const revalidate = 60;
 
@@ -70,6 +71,16 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {structuredData && <JsonLd data={structuredData} />}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          ...breadcrumbJsonLd([
+            { name: 'Beranda', path: '/' },
+            { name: 'Kursus Online', path: '/kursus' },
+            { name: course.title, path: `/kursus/${course.slug}` },
+          ]),
+        }}
+      />
       <ViewContentPing
         contentId={course.slug}
         contentName={course.title}

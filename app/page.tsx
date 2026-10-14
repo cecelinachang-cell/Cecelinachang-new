@@ -16,8 +16,20 @@ import { AskCeceButton } from "@/components/home/AskCeceButton";
 import { HomeStickyCta } from "@/components/home/HomeStickyCta";
 import { getAllCourses, pickFeatured, totalStudents } from "@/lib/courses";
 import { getSiteAssets } from "@/lib/settings";
+import JsonLd from "@/components/seo/JsonLd";
+import { SITE_URL } from "@/lib/links";
+import { STORE } from "@/lib/localStore";
 
 export const revalidate = 60;
+
+// Homepage-only: Google reads the site name for search results from here.
+const WEBSITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: STORE.brand,
+  url: SITE_URL,
+  inLanguage: "id-ID",
+};
 
 const BENEFITS = [
   { title: "Resep teruji", desc: "semua udah aku tes berkali-kali, bukan coba-coba." },
@@ -48,6 +60,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col gap-10 sm:gap-14 lg:gap-16 pb-10 sm:pb-16">
+      <JsonLd data={WEBSITE_JSON_LD} />
       {/* Hero: text-first so the CTA lands above the fold on mobile. */}
       <section className="relative bg-cream overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10 sm:pt-12 sm:pb-14 lg:pt-32 lg:pb-32 relative z-10">
@@ -119,6 +132,8 @@ export default async function Home() {
 
       {/* Featured course */}
       <section className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* The card's title is an h3; this keeps the outline h1 > h2 > h3. */}
+        <h2 className="sr-only">Kelas Unggulan</h2>
         <Marginalia rotate={-2} className="block mb-4 text-center">
           kelas paling laris, mulai dari sini ya
         </Marginalia>
