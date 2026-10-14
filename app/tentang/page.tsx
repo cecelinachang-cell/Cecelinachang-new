@@ -50,10 +50,9 @@ export default function TentangPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
         {/* Foto Personal */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+        {/* Plain divs above the fold: a fade-in would ship the H1 and photo at
+            opacity 0 until hydration. */}
+        <div
           className="relative h-[360px] sm:h-[460px] lg:h-[700px] rounded-[3rem_0.5rem_3rem_0.5rem] overflow-hidden shadow-2xl bg-butter/20 border-8 border-white flex items-center justify-center group"
         >
           <Image
@@ -72,15 +71,10 @@ export default function TentangPage() {
               <a href="https://instagram.com/cecelinachang" target="_blank" rel="noopener noreferrer" className="hover:underline">@cecelinachang</a>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Cerita Personal */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="flex flex-col justify-center"
-        >
+        <div className="flex flex-col justify-center">
           <div className="inline-flex items-center space-x-2 bg-butter/40 text-rust-ink px-4 py-2 rounded-full text-sm font-medium mb-6 sm:mb-8 w-fit">
             <Heart className="w-5 h-5 fill-current" /> Halo, Saya Lina!
           </div>
@@ -173,7 +167,7 @@ export default function TentangPage() {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

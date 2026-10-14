@@ -55,7 +55,7 @@ export default async function Home() {
             <div className="flex flex-col text-center lg:text-left">
               <div className="inline-flex items-center gap-2 mx-auto lg:mx-0 mb-4 bg-butter/40 text-rust-ink px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit">
                 <span className="relative w-6 h-6 rounded-full overflow-hidden border border-white shrink-0">
-                  <Image src="/images/lina-avatar.jpeg" alt="" fill sizes="24px" className="object-cover object-top" />
+                  <Image src="/images/lina-avatar-240.jpg" alt="" fill sizes="24px" className="object-cover object-top" />
                 </span>
                 <BookOpen className="w-3.5 h-3.5" /> Kelas Online · Cece Lina Chang
               </div>
@@ -82,7 +82,8 @@ export default async function Home() {
                   fill
                   sizes="50vw"
                   className="object-cover object-top"
-                  priority
+                  // No priority: this column is hidden below lg, and a priority
+                  // preload made every phone download it anyway.
                   unoptimized
                   referrerPolicy="no-referrer"
                 />
@@ -110,7 +111,7 @@ export default async function Home() {
             <div className="text-xs sm:text-sm text-charcoal-brown/60">kelas online</div>
           </div>
           <div>
-            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">16 thn</div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">18 thn</div>
             <div className="text-xs sm:text-sm text-charcoal-brown/60">pengalaman pabrik bakso</div>
           </div>
         </div>

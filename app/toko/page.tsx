@@ -8,6 +8,7 @@ import { waLink } from "@/lib/links";
 import { Marginalia } from "@/components/Marginalia";
 import { getAllProducts } from "@/lib/products";
 import TokoCatalog from "@/components/toko/TokoCatalog";
+import ProductIndex from "@/components/toko/ProductIndex";
 
 export const revalidate = 60;
 
@@ -88,6 +89,8 @@ export default async function TokoPage() {
       </div>
 
       <Faq categories={["shipping", "refund"]} />
+
+      <ProductIndex products={products} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { getAllProducts, type Product } from '@/lib/products';
 import { normalizeCategory } from '@/lib/categories';
 import { findProductByName, localPageJsonLd } from '@/lib/localStore';
+import { pageSocialMetadata } from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -59,13 +60,7 @@ export const metadata: Metadata = {
   title: `${TITLE} | Cece Lina Chang`,
   description: DESCRIPTION,
   alternates: { canonical: PATH },
-  openGraph: {
-    title: `${TITLE} | Cece Lina Chang`,
-    description: DESCRIPTION,
-    url: PATH,
-    locale: 'id_ID',
-    type: 'website',
-  },
+  ...pageSocialMetadata(`${TITLE} | Cece Lina Chang`, DESCRIPTION, PATH),
 };
 
 export default async function SignoraStorePage() {

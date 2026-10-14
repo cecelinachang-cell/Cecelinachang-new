@@ -7,7 +7,7 @@ import { SITE_URL } from '@/lib/links';
 import { productJsonLd } from '@/lib/productSchema';
 import { findProductForParam, type SlugProduct } from '@/lib/productSlug';
 import { getAllProducts, type Product } from '@/lib/products';
-import { stripHtml } from '@/lib/utils';
+import { productSeoDescription, productSeoTitle } from '@/lib/productSeo';
 
 export const revalidate = 60;
 
@@ -48,8 +48,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const { product, slug: canonicalSlug } = match;
-  const title = `${product.name} | Cece Lina Chang`;
-  const description = product.description ? stripHtml(product.description).slice(0, 155) : undefined;
+  const title = productSeoTitle(product);
+  const description = productSeoDescription(product);
   const images = parseImageUrls(product.imageUrl);
   const canonical = `/toko/${canonicalSlug}`;
 
@@ -62,7 +62,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       url: `${SITE_URL}${canonical}`,
       siteName: 'Cece Lina Chang',
-      images: images.length > 0 ? [{ url: images[0], width: 1200, height: 630, alt: product.name }] : undefined,
+      // Catalog photos are square and vary in size, so no width/height is claimed.
+      images: images.length > 0 ? [{ url: images[0], alt: product.name }] : undefined,
       locale: 'id_ID',
       type: 'website',
     },

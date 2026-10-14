@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Star, ShoppingBag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
-import { motion } from 'motion/react';
 import { notFound } from 'next/navigation';
 import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
@@ -182,10 +181,9 @@ export default function ProductDetail({ slug, initialProduct }: { slug: string; 
   const productImages = parseImageUrls(product.imageUrl);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+    // No fade-in wrapper: it shipped the server HTML at opacity 0, so the
+    // product stayed invisible (and the LCP image unpainted) until hydration.
+    <div
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12"
     >
       <ViewContentPing
@@ -207,6 +205,7 @@ export default function ProductDetail({ slug, initialProduct }: { slug: string; 
               alt={product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
               className="object-contain p-8"
               referrerPolicy="no-referrer"
             />
@@ -225,7 +224,7 @@ export default function ProductDetail({ slug, initialProduct }: { slug: string; 
                 >
                   <Image
                     src={imgObj}
-                    alt={`Thumbnail ${i}`}
+                    alt={`${product.name}, foto ${i + 1}`}
                     fill
                     className="object-contain p-2"
                     referrerPolicy="no-referrer"
@@ -350,6 +349,6 @@ export default function ProductDetail({ slug, initialProduct }: { slug: string; 
           shopeeUrl: product.shopeeUrl,
         }}
       />
-    </motion.div>
+    </div>
   );
 }
