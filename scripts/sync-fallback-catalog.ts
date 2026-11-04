@@ -20,7 +20,11 @@
 //
 // Uses DATABASE_URL (the Neon connection string, with its password), so it must
 // be run locally and never shipped to the client.
-import { neon } from '@neondatabase/serverless';
+import { neon, types } from '@neondatabase/serverless';
+
+// Same as lib/db.ts: NUMERIC/BIGINT come back as text otherwise.
+types.setTypeParser(types.builtins.NUMERIC, (v) => Number(v));
+types.setTypeParser(types.builtins.INT8, (v) => Number(v));
 import { config } from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';

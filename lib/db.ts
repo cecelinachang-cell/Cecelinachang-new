@@ -1,4 +1,10 @@
-import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
+import { neon, types, type NeonQueryFunction } from '@neondatabase/serverless';
+
+// Postgres sends NUMERIC (courses.students, items.rating, ...) and BIGINT as
+// text; supabase-js returned numbers. Parse them back so the site keeps doing
+// arithmetic, not string concatenation (e.g. totalStudents).
+types.setTypeParser(types.builtins.NUMERIC, (v) => Number(v));
+types.setTypeParser(types.builtins.INT8, (v) => Number(v));
 
 /**
  * Server-only Postgres access (Neon, over HTTP). Never import from a client
