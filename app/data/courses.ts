@@ -67,7 +67,7 @@ export const courses = [
     title: "Kelas Lapis Legit 3 Generasi",
     description: "Kuasai resep warisan keluarga yang telah turun-temurun selama 3 generasi. Pelajari teknik memanggang selapis demi selapis untuk menghasilkan Lapis Legit yang moist, harum butter, dan bermotif cantik sempurna tanpa gagal.",
     price: "Rp 699.000",
-    originalPrice: "1.500.000",
+    originalPrice: "799.000",
     students: 1100,
     duration: "62 menit",
     modules: 0,
