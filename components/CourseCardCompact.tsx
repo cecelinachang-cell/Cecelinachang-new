@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChefHat, MessageCircle, Star, Users } from "lucide-react";
+import { ChefHat, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
-import LeadFormModal from "@/components/LeadFormModal";
 
 interface Course {
   id: string;
@@ -31,7 +29,6 @@ export default function CourseCardCompact({
   course: Course;
   featured?: boolean;
 }) {
-  const [showLeadForm, setShowLeadForm] = useState(false);
 
   return (
     <div className="bg-white rounded-[1.5rem_0.5rem_1.5rem_0.5rem] overflow-hidden shadow-sm border border-butter/30 hover:shadow-md transition-shadow flex flex-col relative">
@@ -94,21 +91,9 @@ export default function CourseCardCompact({
               {course.price}
             </span>
           </div>
-          <Button
-            type="button"
-            onClick={() => {
-              trackConversion("lead_form_open", course.slug, {
-                contentName: course.title,
-                contentType: "course",
-                value: parseIdr(course.price),
-              });
-              setShowLeadForm(true);
-            }}
-            variant="whatsapp"
-            size="md"
-            fullWidth
-          >
-            <MessageCircle className="w-4 h-4 mr-1.5" /> Chat Cece, Daftar Kelas
+          {/* Classes are bought on the class page (Lynk checkout), not by WhatsApp sign-up. */}
+          <Button href={`/kursus/${course.slug}`} size="md" fullWidth>
+            Lihat & Beli Kelas
           </Button>
           {course.shopeeUrl && (
             <Button
@@ -129,23 +114,9 @@ export default function CourseCardCompact({
               Beli via Shopee
             </Button>
           )}
-          <Link
-            href={`/kursus/${course.slug}`}
-            className="tap-target flex items-center justify-center text-center text-terracotta text-sm font-medium mt-1 hover:text-rust-ink transition-colors"
-          >
-            Lihat detail & kurikulum
-          </Link>
         </div>
       </div>
 
-      {showLeadForm && (
-        <LeadFormModal
-          courseSlug={course.slug}
-          courseTitle={course.title}
-          coursePrice={course.price}
-          onClose={() => setShowLeadForm(false)}
-        />
-      )}
     </div>
   );
 }
