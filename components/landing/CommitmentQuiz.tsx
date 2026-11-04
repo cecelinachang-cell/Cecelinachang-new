@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Check, MessageCircle } from "lucide-react";
+import { ArrowLeft, Check, Lock, MessageCircle } from "lucide-react";
 import type { OfflineClass, QuizQuestion } from "@/app/data/landing-pages";
 import { trackConversion } from "@/lib/analytics";
 import { buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLead";
 import { buildQuizLead, offersOffline, quizPains } from "@/lib/quizLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
+import { lynkCheckoutUrl } from "@/lib/lynk";
+import { parseIdr } from "@/lib/pixels";
 
 interface CommitmentQuizProps {
   courseSlug: string;
@@ -65,6 +67,9 @@ export function CommitmentQuiz({
   // Upsell: sellers also see the offline class, second, next to the online one.
   const offerOffline = offersOffline(questions, answers, offlineClass);
   const isOffline = offerOffline && classChoice === "offline";
+  // After the form, online buyers can pay on Lynk right away instead of waiting
+  // for an admin reply. The lead (and the ads' Lead event) is recorded either way.
+  const payUrl = isOffline ? null : lynkCheckoutUrl(courseSlug, "landing_page");
 
   useEffect(() => {
     flushPendingLeads();
@@ -224,15 +229,44 @@ export function CommitmentQuiz({
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-seledri/10 text-seledri">
                 <Check className="h-8 w-8" aria-hidden="true" />
               </div>
-              <p className="mb-2 font-display text-2xl font-extrabold text-kecap">Tinggal kirim pesannya ke Cece</p>
-              <p className="mb-6 text-kecap/70">
-                WhatsApp sudah terbuka dengan pesan yang siap dikirim. Belum terbuka?
-              </p>
+              {payUrl ? (
+                <>
+                  <p className="mb-2 font-display text-2xl font-extrabold text-kecap">Mau langsung mulai belajar?</p>
+                  <p className="mb-6 text-kecap/70">
+                    Bayar sekarang via QRIS, e-wallet, atau Virtual Account. Link kelas langsung masuk ke Gmail kamu.
+                  </p>
+                  <a
+                    href={payUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() =>
+                      trackConversion("checkout_open", courseSlug, {
+                        contentName: courseTitle,
+                        contentType: "course",
+                        value: parseIdr(coursePrice),
+                      })
+                    }
+                    className="tap-target mb-3 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-sambal px-6 py-4 font-bold text-white"
+                  >
+                    <Lock className="h-5 w-5" aria-hidden="true" /> Bayar Sekarang · {coursePrice}
+                  </a>
+                  <p className="mb-3 text-sm text-kecap/70">Mau tanya dulu? Pesan WhatsApp-mu sudah siap.</p>
+                </>
+              ) : (
+                <>
+                  <p className="mb-2 font-display text-2xl font-extrabold text-kecap">Tinggal kirim pesannya ke Cece</p>
+                  <p className="mb-6 text-kecap/70">
+                    WhatsApp sudah terbuka dengan pesan yang siap dikirim. Belum terbuka?
+                  </p>
+                </>
+              )}
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tap-target inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-seledri px-6 py-4 font-bold text-white"
+                className={`tap-target inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl px-6 py-4 font-bold ${
+                  payUrl ? "border border-seledri bg-white text-seledri" : "bg-seledri text-white"
+                }`}
               >
                 <MessageCircle className="h-5 w-5" aria-hidden="true" /> Buka WhatsApp
               </a>

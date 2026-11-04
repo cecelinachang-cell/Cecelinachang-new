@@ -9,6 +9,12 @@ describe('lynkCheckoutUrl', () => {
     );
   });
 
+  it('tags landing page traffic separately', () => {
+    expect(lynkCheckoutUrl('bakso-sapi-premium', 'landing_page')).toBe(
+      'https://lynk.id/cecelinachang/yrjo962jjj6j/checkout?utm_source=website&utm_medium=landing_page&utm_campaign=bakso-sapi-premium'
+    );
+  });
+
   it('returns null for a course that is not on Lynk', () => {
     expect(lynkCheckoutUrl('kelas-baru')).toBeNull();
   });
