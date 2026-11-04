@@ -2,10 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const pixelCalls: unknown[][] = [];
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: { from: () => ({ insert: () => ({ then: (r: () => void) => r() }) }) },
-}));
-
 vi.mock("@/lib/pixels", () => ({
   trackPixelEvent: (...args: unknown[]) => {
     pixelCalls.push(args);

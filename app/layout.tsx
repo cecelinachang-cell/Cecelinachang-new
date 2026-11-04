@@ -6,10 +6,9 @@ import { Footer } from '@/components/footer';
 import { SearchOverlay } from '@/components/SearchOverlay';
 import { CookieNotice } from '@/components/CookieNotice';
 import { AuthProvider } from '@/context/AuthContext';
-import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { Pixels } from '@/components/Pixels';
 import { MotionProvider } from '@/components/MotionProvider';
-import { supabase } from '@/lib/supabase';
+import { getSettingRows } from '@/lib/settings';
 import { SITE_URL } from '@/lib/links';
 import { STORE } from '@/lib/localStore';
 import { DEFAULT_OG_IMAGE } from '@/lib/seo';
@@ -45,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
   let ogImage = DEFAULT_OG_IMAGE;
 
   try {
-    const { data: settings } = await supabase.from('settings').select('*').in('id', ['general', 'hero_image']);
+    const settings = await getSettingRows(['general', 'hero_image']);
     const general = settings?.find(s => s.id === 'general');
     const heroImage = settings?.find(s => s.id === 'hero_image');
 
@@ -58,10 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ogImage = heroImage.logo_url;
     }
   } catch (error: any) {
-    const errMsg = error?.message || error?.toString() || '';
-    if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-      console.error('Error fetching metadata settings:', error);
-    }
+    console.error('Error fetching metadata settings:', error?.message || error);
   }
 
   return {
@@ -143,7 +139,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body className="font-sans bg-cream text-charcoal-brown min-h-screen flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <MotionProvider>
-            <AnalyticsTracker />
             <Pixels />
             <Navbar />
             <main className="flex-grow">

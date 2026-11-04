@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Star, ShoppingBag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { notFound } from 'next/navigation';
-import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { POLICIES } from '@/lib/policies';
 import { waLink, shopeeLink } from '@/lib/links';
@@ -61,55 +60,20 @@ export default function ProductDetail({ slug, initialProduct }: { slug: string; 
 
     const fetchProduct = async () => {
       try {
-        if (!isSupabaseConfigured()) {
-          const { products: fallbackProducts } = await import("@/app/data/products");
-          const found = fallbackProducts.find((p: any) => p.id === slug);
-          if (found) {
-            setProduct(found as unknown as Product);
-            if (found.description) {
-              setSanitizedDescription(DOMPurify.sanitize(found.description));
-            }
-            const parsedImages = parseImageUrls(found.imageUrl);
-            if (parsedImages.length > 0) {
-              setSelectedImage(parsedImages[0]);
-            }
-          } else {
-            setError(true);
+        // The server page passes initialProduct; without it, use the built-in catalog.
+        const { products: fallbackProducts } = await import("@/app/data/products");
+        const found = fallbackProducts.find((p: any) => p.id === slug);
+        if (found) {
+          setProduct(found as unknown as Product);
+          if (found.description) {
+            setSanitizedDescription(DOMPurify.sanitize(found.description));
           }
-          setLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabasePublic.from('items').select('*').eq('id', slug).single();
-        if (error) {
-           const errMsg = error?.message || (error as any)?.toString() || '';
-           if (errMsg !== "Failed to fetch" && !errMsg.includes("Failed to fetch")) {
-             console.error("Error fetching product detail:", errMsg);
-           }
-           // Try to recover with fallback
-           const { products: fallbackProducts } = await import("@/app/data/products");
-           const found = fallbackProducts.find((p: any) => p.id === slug);
-           if (found) {
-             setProduct(found as unknown as Product);
-             if (found.description) {
-               setSanitizedDescription(DOMPurify.sanitize(found.description));
-             }
-             const parsedImages = parseImageUrls(found.imageUrl);
-             if (parsedImages.length > 0) {
-               setSelectedImage(parsedImages[0]);
-             }
-           } else {
-             setError(true);
-           }
-        } else if (data) {
-           setProduct(data as Product);
-           if (data.description) {
-             setSanitizedDescription(DOMPurify.sanitize(data.description));
-           }
-           const parsedImages = parseImageUrls(data.imageUrl);
-           if (parsedImages.length > 0) {
-             setSelectedImage(parsedImages[0]);
-           }
+          const parsedImages = parseImageUrls(found.imageUrl);
+          if (parsedImages.length > 0) {
+            setSelectedImage(parsedImages[0]);
+          }
+        } else {
+          setError(true);
         }
       } catch (err: any) {
         const errMsg = err?.message || err?.toString() || '';

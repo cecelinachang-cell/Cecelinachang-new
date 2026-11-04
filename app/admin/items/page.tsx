@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { supabase } from "@/lib/supabase";
-import { compressImage, uploadToStorage, removeFromStorage, stripHtml, matchesSearchTerm } from "@/lib/utils";
+import { adminDb } from "@/lib/adminDb";
+import { compressImage, stripHtml, matchesSearchTerm } from "@/lib/utils";
+import { uploadToStorage, removeFromStorage } from "@/lib/adminStorage";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Modal } from "@/components/admin/Modal";
 import { withTimeout } from "@/lib/withTimeout";
@@ -66,7 +67,7 @@ export default function ItemsManager() {
 
   const fetchItems = useCallback(async () => {
     try {
-      const { data, error } = await supabase.from("items").select("*");
+      const { data, error } = await adminDb.from("items").select("*");
 
       if (error) {
         const errMsg = error.message || (error as any).toString();
@@ -104,7 +105,7 @@ export default function ItemsManager() {
   useEffect(() => {
     fetchItems();
 
-    const channel = supabase
+    const channel = adminDb
       .channel("public:items")
       .on(
         "postgres_changes",
@@ -114,7 +115,7 @@ export default function ItemsManager() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      adminDb.removeChannel(channel);
     };
   }, [fetchItems]);
 
@@ -144,10 +145,10 @@ export default function ItemsManager() {
 
   const executeDelete = async (id: string, imageUrl: string) => {
     try {
-      const { error } = await supabase.from("items").delete().eq("id", id);
+      const { error } = await adminDb.from("items").delete().eq("id", id);
       if (error) throw error;
       await Promise.all(
-        parseImageUrls(imageUrl).map((url) => removeFromStorage(supabase, url))
+        parseImageUrls(imageUrl).map((url) => removeFromStorage(url))
       );
       setAlertMsg({ type: "success", text: "Item berhasil dihapus." });
       fetchItems();
@@ -231,7 +232,7 @@ export default function ItemsManager() {
               );
               const path = `items/${editingItem?.id || "new"}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
               return withTimeout(
-                uploadToStorage(supabase, blob, path),
+                uploadToStorage(blob, path),
                 300000,
                 "Unggah gambar memakan waktu terlalu lama. Periksa koneksi internet.",
               );
@@ -275,7 +276,7 @@ export default function ItemsManager() {
       if (editingItem && editingItem.id) {
         // Update existing item
         const { error: updateErr } = await withTimeout<any>(
-          supabase.from("items").update(itemData).eq("id", editingItem.id),
+          adminDb.from("items").update(itemData).eq("id", editingItem.id),
           300000,
           "Menyimpan data memakan waktu terlalu lama. Pastikan koneksi internet stabil.",
         );
@@ -284,7 +285,7 @@ export default function ItemsManager() {
       } else {
         // Create new item
         const { error: insertErr } = await withTimeout<any>(
-          supabase.from("items").insert({
+          adminDb.from("items").insert({
             ...itemData,
             rating: 5.0,
             reviews: 0,

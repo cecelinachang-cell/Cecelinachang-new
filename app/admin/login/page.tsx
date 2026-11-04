@@ -3,54 +3,41 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Mail } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Lock } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { withTimeout } from '@/lib/withTimeout';
 
+// One shared admin password (ADMIN_PASSWORD in Vercel). The server sets a
+// signed httpOnly cookie on success; see app/api/admin/login.
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { refresh } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!supabase) {
-      setError('Supabase configuration is missing.');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const { data: signInData, error: signInErr } = await withTimeout(
-        supabase.auth.signInWithPassword({
-          email,
-          password,
+      const res = await withTimeout(
+        fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
         }),
         15_000,
         'Login request timed out. Please try again.',
       );
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(body.error || 'Failed to login');
 
-      if (signInErr) throw signInErr;
-
-      const currentUser = signInData?.session?.user;
-      if (!currentUser) throw new Error('No user session found. Please check your credentials.');
-
-      const { data: userDoc } = await withTimeout(
-        supabase.from('users').select('role').eq('id', currentUser.id).single(),
-        10_000,
-        'Admin role check timed out. Please try again.',
-      );
-
-      if (userDoc?.role === 'admin') {
+      if (await refresh()) {
         router.push('/admin/dashboard');
       } else {
-        await supabase.auth.signOut();
-        setError('Access denied. Admin privileges required.');
+        setError('Login succeeded but the session was not saved. Are cookies blocked?');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to login');
@@ -75,31 +62,16 @@ export default function AdminLogin() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">Email Address</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-stone-400" />
-              </div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-stone-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                placeholder="admin@example.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">Password</label>
+            <label htmlFor="admin-password" className="block text-sm font-medium text-stone-700 mb-2">Admin Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-stone-400" />
               </div>
               <input
+                id="admin-password"
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="block w-full pl-10 pr-3 py-3 border border-stone-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 sm:text-sm"

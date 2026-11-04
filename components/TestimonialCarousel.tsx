@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabasePublic, isSupabaseConfigured } from '@/lib/supabase';
 import { withTimeout } from '@/lib/withTimeout';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -43,52 +42,15 @@ export function TestimonialCarousel() {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        if (!isSupabaseConfigured()) {
-          setTestimonials(FALLBACK_TESTIMONIALS);
-          setLoading(false);
-          return;
-        }
-
-        // Testimonials are public content. Avoid the session-backed client here:
-        // its auth initialization can be blocked by a stale browser lock and leave
-        // this component's loading state unresolved indefinitely.
-        const { data, error } = await withTimeout(
-          supabasePublic
-            .from('testimonials')
-            .select('*')
-            .order('createdAt', { ascending: false }),
-          15_000,
-          'Testimonial query timed out',
-        );
-          
-        if (error) {
-          const errMsg = error.message || (error as any).toString();
-          if (errMsg.includes('schema cache')) {
-             console.warn('Supabase schema not initialized yet.');
-          } else if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
-             console.warn('AdBlocker or database connection issue. Testimonial carousel fell back to offline slides.');
-          } else {
-             console.error('Error fetching testimonials:', errMsg);
-          }
-          setTestimonials(FALLBACK_TESTIMONIALS);
-        } else if (!data || data.length === 0) {
-          setTestimonials(FALLBACK_TESTIMONIALS);
-        } else {
-          // Map database field 'imageUrl' to component's 'image' property
-          const mapped = data.map((item: any) => ({
-            id: item.id,
-            image: item.imageUrl || item.image || '',
-            createdAt: item.createdAt || item.created_at
-          })).filter(item => item.image !== '');
-
-          setTestimonials(mapped.length > 0 ? mapped : FALLBACK_TESTIMONIALS);
-        }
+        // Cached server route (app/api/testimonials); the cover photos below
+        // only show if it fails or there are no testimonials yet.
+        const res = await withTimeout(fetch('/api/testimonials'), 15_000, 'Testimonial request timed out');
+        const body = res.ok ? ((await res.json()) as { testimonials?: Testimonial[] }) : null;
+        const list = body?.testimonials ?? [];
+        if (!res.ok) console.error('Error fetching testimonials:', res.status);
+        setTestimonials(list.length > 0 ? list : FALLBACK_TESTIMONIALS);
       } catch (err: any) {
-        if (err.message === 'Failed to fetch' || err.toString().includes('Failed to fetch')) {
-          console.warn('AdBlocker or database connection issue. Testimonial carousel fell back to offline slides.');
-        } else {
-          console.error('Network or unexpected error fetching testimonials:', err);
-        }
+        console.error('Network or unexpected error fetching testimonials:', err);
         setTestimonials(FALLBACK_TESTIMONIALS);
       } finally {
         setLoading(false);

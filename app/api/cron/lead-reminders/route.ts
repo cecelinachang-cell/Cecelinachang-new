@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-admin';
+import { getSql, isDbConfigured } from '@/lib/db';
 import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildReminderEmail } from '@/lib/emails/lead-emails';
 
@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 
-  const admin = createAdminClient();
-  if (!admin || !isResendConfigured()) {
+  if (!isDbConfigured() || !isResendConfigured()) {
     return NextResponse.json({ ok: true, sent: 0, skipped: 'not configured' });
   }
 
@@ -23,22 +22,23 @@ export async function GET(req: NextRequest) {
   const windowStart = new Date(now - 96 * 60 * 60 * 1000).toISOString();
   const windowEnd = new Date(now - 44 * 60 * 60 * 1000).toISOString();
 
-  const { data: leads, error } = await admin
-    .from('leads')
-    .select('id, email, course_title, created_at')
-    .not('email', 'is', null)
-    .not('welcome_email_sent_at', 'is', null)
-    .is('reminder_email_sent_at', null)
-    .gte('created_at', windowStart)
-    .lte('created_at', windowEnd);
-
-  if (error) {
-    console.error('lead-reminders: query failed', error.message);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  const sql = getSql();
+  let leads: { id: string; email: string | null; course_title: string }[];
+  try {
+    leads = (await sql`
+      select id, email, course_title, created_at from leads
+      where email is not null
+        and welcome_email_sent_at is not null
+        and reminder_email_sent_at is null
+        and created_at >= ${windowStart} and created_at <= ${windowEnd}`) as typeof leads;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('lead-reminders: query failed', message);
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 
   let sent = 0;
-  for (const lead of leads ?? []) {
+  for (const lead of leads) {
     if (!lead.email) continue;
     const { subject, html } = buildReminderEmail(lead.course_title);
     const { error: sendError } = await resend.emails.send(
@@ -49,12 +49,9 @@ export async function GET(req: NextRequest) {
       console.error(`lead-reminders: send failed for ${lead.id}`, sendError.message);
       continue;
     }
-    await admin
-      .from('leads')
-      .update({ reminder_email_sent_at: new Date().toISOString() })
-      .eq('id', lead.id);
+    await sql`update leads set reminder_email_sent_at = now() where id = ${lead.id}`;
     sent += 1;
   }
 
-  return NextResponse.json({ ok: true, sent, checked: leads?.length ?? 0 });
+  return NextResponse.json({ ok: true, sent, checked: leads.length });
 }

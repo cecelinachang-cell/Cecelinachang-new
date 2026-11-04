@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { compressImage, uploadToStorage, removeFromStorage } from '@/lib/utils';
+import { adminDb } from '@/lib/adminDb';
+import { compressImage } from '@/lib/utils';
+import { uploadToStorage, removeFromStorage } from '@/lib/adminStorage';
 import { Plus, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
 import { Modal } from '@/components/admin/Modal';
 import { withTimeout } from '@/lib/withTimeout';
@@ -35,7 +36,7 @@ export default function TestimonialsManager() {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await adminDb
           .from('testimonials')
           .select('*')
           .order('createdAt', { ascending: false });
@@ -63,13 +64,13 @@ export default function TestimonialsManager() {
 
     fetchTestimonials();
     
-    const channel = supabase
+    const channel = adminDb
       .channel('public:testimonials')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, fetchTestimonials)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      adminDb.removeChannel(channel);
     };
   }, []);
 
@@ -136,7 +137,7 @@ export default function TestimonialsManager() {
         );
         const path = `testimonials/${editingTestimonial?.id || 'new'}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
         imageUrl = await withTimeout(
-          uploadToStorage(supabase, blob, path),
+          uploadToStorage(blob, path),
           300000,
           'Unggah gambar timeout. Periksa koneksi internet.'
         );
@@ -151,7 +152,7 @@ export default function TestimonialsManager() {
 
       if (editingTestimonial) {
         const { error: updateErr } = await withTimeout<any>(
-          supabase.from('testimonials').update(testimonialData).eq('id', editingTestimonial.id),
+          adminDb.from('testimonials').update(testimonialData).eq('id', editingTestimonial.id),
           300000,
           'Update testimoni timeout. Hubungan stabil?'
         );
@@ -159,7 +160,7 @@ export default function TestimonialsManager() {
         setAlertMsg({ type: 'success', text: 'Testimoni berhasil diperbarui!' });
       } else {
         const { error: insertErr } = await withTimeout<any>(
-          supabase.from('testimonials').insert({
+          adminDb.from('testimonials').insert({
             ...testimonialData,
             createdAt: new Date().toISOString()
           }),
@@ -187,9 +188,9 @@ export default function TestimonialsManager() {
 
   const executeDelete = async (id: string, imageUrl?: string) => {
     try {
-      const { error: deleteErr } = await supabase.from('testimonials').delete().eq('id', id);
+      const { error: deleteErr } = await adminDb.from('testimonials').delete().eq('id', id);
       if (deleteErr) throw deleteErr;
-      if (imageUrl) await removeFromStorage(supabase, imageUrl);
+      if (imageUrl) await removeFromStorage(imageUrl);
       setTestimonials(prev => prev.filter(t => t.id !== id));
       setAlertMsg({ type: 'success', text: 'Testimoni berhasil dihapus!' });
     } catch (error: any) {

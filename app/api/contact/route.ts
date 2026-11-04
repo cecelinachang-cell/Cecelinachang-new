@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getSql, isDbConfigured } from '@/lib/db';
 import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
@@ -26,19 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  if (!isSupabaseConfigured()) {
+  if (!isDbConfigured()) {
     return NextResponse.json({ ok: true });
   }
 
-  const { error } = await supabase.from('customer_inquiries').insert({
-    name,
-    whatsapp,
-    message,
-    topic: 'Formulir Kontak',
-  });
-
-  if (error) {
-    console.error('Error inserting contact message:', error.message);
+  try {
+    await getSql()`
+      insert into customer_inquiries (name, whatsapp, message, topic)
+      values (${name}, ${whatsapp}, ${message}, 'Formulir Kontak')`;
+  } catch (err) {
+    console.error('Error inserting contact message:', err instanceof Error ? err.message : err);
   }
 
   return NextResponse.json({ ok: true });

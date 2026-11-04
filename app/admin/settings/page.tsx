@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { compressImage, uploadToStorage } from '@/lib/utils';
+import { adminDb } from '@/lib/adminDb';
+import { compressImage } from '@/lib/utils';
+import { uploadToStorage } from '@/lib/adminStorage';
 import { withTimeout } from '@/lib/withTimeout';
 import { Save, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -19,7 +20,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const { data, error } = await supabase.from('settings').select('*').eq('id', 'general').single();
+        const { data, error } = await adminDb.from('settings').select('*').eq('id', 'general').single();
         if (!error && data) {
           setTitle(data.title || '');
           setDescription(data.description || '');
@@ -35,13 +36,13 @@ export default function Settings() {
     fetchSettings();
     
     // Subscribe to updates
-    const channel = supabase
+    const channel = adminDb
       .channel('public:settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, fetchSettings)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      adminDb.removeChannel(channel);
     };
   }, []);
 
@@ -68,14 +69,14 @@ export default function Settings() {
       if (logoFile) {
         const blob = await compressImage(logoFile, 512);
         logoUrl = await withTimeout(
-          uploadToStorage(supabase, blob, `settings/logo-${Date.now()}.webp`),
+          uploadToStorage(blob, `settings/logo-${Date.now()}.webp`),
           300000,
           'Unggah logo memakan waktu terlalu lama (timeout 5 menit). Koneksi lambat?'
         );
       }
 
       const { error } = await withTimeout<any>(
-        supabase.from('settings').upsert({
+        adminDb.from('settings').upsert({
           id: 'general',
           title,
           description,

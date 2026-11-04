@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/lib/supabase";
-import { compressImage, uploadToStorage, removeFromStorage, matchesSearchTerm } from "@/lib/utils";
+import { adminDb } from "@/lib/adminDb";
+import { compressImage, matchesSearchTerm } from "@/lib/utils";
+import { uploadToStorage, removeFromStorage } from "@/lib/adminStorage";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Modal } from "@/components/admin/Modal";
 import { withTimeout } from "@/lib/withTimeout";
@@ -89,7 +90,7 @@ export default function CoursesManager() {
 
   const fetchCourses = async () => {
     try {
-      const { data, error } = await supabase.from("courses").select("*");
+      const { data, error } = await adminDb.from("courses").select("*");
 
       if (error) {
         const errMsg = error.message || (error as any).toString();
@@ -127,7 +128,7 @@ export default function CoursesManager() {
   useEffect(() => {
     fetchCourses();
 
-    const channel = supabase
+    const channel = adminDb
       .channel("public:courses")
       .on(
         "postgres_changes",
@@ -137,7 +138,7 @@ export default function CoursesManager() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      adminDb.removeChannel(channel);
     };
   }, []);
 
@@ -189,9 +190,9 @@ export default function CoursesManager() {
 
   const executeDelete = async (id: string, imageUrl?: string) => {
     try {
-      const { error } = await supabase.from("courses").delete().eq("id", id);
+      const { error } = await adminDb.from("courses").delete().eq("id", id);
       if (error) throw error;
-      if (imageUrl) await removeFromStorage(supabase, imageUrl);
+      if (imageUrl) await removeFromStorage(imageUrl);
       setCourses(prev => prev.filter(c => c.id !== id));
       setAlertMsg({ type: "success", text: "Kelas berhasil dihapus." });
     } catch (error: any) {
@@ -222,7 +223,7 @@ export default function CoursesManager() {
     try {
       const results = await Promise.all(
         updatedCourses.map((course) =>
-          supabase
+          adminDb
             .from("courses")
             .update({ orderIndex: course.orderIndex })
             .eq("id", course.id),
@@ -344,7 +345,7 @@ export default function CoursesManager() {
           setUploadProgress(60);
           const path = `courses/${editingCourse?.id || "new"}/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
           imageUrl = await withTimeout(
-            uploadToStorage(supabase, blob, path),
+            uploadToStorage(blob, path),
             300000,
             "Unggah gambar memakan waktu terlalu lama. Periksa koneksi internet.",
           );
@@ -388,7 +389,7 @@ export default function CoursesManager() {
 
       const trySave = async (dataPayload: any) => {
         if (editingCourse) {
-          const { data, error } = await supabase
+          const { data, error } = await adminDb
             .from("courses")
             .update(dataPayload)
             .eq("id", editingCourse.id)
@@ -397,7 +398,7 @@ export default function CoursesManager() {
           if (!data || data.length === 0)
             throw new Error("row-level security policy or no rows updated");
         } else {
-          const { data, error } = await supabase
+          const { data, error } = await adminDb
             .from("courses")
             .insert({
               ...dataPayload,

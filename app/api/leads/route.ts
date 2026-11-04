@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { createAdminClient } from '@/lib/supabase-admin';
+import { getSql, isDbConfigured } from '@/lib/db';
 import { getClientIp, isRateLimited } from '@/lib/rate-limit';
 import { resend, isResendConfigured, FROM_ADDRESS, REPLY_TO_ADDRESS } from '@/lib/resend';
 import { buildWelcomeEmail } from '@/lib/emails/lead-emails';
-import { isMissingColumnError, sanitizeAgeRange, sanitizeName, sanitizeQuizAnswers, sanitizeSource } from '@/lib/leadFields';
+import { sanitizeAgeRange, sanitizeName, sanitizeQuizAnswers, sanitizeSource } from '@/lib/leadFields';
 
 export async function POST(req: NextRequest) {
   // 20/min: Indonesian mobile carriers put many users behind one IP (CGNAT),
@@ -31,8 +30,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  if (!isSupabaseConfigured()) {
-    return NextResponse.json({ ok: true });
+  if (!isDbConfigured()) {
+    // Not ok: the client keeps the lead queued until the database is back.
+    return NextResponse.json({ ok: false }, { status: 503 });
   }
 
   const email = String(body.email || '').slice(0, 300) || null;
@@ -45,8 +45,7 @@ export async function POST(req: NextRequest) {
     city: String(body.city || '').slice(0, 100) || null,
     tiktok_handle: String(body.tiktokHandle || '').slice(0, 100) || null,
   };
-  // Landing-page extras (app/lp). Only sent when present, so plain course
-  // sign-ups insert exactly the columns they always did.
+  // Landing-page extras (app/lp). Plain course sign-ups leave them null.
   const quizAnswers = sanitizeQuizAnswers(body.quizAnswers);
   const source = sanitizeSource(body.source);
   const ageRange = sanitizeAgeRange(body.ageRange);
@@ -58,40 +57,21 @@ export async function POST(req: NextRequest) {
     ...(ageRange ? { age_range: ageRange } : {}),
   };
 
-  // Writes go through the service-role client. public.leads grants anon INSERT
-  // but no SELECT, so `insert().select()` under the anon key is rejected by RLS
-  // (42501) and the lead is lost -- that silently swallowed a month of
-  // sign-ups. Service role bypasses RLS and returns the id the welcome email
-  // needs for its idempotency key.
-  const admin = createAdminClient();
-
-  type InsertResult = {
-    data: { id: string } | null;
-    error: { code?: string; message: string } | null;
-  };
-
-  const insertLead = async (row: Record<string, unknown>): Promise<InsertResult> => {
-    if (admin) {
-      return (await admin.from('leads').insert(row).select('id').single()) as InsertResult;
-    }
-    // No SUPABASE_SERVICE_ROLE_KEY: still capture the lead under the anon key,
-    // just without RETURNING (which RLS denies). No id means no welcome email.
-    console.warn('SUPABASE_SERVICE_ROLE_KEY missing; lead saved without the welcome email.');
-    const { error } = await supabase.from('leads').insert(row);
-    return { data: null, error };
-  };
-
-  let { data, error } = await insertLead({ ...baseRow, ...extras });
-
-  // The quiz_answers/source/age_range/name migrations may not be applied yet. Never
-  // lose the lead over it: retry with only the original columns.
-  if (error && Object.keys(extras).length > 0 && isMissingColumnError(error)) {
-    console.warn(`Lead extras skipped (${error.code}); apply supabase/migrations/20260922_lead_quiz_answers.sql`);
-    ({ data, error } = await insertLead(baseRow));
-  }
-
-  if (error) {
-    console.error('Error inserting lead:', error.message);
+  let id: string | null = null;
+  try {
+    const sql = getSql();
+    const [row] = await sql`
+      insert into leads (course_slug, course_title, email, phone, city, tiktok_handle, name, quiz_answers, source, age_range)
+      values (
+        ${baseRow.course_slug}, ${baseRow.course_title}, ${baseRow.email}, ${baseRow.phone}, ${baseRow.city},
+        ${baseRow.tiktok_handle}, ${extras.name ?? null},
+        ${extras.quiz_answers ? JSON.stringify(extras.quiz_answers) : null}::jsonb,
+        ${extras.source ?? null}, ${extras.age_range ?? null}
+      )
+      returning id`;
+    id = (row?.id as string) ?? null;
+  } catch (err) {
+    console.error('Error inserting lead:', err instanceof Error ? err.message : err);
     // Non-2xx so the client keeps the lead in its retry queue.
     return NextResponse.json({ ok: false }, { status: 500 });
   }
@@ -99,20 +79,17 @@ export async function POST(req: NextRequest) {
   // Best-effort: a failed welcome email never fails the lead capture itself.
   // Awaited (not fire-and-forget) so the send completes before the
   // serverless function is torn down after the response is sent.
-  if (admin && data?.id && email && isResendConfigured()) {
+  if (id && email && isResendConfigured()) {
     try {
       const { subject, html } = buildWelcomeEmail(courseTitle);
       const { error: sendError } = await resend.emails.send(
         { from: FROM_ADDRESS, replyTo: REPLY_TO_ADDRESS, to: [email], subject, html },
-        { idempotencyKey: `lead-welcome/${data.id}` },
+        { idempotencyKey: `lead-welcome/${id}` },
       );
       if (sendError) {
         console.error('Error sending welcome email:', sendError.message);
       } else {
-        await admin
-          .from('leads')
-          .update({ welcome_email_sent_at: new Date().toISOString() })
-          .eq('id', data.id);
+        await getSql()`update leads set welcome_email_sent_at = now() where id = ${id}`;
       }
     } catch (err) {
       console.error('Unexpected welcome email error:', err);

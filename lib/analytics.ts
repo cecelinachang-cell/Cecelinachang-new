@@ -1,4 +1,3 @@
-import { supabase } from '@/lib/supabase';
 import { trackPixelEvent, type PixelEvent } from '@/lib/pixels';
 
 export type ConversionType =
@@ -6,7 +5,7 @@ export type ConversionType =
   | 'lead_form_submit'
   | 'whatsapp_open'
   | 'shopee_open'
-  // Online payment (components/CheckoutModal.tsx -> Midtrans).
+  // Online payment (the Lynk checkout, lib/lynk.ts).
   | 'checkout_open'
   | 'checkout_submit'
   // Landing-page funnel (app/lp).
@@ -33,25 +32,15 @@ const PIXEL_EVENT_MAP: Partial<Record<ConversionType, PixelEvent>> = {
   lead_form_submit: 'Lead',
   whatsapp_open: 'Contact',
   // Same ad signal as the quiz's WhatsApp hand-off; the separate type keeps
-  // the two paths apart in the conversions table.
+  // the two paths apart in the pixel reports.
   whatsapp_direct: 'Contact',
   shopee_open: 'AddToCart',
 };
 
+// Fires the ad pixels only. Conversions used to be written to the database
+// too; that stopped with the move to Neon's free plan (a write per click would
+// keep the database awake all day). The Meta/TikTok pixels still get them.
 export function trackConversion(type: ConversionType, courseSlug?: string, extra?: ConversionExtra) {
-  try {
-    const sessionId = sessionStorage.getItem('analytics_session_id') || 'unknown';
-    supabase
-      .from('conversions')
-      .insert({
-        type,
-        course_slug: courseSlug || null,
-        path: window.location.pathname,
-        session_id: sessionId,
-      })
-      .then(() => {});
-  } catch {}
-
   const pixelEvent = PIXEL_EVENT_MAP[type];
   if (!pixelEvent) return;
   trackPixelEvent(pixelEvent, {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { adminDb } from '@/lib/adminDb';
 import {
   Package,
   Tags,
@@ -100,8 +100,8 @@ export default function Dashboard() {
   const fetchContentStats = useCallback(async () => {
     try {
       const [{ count: itemsCount, data: itemsData }, { count: coursesCount }] = await Promise.all([
-        supabase.from('items').select('category', { count: 'exact' }),
-        supabase.from('courses').select('id', { count: 'exact', head: true }),
+        adminDb.from('items').select('category', { count: 'exact' }),
+        adminDb.from('courses').select('id', { count: 'exact', head: true }),
       ]);
 
       const categories = new Set<string>();
@@ -138,7 +138,7 @@ export default function Dashboard() {
 
     setAnalyticsError(null);
     try {
-      const { data, error } = await supabase.rpc('analytics_dashboard', { days: range, lim: 8 });
+      const { data, error } = await adminDb.rpc('analytics_dashboard', { days: range, lim: 8 });
       if (isStale()) return;
       if (error) throw error;
 
@@ -180,7 +180,7 @@ export default function Dashboard() {
   /** Polled independently of the range-scoped bundle above -- "Active Now" is a live figure, not a range figure. */
   const fetchActiveNow = useCallback(async () => {
     try {
-      const { data, error } = await supabase.rpc('analytics_active_now');
+      const { data, error } = await adminDb.rpc('analytics_active_now');
       if (error) throw error;
       setSummary((prev) => ({ ...prev, active_now: Number(data ?? 0) }));
     } catch (err) {
