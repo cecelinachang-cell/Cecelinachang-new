@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   Star,
   Users,
-  Clock,
+  ChefHat,
 } from "lucide-react";
 import { stripHtml } from "@/lib/utils";
 import LeadFormModal from "./LeadFormModal";
@@ -103,8 +103,8 @@ export default function CourseCard({ course }: { course: Course }) {
               {course.students} Murid
             </div>
             <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
-              <Clock className="w-4 h-4 mr-2 text-terracotta" />
-              {course.duration}
+              <ChefHat className="w-4 h-4 mr-2 text-terracotta" />
+              Langsung praktik di rumah
             </div>
           </div>
 
