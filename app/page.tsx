@@ -16,6 +16,8 @@ import { AskCeceButton } from "@/components/home/AskCeceButton";
 import { HomeStickyCta } from "@/components/home/HomeStickyCta";
 import { getAllCourses, pickFeatured, totalStudents } from "@/lib/courses";
 import { getSiteAssets } from "@/lib/settings";
+import { Promo1111 } from "@/components/Promo1111";
+import { buildPromoBundles } from "@/lib/promo1111";
 
 export const revalidate = 60;
 
@@ -97,6 +99,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* 11.11 bundles: shows itself only 11–13 Nov 2026 (lib/promo1111.ts). */}
+      <Promo1111 bundles={buildPromoBundles(courses)} />
 
       {/* Social proof strip */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full">

@@ -7,6 +7,8 @@ import CourseCardCompact from "@/components/CourseCardCompact";
 import { Marginalia } from "@/components/Marginalia";
 import Faq from "@/components/Faq";
 import { getAllCourses, type Course } from "@/lib/courses";
+import { Promo1111 } from "@/components/Promo1111";
+import { buildPromoBundles } from "@/lib/promo1111";
 
 export const revalidate = 60; // Cache the page for 60 seconds
 
@@ -83,6 +85,9 @@ export default async function KursusPage() {
           </Link>
         </p>
       </div>
+
+      {/* 11.11 bundles: shows itself only 11–13 Nov 2026 (lib/promo1111.ts). */}
+      <Promo1111 bundles={buildPromoBundles(finalCourses)} contained={false} />
 
       {finalCourses.length > 0 ? (
         <>
