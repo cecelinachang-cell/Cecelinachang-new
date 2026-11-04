@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { adminDb } from '@/lib/adminDb';
 import { Inbox, RefreshCw, MessageSquare, GraduationCap, AlertCircle } from 'lucide-react';
 import { parseLeadSource } from '@/lib/submitLead';
 
@@ -62,8 +62,8 @@ const formatWhen = (iso: string) =>
  * awaiting rather than setting state synchronously on mount. */
 async function loadLeads() {
   const [leadsRes, inquiriesRes] = await Promise.all([
-    supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(500),
-    supabase
+    adminDb.from('leads').select('*').order('created_at', { ascending: false }).limit(500),
+    adminDb
       .from('customer_inquiries')
       .select('*')
       .order('created_at', { ascending: false })
@@ -117,7 +117,7 @@ export default function LeadsPage() {
     // Optimistic: the select is the only control, so a failed write is visible
     // on the next refresh rather than silently diverging.
     setInquiries((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminDb
       .from('customer_inquiries')
       .update({ status })
       .eq('id', id);

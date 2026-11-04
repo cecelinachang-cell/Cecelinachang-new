@@ -1,12 +1,12 @@
-// Regenerates the static fallback catalogs in app/data/ from Supabase.
+// Regenerates the static fallback catalogs in app/data/ from the database (Neon).
 //
 // Every catalog read path (app/kursus, app/toko, app/page.tsx,
 // components/ProductDetail, lib/search, lib/chatbot-knowledge, app/sitemap)
-// silently substitutes these files whenever a Supabase query errors, times
-// out, or returns zero rows. That means any drift between Supabase and these
-// files shows up on the live site as a second, stale version of the catalog —
-// e.g. a course priced Rp 299.000 in Supabase rendering as Rp 199.000 for
-// whichever requests hit the fallback path.
+// silently substitutes these files whenever a database query errors, times
+// out, or returns zero rows. That means any drift between the database and
+// these files shows up on the live site as a second, stale version of the
+// catalog -- e.g. a course priced Rp 299.000 in the database rendering as
+// Rp 199.000 for whichever requests hit the fallback path.
 //
 // Run this after every catalog edit in /admin so the fallback stays a byte-
 // for-byte mirror of the live data:
@@ -16,13 +16,11 @@
 //
 // Pass --localize-images to also download each course photo into
 // public/images/<slug>.webp and point the fallback at the checked-in copy
-// instead of a remote URL, so the images survive both a dead image host and a
-// restricted Supabase project. Requires storage egress, so it cannot run while
-// the project is returning 402.
+// instead of a remote URL, so the images survive a dead image host.
 //
-// Uses the service-role key (server-side only, bypasses RLS) so it must be
-// run locally and never shipped to the client.
-import { createClient } from '@supabase/supabase-js';
+// Uses DATABASE_URL (the Neon connection string, with its password), so it must
+// be run locally and never shipped to the client.
+import { neon } from '@neondatabase/serverless';
 import { config } from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,14 +28,14 @@ import sharp from 'sharp';
 
 config({ path: '.env.local' });
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const databaseUrl = process.env.DATABASE_URL;
 
-if (!url || !serviceKey) {
-  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+if (!databaseUrl) {
+  throw new Error('Missing DATABASE_URL in .env.local (run `vercel env pull .env.local`)');
 }
 
-const supabase = createClient(url, serviceKey);
+const sql = neon(databaseUrl);
+const TABLES = new Set(['courses', 'items']);
 const checkOnly = process.argv.includes('--check');
 const localizeImages = process.argv.includes('--localize-images');
 
@@ -189,9 +187,12 @@ async function localizeImage(slug: string, remoteUrl: string): Promise<string> {
 }
 
 async function fetchTable(table: string) {
-  const { data, error } = await supabase.from(table).select('*');
-  if (error) {
-    throw new Error(`Failed to read "${table}" from Supabase: ${error.message}`);
+  if (!TABLES.has(table)) throw new Error(`Unknown table: ${table}`);
+  let data: Record<string, unknown>[];
+  try {
+    data = (await sql.query(`select * from "${table}"`)) as Record<string, unknown>[];
+  } catch (err) {
+    throw new Error(`Failed to read "${table}" from the database: ${err instanceof Error ? err.message : err}`);
   }
   if (!data || data.length === 0) {
     // Writing an empty fallback would make every failed query render an empty

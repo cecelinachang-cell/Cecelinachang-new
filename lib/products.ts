@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { CACHE_SECONDS, TAGS, dbQuery, isDbConfigured } from '@/lib/db';
 import { fetchProducts } from '@/lib/fetchProducts';
 import { assignProductSlugs, slugifyProductName } from '@/lib/productSlug';
 
@@ -24,18 +24,17 @@ export interface Product {
   slug?: string;
 }
 
-// Same pattern as lib/courses.ts's getAllCourses: Next 15 doesn't cache fetch()
-// by default and supabase-js's internal fetch doesn't opt in, so a page's
-// `revalidate = 60` caches nothing on its own -- wrap the fetch.
+// Cached like lib/courses.ts's getAllCourses, so a page visit doesn't wake the
+// database. Admin saves revalidate TAGS.items.
 //
-// timeoutMs is 3s (not fetchProducts's 20s default): this now runs during SSR,
-// so a slow Supabase must not turn a fast skeleton into a 20s TTFB.
+// timeoutMs is 3s (not fetchProducts's 20s default): this runs during SSR, and
+// a cold database (a few seconds to wake) must not turn into a 20s TTFB.
 export const getAllProducts = unstable_cache(
   async (): Promise<Product[]> => {
     const { products: fallback } = await import('@/app/data/products');
     const rows = await fetchProducts<Product>({
-      isConfigured: isSupabaseConfigured(),
-      query: () => supabase.from('items').select('*').order('createdAt', { ascending: false }),
+      isConfigured: isDbConfigured(),
+      query: () => dbQuery<Product>((sql) => sql`select * from items order by "createdAt" desc`),
       fallback: fallback as unknown as Product[],
       timeoutMs: 3000,
     });
@@ -46,5 +45,5 @@ export const getAllProducts = unstable_cache(
     }));
   },
   ['all-products'],
-  { revalidate: 60 },
+  { revalidate: CACHE_SECONDS, tags: [TAGS.items] },
 );

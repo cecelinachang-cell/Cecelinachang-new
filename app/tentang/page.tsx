@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Heart, Users, Instagram } from 'lucide-react';
 import { motion } from 'motion/react';
-import { supabase } from '@/lib/supabase';
 import { Marginalia } from '@/components/Marginalia';
 import { Button } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
@@ -21,29 +20,15 @@ export default function TentangPage() {
   const [studentsLabel, setStudentsLabel] = useState(() => totalStudents(fallbackCourses as any).toLocaleString('id-ID'));
 
   useEffect(() => {
-    const fetchAsset = async () => {
-      try {
-        const { data, error } = await supabase.from('settings').select('logo_url').eq('id', 'about_image').single();
-        if (!error && data?.logo_url) {
-          setAboutImage(data.logo_url);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchAsset();
-
-    const fetchStudentCount = async () => {
-      try {
-        const { data, error } = await supabase.from('courses').select('students');
-        if (!error && data && data.length > 0) {
-          setStudentsLabel(totalStudents(data as any).toLocaleString('id-ID'));
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchStudentCount();
+    // About photo and student count, from a cached server route (app/api/site/about).
+    fetch('/api/site/about')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((info: { aboutImage: string | null; students: number } | null) => {
+        if (!info) return;
+        if (info.aboutImage) setAboutImage(info.aboutImage);
+        if (info.students > 0) setStudentsLabel(info.students.toLocaleString('id-ID'));
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   return (

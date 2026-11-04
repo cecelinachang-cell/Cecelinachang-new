@@ -42,10 +42,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        // Admin uploads (lib/adminStorage.ts) and the images migrated from Supabase.
         protocol: 'https',
-        hostname: 'yjxvrsmubrasvoipkwvn.supabase.co',
+        hostname: '*.public.blob.vercel-storage.com',
         port: '',
-        pathname: '/storage/v1/object/public/**',
+        pathname: '/**',
       },
     ],
   },
@@ -61,9 +62,9 @@ const nextConfig: NextConfig = {
       // needs eval, so the built bundle stays eval-free either way.
       `script-src 'self' 'unsafe-inline' https://analytics.tiktok.com https://connect.facebook.net${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://yjxvrsmubrasvoipkwvn.supabase.co https://www.facebook.com https://analytics.tiktok.com https://i.ytimg.com",
+      "img-src 'self' data: blob: https://picsum.photos https://i.postimg.cc https://signora.co.id https://*.public.blob.vercel-storage.com https://www.facebook.com https://analytics.tiktok.com https://i.ytimg.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://yjxvrsmubrasvoipkwvn.supabase.co wss://yjxvrsmubrasvoipkwvn.supabase.co https://analytics.tiktok.com https://www.facebook.com https://connect.facebook.net",
+      "connect-src 'self' https://vercel.com https://*.blob.vercel-storage.com https://analytics.tiktok.com https://www.facebook.com https://connect.facebook.net",
       // www.facebook.com in frame-src and form-action: once the pixel carries
       // advanced-matching hashes (lib/pixelMatch.ts) its URL gets too long for
       // an image GET, so fbevents.js POSTs a form through a hidden iframe

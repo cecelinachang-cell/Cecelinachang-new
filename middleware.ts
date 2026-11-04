@@ -1,60 +1,37 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { ADMIN_COOKIE, verifySessionToken } from '@/lib/adminSession';
 
 // Server-side gate for the admin area. The /admin layout only redirects in
-// client-side JS, which protects nothing against a direct request; the real
-// data is guarded by Supabase RLS, but this middleware adds the missing
-// server-side wall: no session or no admin role means no admin page is ever
-// rendered.
+// client-side JS, which protects nothing against a direct request, so every
+// admin page and admin API call is checked here against the signed session
+// cookie (lib/adminSession.ts). The admin API routes check it again
+// themselves, so a matcher change can't silently open them.
+const PUBLIC_ADMIN_PATHS = new Set(['/admin/login', '/api/admin/login', '/api/admin/session']);
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === '/admin/login') {
+  if (PUBLIC_ADMIN_PATHS.has(pathname)) {
     return NextResponse.next();
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const loginUrl = new URL('/admin/login', request.url);
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.redirect(loginUrl);
+  // Vercel Blob calls this route back after an upload, without the cookie; the
+  // route verifies Blob's own signature instead (see app/api/admin/upload).
+  if (pathname === '/api/admin/upload' && request.headers.has('x-vercel-signature')) {
+    return NextResponse.next();
   }
 
-  let response = NextResponse.next({ request });
-
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.redirect(loginUrl);
+  const token = request.cookies.get(ADMIN_COOKIE)?.value;
+  if (await verifySessionToken(token, process.env.ADMIN_SESSION_SECRET)) {
+    return NextResponse.next();
   }
 
-  const { data: isAdmin, error } = await supabase.rpc('is_admin');
-  if (error || isAdmin !== true) {
-    return NextResponse.redirect(loginUrl);
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  return response;
+  return NextResponse.redirect(new URL('/admin/login', request.url));
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };

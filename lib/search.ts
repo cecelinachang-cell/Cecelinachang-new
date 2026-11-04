@@ -1,7 +1,8 @@
 import { products as fallbackProducts } from '@/app/data/products';
 import { courses as fallbackCourses } from '@/app/data/courses';
 import { assignProductSlugs } from '@/lib/productSlug';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { unstable_cache } from 'next/cache';
+import { CACHE_SECONDS, TAGS, dbQuery, isDbConfigured } from '@/lib/db';
 
 export type SearchResult = {
   type: 'product' | 'course';
@@ -42,15 +43,21 @@ function firstImage(imageUrl: string | null | undefined): string | null {
   return imageUrl;
 }
 
-export async function getCatalogData(): Promise<{ products: CatalogProduct[]; courses: CatalogCourse[] }> {
-  if (!isSupabaseConfigured()) {
+// Cached so a search doesn't wake the database (Neon free plan, see lib/db.ts).
+export const getCatalogData = unstable_cache(loadCatalogData, ['search-catalog'], {
+  revalidate: CACHE_SECONDS,
+  tags: [TAGS.items, TAGS.courses],
+});
+
+async function loadCatalogData(): Promise<{ products: CatalogProduct[]; courses: CatalogCourse[] }> {
+  if (!isDbConfigured()) {
     return { products: fallbackProducts, courses: fallbackCourses };
   }
 
   try {
     const [{ data: products, error: productsError }, { data: courses, error: coursesError }] = await Promise.all([
-      supabase.from('items').select('id, name, price, category, description, imageUrl'),
-      supabase.from('courses').select('id, slug, title, price, description, imageUrl'),
+      dbQuery<CatalogProduct>((sql) => sql`select id, name, price, category, description, "imageUrl" from items`),
+      dbQuery<CatalogCourse>((sql) => sql`select id, slug, title, price, description, "imageUrl" from courses`),
     ]);
 
     return {

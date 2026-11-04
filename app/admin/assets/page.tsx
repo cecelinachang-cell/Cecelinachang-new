@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { compressImage, uploadToStorage } from '@/lib/utils';
+import { adminDb } from '@/lib/adminDb';
+import { compressImage } from '@/lib/utils';
+import { uploadToStorage } from '@/lib/adminStorage';
 import { withTimeout } from '@/lib/withTimeout';
 import { Save, Image as ImageIcon, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -28,20 +29,20 @@ export default function AssetsManager() {
   useEffect(() => {
     fetchAssets();
     // Subscribe to updates
-    const channel = supabase
+    const channel = adminDb
       .channel('public:settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, fetchAssets)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      adminDb.removeChannel(channel);
     };
   }, []);
 
   const fetchAssets = async () => {
     try {
       const keys = ASSET_KEYS.map(a => a.id);
-      const { data, error } = await supabase.from('settings').select('id, logo_url').in('id', keys);
+      const { data, error } = await adminDb.from('settings').select('id, logo_url').in('id', keys);
       
       if (!error && data) {
         const newAssets: Record<string, string> = {};
@@ -67,7 +68,7 @@ export default function AssetsManager() {
 
     try {
       const { error } = await withTimeout<any>(
-        supabase.from('settings').upsert({
+        adminDb.from('settings').upsert({
           id: assetId,
           logo_url: urlStr,
           updated_at: new Date().toISOString()
@@ -113,7 +114,7 @@ export default function AssetsManager() {
     try {
       const blob = await compressImage(file, ASSET_KEYS.find(a => a.id === assetId)?.width || 1000);
       const path = `assets/${assetId}/${Date.now()}.webp`;
-      const publicUrl = await uploadToStorage(supabase, blob, path);
+      const publicUrl = await uploadToStorage(blob, path);
       await saveUrlToDb(assetId, publicUrl);
     } catch (err: any) {
       setMessage({ type: 'error', text: `Gagal memproses gambar: ${err.message}` });

@@ -64,27 +64,3 @@ export const compressImage = (file: File, maxWidth = 1000): Promise<Blob> => {
     reader.onerror = () => reject(new Error("Failed to read file"));
   });
 };
-
-export const uploadToStorage = async (
-  supabase: import("@supabase/supabase-js").SupabaseClient,
-  blob: Blob,
-  path: string
-): Promise<string> => {
-  const { error } = await supabase.storage
-    .from("admin-media")
-    .upload(path, blob, { upsert: true, contentType: "image/webp" });
-  if (error) throw error;
-  const { data } = supabase.storage.from("admin-media").getPublicUrl(path);
-  return data.publicUrl;
-};
-
-export const removeFromStorage = async (
-  supabase: import("@supabase/supabase-js").SupabaseClient,
-  publicUrl: string
-): Promise<void> => {
-  const marker = "/object/public/admin-media/";
-  const idx = publicUrl.indexOf(marker);
-  if (idx === -1) return; // not a Storage URL (e.g. leftover base64 or external URL)
-  const path = publicUrl.slice(idx + marker.length);
-  await supabase.storage.from("admin-media").remove([path]);
-};

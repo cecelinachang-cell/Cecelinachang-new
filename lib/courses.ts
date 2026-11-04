@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { CACHE_SECONDS, TAGS, dbQuery, isDbConfigured } from '@/lib/db';
 
 export interface Course {
   id: string;
@@ -21,41 +21,28 @@ export interface Course {
   createdAt?: string;
 }
 
-// Next 15 doesn't cache fetch() by default and supabase-js's internal fetch
-// doesn't opt in, so a page's `revalidate = 60` caches nothing on its own --
-// every visit re-hits Supabase and renders dynamically. Wrap the fetch.
+// Cached so a page visit doesn't wake the database (Neon free plan, see
+// lib/db.ts). Admin saves revalidate TAGS.courses.
 export const getAllCourses = unstable_cache(
   async (): Promise<Course[]> => {
-    if (!isSupabaseConfigured()) {
+    if (!isDbConfigured()) {
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return fallbackCourses as unknown as Course[];
     }
-    const { data, error } = await supabase.from('courses').select('*');
+    const { data, error } = await dbQuery<Course>((sql) => sql`select * from courses`);
 
     if (error || !data || data.length === 0) {
-      if (error && error.message && error.message.includes('schema cache')) {
-        console.warn('Supabase schema not initialized yet.');
-      } else if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg === 'Failed to fetch' || errMsg.includes('Failed to fetch')) {
-          console.warn('AdBlocker or Network issue detected. Falling back to mock data.');
-        } else {
-          console.error('Error fetching courses:', errMsg);
-        }
-      }
+      if (error) console.error('Error fetching courses:', error.message);
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return fallbackCourses as unknown as Course[];
     }
     return data as Course[];
   },
   ['all-courses'],
-  { revalidate: 60 },
+  { revalidate: CACHE_SECONDS, tags: [TAGS.courses] },
 );
 
-// Next 15 no longer caches `fetch` by default, and supabase-js's internal
-// fetch doesn't opt in -- so without this, every request re-hits Supabase
-// and the whole route renders dynamically (a page's `revalidate = 60`
-// only caches the render, not the data fetch it depends on).
+// Cached like getAllCourses, so a page visit doesn't wake the database.
 //
 // generateMetadata() and the page component both call this, and without
 // React's per-request cache() wrapping unstable_cache, those two calls
@@ -66,36 +53,28 @@ export const getAllCourses = unstable_cache(
 export const getCourseBySlug = cache(unstable_cache(
   async (slug: string): Promise<Course | null> => {
     try {
-      if (!isSupabaseConfigured()) {
+      if (!isDbConfigured()) {
         const { courses: fallbackCourses } = await import('@/app/data/courses');
         return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
       }
-      const { data, error } = await supabase.from('courses').select('*').eq('slug', slug).single();
-      if (error) {
-        const errMsg = error?.message || (error as any)?.toString() || '';
-        if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-          console.error('Error fetching course detail:', errMsg);
-        }
-      }
-      if (data) return data as Course;
+      const { data, error } = await dbQuery<Course>((sql) => sql`select * from courses where slug = ${slug} limit 1`);
+      if (error) console.error('Error fetching course detail:', error.message);
+      if (data?.[0]) return data[0];
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
     } catch (err: any) {
-      const errMsg = err?.message || err?.toString() || '';
-      if (errMsg !== 'Failed to fetch' && !errMsg.includes('Failed to fetch')) {
-        console.error('Unexpected error fetching course detail:', err);
-      }
+      console.error('Unexpected error fetching course detail:', err?.message || err);
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
     }
   },
   ['course-by-slug'],
-  { revalidate: 60 },
+  { revalidate: CACHE_SECONDS, tags: [TAGS.courses] },
 ));
 
 // Re-exported for convenience so server code can `import { ... } from
 // '@/lib/courses'` for everything in one place. Client components should
 // import these two directly from '@/lib/course-stats' instead, to avoid
-// pulling this file's unstable_cache/Supabase imports into the client
+// pulling this file's unstable_cache/database imports into the client
 // bundle -- see the comment there.
 export { pickFeatured, totalStudents } from './course-stats';

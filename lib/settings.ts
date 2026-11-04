@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
-import { supabase } from '@/lib/supabase';
+import { CACHE_SECONDS, TAGS, dbQuery } from '@/lib/db';
 
 export type SiteAssets = Record<string, string>;
 
@@ -12,7 +12,9 @@ export type SiteAssets = Record<string, string>;
 export const getSiteAssets = cache(unstable_cache(
   async (keys: string[]): Promise<SiteAssets> => {
     try {
-      const { data, error } = await supabase.from('settings').select('id, logo_url').in('id', keys);
+      const { data, error } = await dbQuery<{ id: string; logo_url: string | null }>(
+        (sql) => sql`select id, logo_url from settings where id = any(${keys})`,
+      );
       if (error || !data) return {};
       const assets: SiteAssets = {};
       data.forEach((item) => {
@@ -24,5 +26,19 @@ export const getSiteAssets = cache(unstable_cache(
     }
   },
   ['site-assets'],
-  { revalidate: 60 },
+  { revalidate: CACHE_SECONDS, tags: [TAGS.settings] },
+));
+
+export type SettingRow = { id: string; title: string | null; description: string | null; logo_url: string | null };
+
+/** Full settings rows (title, description, image), cached like getSiteAssets. */
+export const getSettingRows = cache(unstable_cache(
+  async (ids: string[]): Promise<SettingRow[]> => {
+    const { data } = await dbQuery<SettingRow>(
+      (sql) => sql`select id, title, description, logo_url from settings where id = any(${ids})`,
+    );
+    return data ?? [];
+  },
+  ['setting-rows'],
+  { revalidate: CACHE_SECONDS, tags: [TAGS.settings] },
 ));

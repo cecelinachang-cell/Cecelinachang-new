@@ -5,7 +5,6 @@ import { CheckCircle2, Lock, MessageCircle } from 'lucide-react';
 import { POLICIES } from '@/lib/policies';
 import { Button } from '@/components/ui/Button';
 import LeadFormModal from '@/components/LeadFormModal';
-import CheckoutModal from '@/components/CheckoutModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { shopeeLink, waLink } from '@/lib/links';
@@ -25,16 +24,11 @@ interface CoursePricingPanelProps {
   compact?: boolean;
 }
 
-// Online payment (Midtrans) stays hidden until the merchant account is
-// approved and MIDTRANS_SERVER_KEY is set.
-const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
-
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  // Lynk checkout wins when the course is on Lynk; Midtrans is the fallback.
+  // Online payment is the course's Lynk checkout (lib/lynk.ts).
   const lynkUrl = lynkCheckoutUrl(course.slug);
-  const canPayOnline = Boolean(lynkUrl) || PAYMENTS_ENABLED;
+  const canPayOnline = Boolean(lynkUrl);
   const trackCheckout = () =>
     trackConversion('checkout_open', course.slug, {
       contentName: course.title,
@@ -84,21 +78,8 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         </div>
       )}
 
-      {lynkUrl ? (
+      {lynkUrl && (
         <Button href={lynkUrl} external onClick={trackCheckout} size="lg" fullWidth className="mb-4">
-          <Lock className="w-5 h-5 mr-2" /> Bayar Sekarang
-        </Button>
-      ) : PAYMENTS_ENABLED && (
-        <Button
-          type="button"
-          onClick={() => {
-            trackCheckout();
-            setShowCheckout(true);
-          }}
-          size="lg"
-          fullWidth
-          className="mb-4"
-        >
           <Lock className="w-5 h-5 mr-2" /> Bayar Sekarang
         </Button>
       )}
@@ -171,15 +152,6 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
             Masih bingung? Tanya Lina dulu →
           </a>
         </>
-      )}
-
-      {showCheckout && (
-        <CheckoutModal
-          courseSlug={course.slug}
-          courseTitle={course.title}
-          coursePrice={course.price}
-          onClose={() => setShowCheckout(false)}
-        />
       )}
 
       {showLeadForm && (

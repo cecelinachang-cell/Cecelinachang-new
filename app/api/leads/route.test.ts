@@ -1,59 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 /**
- * The anon key may INSERT into public.leads but has no SELECT policy, so
- * `insert().select()` under it fails with 42501 and the lead is lost — that
- * silently dropped a month of sign-ups. Writes must go through the
- * service-role client instead. These mocks make the anon client reject any
- * `.select()` after an insert, exactly like RLS does.
+ * The lead route writes to Neon through lib/db's tagged-template client. The
+ * mock records each query's SQL text and bound values, and can be told to fail
+ * like a dropped connection.
  */
-const anonInserts: unknown[] = [];
-const adminInserts: unknown[] = [];
-const adminUpdates: unknown[] = [];
-let adminAvailable = true;
-let adminInsertError: { code?: string; message: string } | null = null;
+type Call = { text: string; values: unknown[] };
+const calls: Call[] = [];
+let failWith: Error | null = null;
+let configured = true;
 
-vi.mock("@/lib/supabase", () => ({
-  isSupabaseConfigured: () => true,
-  supabase: {
-    from: () => ({
-      insert: (row: unknown) => {
-        anonInserts.push(row);
-        return {
-          // Mirrors RLS: the row goes in, but reading it back is denied.
-          select: () => ({
-            single: async () => ({ data: null, error: { code: "42501", message: "rls" } }),
-          }),
-          then: (resolve: (v: { error: null }) => unknown) => resolve({ error: null }),
-        };
-      },
-    }),
+vi.mock("@/lib/db", () => ({
+  isDbConfigured: () => configured,
+  getSql: () => async (strings: TemplateStringsArray, ...values: unknown[]) => {
+    calls.push({ text: strings.join("?"), values });
+    if (failWith) throw failWith;
+    return strings[0].includes("insert into leads") ? [{ id: "lead-1" }] : [];
   },
-}));
-
-vi.mock("@/lib/supabase-admin", () => ({
-  createAdminClient: () =>
-    adminAvailable
-      ? {
-          from: () => ({
-            insert: (row: unknown) => {
-              adminInserts.push(row);
-              return {
-                select: () => ({
-                  single: async () =>
-                    adminInsertError
-                      ? { data: null, error: adminInsertError }
-                      : { data: { id: "lead-1" }, error: null },
-                }),
-              };
-            },
-            update: (patch: unknown) => {
-              adminUpdates.push(patch);
-              return { eq: async () => ({ error: null }) };
-            },
-          }),
-        }
-      : null,
 }));
 
 vi.mock("@/lib/resend", () => ({
@@ -78,50 +41,68 @@ const post = (body: Record<string, unknown>, ip = "1.2.3.4") =>
 const lead = { courseSlug: "s", courseTitle: "T", email: "a@b.com", phone: "1" };
 
 beforeEach(() => {
-  anonInserts.length = 0;
-  adminInserts.length = 0;
-  adminUpdates.length = 0;
-  adminAvailable = true;
-  adminInsertError = null;
+  calls.length = 0;
+  failWith = null;
+  configured = true;
 });
 
 describe("POST /api/leads", () => {
-  it("saves the lead through the service-role client, not the anon key", async () => {
+  it("saves a plain course sign-up", async () => {
     const res = await post(lead, "10.0.0.1");
 
     expect(res.status).toBe(200);
-    expect(adminInserts).toHaveLength(1);
-    expect(adminInserts[0]).toMatchObject({ course_slug: "s", email: "a@b.com" });
-    expect(anonInserts).toHaveLength(0);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].text).toContain("insert into leads");
+    expect(calls[0].values.slice(0, 4)).toEqual(["s", "T", "a@b.com", "1"]);
   });
 
-  it("still saves the lead when no service-role key is configured", async () => {
-    adminAvailable = false;
+  it("accepts the exact body lib/submitLead sends, including queued leads replayed after the outage", async () => {
+    // Same keys as submitLead's payload (lib/submitLead.ts). Leads queued in
+    // visitors' localStorage since 26 Oct 2026 replay with this shape.
+    const queued = {
+      courseSlug: "bakso-sapi-premium",
+      courseTitle: "Kelas Bakso Sapi Premium",
+      email: "ani@gmail.com",
+      phone: "081234567890",
+      city: "",
+      tiktokHandle: "",
+      website: "",
+      quizAnswers: ["Pernah gagal"],
+      source: "lp:tiktok:v1",
+      name: "Ani",
+    };
 
-    const res = await post(lead, "10.0.0.2");
+    const res = await post(queued, "10.0.0.2");
 
-    // The anon key can insert, just not read the row back, so no id and no
-    // welcome email — but the lead itself is never dropped.
     expect(res.status).toBe(200);
-    expect(anonInserts).toHaveLength(1);
+    const values = calls[0].values;
+    expect(values).toContain("bakso-sapi-premium");
+    expect(values).toContain("Ani");
+    expect(values).toContain(JSON.stringify(["Pernah gagal"]));
+    expect(values).toContain("lp:tiktok:v1");
   });
 
-  it("returns a non-2xx status when the insert really fails, so the client queues the lead", async () => {
-    adminInsertError = { code: "08006", message: "connection failure" };
+  it("returns a non-2xx status when the insert fails, so the client keeps the lead queued", async () => {
+    failWith = new Error("connection failure");
 
     const res = await post(lead, "10.0.0.3");
 
     expect(res.status).toBeGreaterThanOrEqual(500);
   });
 
-  it("retries without the landing-page columns when the migration is not applied", async () => {
-    adminInsertError = { code: "PGRST204", message: "column leads.quiz_answers does not exist" };
+  it("returns a non-2xx status when the database isn't configured, so nothing is dropped", async () => {
+    configured = false;
 
-    const res = await post({ ...lead, quizAnswers: ["ya"], source: "lp:tiktok:v1" }, "10.0.0.4");
+    const res = await post(lead, "10.0.0.4");
 
     expect(res.status).toBeGreaterThanOrEqual(500);
-    expect(adminInserts).toHaveLength(2);
-    expect(adminInserts[0]).toMatchObject({ quiz_answers: ["ya"] });
-    expect(adminInserts[1]).not.toHaveProperty("quiz_answers");
+    expect(calls).toHaveLength(0);
+  });
+
+  it("drops honeypot submissions without touching the database", async () => {
+    const res = await post({ ...lead, website: "spam.example" }, "10.0.0.5");
+
+    expect(res.status).toBe(200);
+    expect(calls).toHaveLength(0);
   });
 });
