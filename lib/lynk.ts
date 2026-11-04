@@ -17,10 +17,16 @@ const LYNK_CHECKOUT_IDS: Record<string, string> = {
   'lapis-legit': 'pk25xg58j5pw',
 };
 
-/** Lynk checkout URL for a course, tagged as website traffic, or null if the course isn't on Lynk. */
-export function lynkCheckoutUrl(courseSlug: string): string | null {
+/**
+ * Lynk checkout URL for a course, tagged as website traffic, or null if the
+ * course isn't on Lynk. `medium` says which page sent the buyer.
+ */
+export function lynkCheckoutUrl(
+  courseSlug: string,
+  medium: 'course_page' | 'landing_page' = 'course_page'
+): string | null {
   const id = LYNK_CHECKOUT_IDS[courseSlug];
   if (!id) return null;
-  const params = new URLSearchParams({ utm_source: 'website', utm_medium: 'course_page', utm_campaign: courseSlug });
+  const params = new URLSearchParams({ utm_source: 'website', utm_medium: medium, utm_campaign: courseSlug });
   return `https://lynk.id/cecelinachang/${id}/checkout?${params}`;
 }
