@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Users, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Users, ChefHat } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { SanitizedHtml } from '@/components/SanitizedHtml';
@@ -95,8 +95,9 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
             <span>{course.students.toLocaleString('id-ID')} Murid Bergabung</span>
           </div>
           <div className="flex items-center">
-            <Clock className="w-5 h-5 mr-2 text-terracotta" />
-            <span>{course.duration} Total Video</span>
+            {/* Result, not minutes: "28 menit" next to the price made the class look small. */}
+            <ChefHat className="w-5 h-5 mr-2 text-terracotta" />
+            <span>Langsung bisa dipraktikkan di rumah</span>
           </div>
           <div className="flex items-center">
             <CheckCircle2 className="w-5 h-5 mr-2 text-green-500" />

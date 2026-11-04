@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, MessageCircle, Star, Users } from "lucide-react";
+import { ChefHat, MessageCircle, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
@@ -72,8 +72,8 @@ export default function CourseCardCompact({
         )}
         <div className="flex items-center gap-4 text-charcoal-brown/50 text-xs mb-4">
           <div className="flex items-center">
-            <Clock className="w-3.5 h-3.5 mr-1.5" />
-            {course.duration}
+            <ChefHat className="w-3.5 h-3.5 mr-1.5" />
+            Langsung praktik di rumah
           </div>
           {featured && typeof course.students === "number" && (
             <div className="flex items-center">
