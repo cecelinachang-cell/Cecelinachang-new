@@ -11,11 +11,7 @@ import {
   ChefHat,
 } from "lucide-react";
 import { stripHtml } from "@/lib/utils";
-import LeadFormModal from "./LeadFormModal";
 import { Button } from "@/components/ui/Button";
-import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { trackConversion } from "@/lib/analytics";
-import { parseIdr } from "@/lib/pixels";
 
 interface Course {
   id: string;
@@ -35,7 +31,6 @@ interface Course {
 
 export default function CourseCard({ course }: { course: Course }) {
   const [playingVideo, setPlayingVideo] = useState(false);
-  const [showLeadForm, setShowLeadForm] = useState(false);
 
   return (
     <div
@@ -134,40 +129,12 @@ export default function CourseCard({ course }: { course: Course }) {
               {course.price}
             </span>
           </div>
-          <Button
-            type="button"
-            onClick={() => {
-              trackConversion('lead_form_open', course.slug, {
-                contentName: course.title,
-                contentType: 'course',
-                value: parseIdr(course.price),
-              });
-              setShowLeadForm(true);
-            }}
-            variant="whatsapp"
-            size="lg"
-            fullWidth
-            className="sm:w-fit"
-          >
-            <WhatsAppIcon className="w-5 h-5 mr-2" />
-            Chat Cece, Daftar Kelas
+          {/* Classes are bought on the class page (Lynk checkout), not by WhatsApp sign-up. */}
+          <Button href={`/kursus/${course.slug}`} size="lg" fullWidth className="sm:w-fit">
+            Lihat & Beli Kelas
           </Button>
-          <Link
-            href={`/kursus/${course.slug}`}
-            className="tap-target flex items-center w-full sm:w-auto justify-center sm:justify-start text-center sm:text-left text-terracotta font-medium text-sm mt-1 hover:text-rust-ink transition-colors underline underline-offset-2"
-          >
-            Lihat detail & kurikulum lengkap
-          </Link>
         </div>
       </div>
-      {showLeadForm && (
-        <LeadFormModal
-          courseSlug={course.slug}
-          courseTitle={course.title}
-          coursePrice={course.price}
-          onClose={() => setShowLeadForm(false)}
-        />
-      )}
     </div>
   );
 }

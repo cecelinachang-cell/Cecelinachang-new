@@ -26,7 +26,7 @@ interface CoursePricingPanelProps {
 }
 
 // Online payment (Midtrans) stays hidden until the merchant account is
-// approved and MIDTRANS_SERVER_KEY is set; WhatsApp sign-up is always on.
+// approved and MIDTRANS_SERVER_KEY is set.
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
@@ -103,23 +103,27 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         </Button>
       )}
 
-      <Button
-        type="button"
-        onClick={() => {
-          trackConversion('lead_form_open', course.slug, {
-            contentName: course.title,
-            contentType: 'course',
-            value: parseIdr(course.price),
-          });
-          setShowLeadForm(true);
-        }}
-        variant={canPayOnline ? 'secondary' : 'whatsapp'}
-        size="lg"
-        fullWidth
-        className="mb-4"
-      >
-        <MessageCircle className="w-5 h-5 mr-2" /> {canPayOnline ? 'Daftar via WhatsApp' : 'Chat Cece, Daftar Kelas'}
-      </Button>
+      {/* Classes are bought on the website only. WhatsApp sign-up is a
+          fallback for a course that has no online checkout yet. */}
+      {!canPayOnline && (
+        <Button
+          type="button"
+          onClick={() => {
+            trackConversion('lead_form_open', course.slug, {
+              contentName: course.title,
+              contentType: 'course',
+              value: parseIdr(course.price),
+            });
+            setShowLeadForm(true);
+          }}
+          variant="whatsapp"
+          size="lg"
+          fullWidth
+          className="mb-4"
+        >
+          <MessageCircle className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
+        </Button>
+      )}
 
       {course.shopeeUrl && (
         <Button

@@ -1,12 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
-import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { waLink } from '@/lib/links';
@@ -43,8 +40,8 @@ export function HeroCtaFallback({ featured, courses }: HeroCtaProps) {
 
   return (
     <div id="hero-cta" className={WRAPPER_CLASS}>
-      <Button href={`/kursus/${cheapest.slug}`} variant="whatsapp" size="lg" fullWidth className="sm:w-fit">
-        <WhatsAppIcon className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
+      <Button href="/kursus" size="lg" fullWidth className="sm:w-fit">
+        Pilih Kelasnya <ArrowRight className="w-5 h-5 ml-2" />
       </Button>
       <span className="text-sm text-charcoal-brown/60">
         Mulai {cheapest.price} · akses seumur hidup · nggak perlu bikin akun
@@ -76,7 +73,6 @@ export function HeroCtaFallback({ featured, courses }: HeroCtaProps) {
  */
 export function HeroCta({ featured, courses }: HeroCtaProps) {
   const searchParams = useSearchParams();
-  const [showLeadForm, setShowLeadForm] = useState(false);
 
   const v = searchParams.get('v') || searchParams.get('utm_content');
   const tagged = v ? courses.find((c) => c.slug === v) : undefined;
@@ -85,22 +81,10 @@ export function HeroCta({ featured, courses }: HeroCtaProps) {
 
   return (
     <div id="hero-cta" className={WRAPPER_CLASS}>
-      <Button
-        type="button"
-        onClick={() => {
-          trackConversion('lead_form_open', target.slug, {
-            contentName: target.title,
-            contentType: 'course',
-            value: parseIdr(target.price),
-          });
-          setShowLeadForm(true);
-        }}
-        variant="whatsapp"
-        size="lg"
-        fullWidth
-        className="sm:w-fit"
-      >
-        <WhatsAppIcon className="w-5 h-5 mr-2" /> Chat Cece, Daftar Kelas
+      {/* Classes are bought on the class page (Lynk checkout). A visitor
+          tagged to one class goes straight to it; others pick from the list. */}
+      <Button href={tagged ? `/kursus/${tagged.slug}` : '/kursus'} size="lg" fullWidth className="sm:w-fit">
+        {tagged ? 'Beli Kelasnya' : 'Pilih Kelasnya'} <ArrowRight className="w-5 h-5 ml-2" />
       </Button>
       <span className="text-sm text-charcoal-brown/60">
         {tagged ? target.price : `Mulai ${cheapest.price}`} · akses seumur hidup · nggak perlu bikin akun
@@ -124,14 +108,6 @@ export function HeroCta({ featured, courses }: HeroCtaProps) {
         Lihat semua kelas <ArrowRight className="w-3.5 h-3.5" />
       </Link>
 
-      {showLeadForm && (
-        <LeadFormModal
-          courseSlug={target.slug}
-          courseTitle={target.title}
-          coursePrice={target.price}
-          onClose={() => setShowLeadForm(false)}
-        />
-      )}
     </div>
   );
 }
