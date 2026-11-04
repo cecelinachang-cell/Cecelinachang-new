@@ -9,6 +9,7 @@ import CheckoutModal from '@/components/CheckoutModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { shopeeLink, waLink } from '@/lib/links';
+import { lynkCheckoutUrl } from '@/lib/lynk';
 
 interface Course {
   slug: string;
@@ -31,6 +32,15 @@ const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  // Lynk checkout wins when the course is on Lynk; Midtrans is the fallback.
+  const lynkUrl = lynkCheckoutUrl(course.slug);
+  const canPayOnline = Boolean(lynkUrl) || PAYMENTS_ENABLED;
+  const trackCheckout = () =>
+    trackConversion('checkout_open', course.slug, {
+      contentName: course.title,
+      contentType: 'course',
+      value: parseIdr(course.price),
+    });
 
   return (
     <div className={`bg-white rounded-3xl shadow-xl border border-butter/30 ${compact ? 'p-5' : 'p-8'}`}>
@@ -74,15 +84,15 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
         </div>
       )}
 
-      {PAYMENTS_ENABLED && (
+      {lynkUrl ? (
+        <Button href={lynkUrl} external onClick={trackCheckout} size="lg" fullWidth className="mb-4">
+          <Lock className="w-5 h-5 mr-2" /> Bayar Sekarang
+        </Button>
+      ) : PAYMENTS_ENABLED && (
         <Button
           type="button"
           onClick={() => {
-            trackConversion('checkout_open', course.slug, {
-              contentName: course.title,
-              contentType: 'course',
-              value: parseIdr(course.price),
-            });
+            trackCheckout();
             setShowCheckout(true);
           }}
           size="lg"
@@ -103,12 +113,12 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
           });
           setShowLeadForm(true);
         }}
-        variant={PAYMENTS_ENABLED ? 'secondary' : 'whatsapp'}
+        variant={canPayOnline ? 'secondary' : 'whatsapp'}
         size="lg"
         fullWidth
         className="mb-4"
       >
-        <MessageCircle className="w-5 h-5 mr-2" /> {PAYMENTS_ENABLED ? 'Daftar via WhatsApp' : 'Chat Cece, Daftar Kelas'}
+        <MessageCircle className="w-5 h-5 mr-2" /> {canPayOnline ? 'Daftar via WhatsApp' : 'Chat Cece, Daftar Kelas'}
       </Button>
 
       {course.shopeeUrl && (
@@ -134,7 +144,7 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
       {!compact && (
         <>
           <p className="text-xs text-charcoal-brown/50 text-center">
-            {PAYMENTS_ENABLED
+            {canPayOnline
               ? 'Bayar via QRIS, GoPay, ShopeePay, atau Virtual Account. Tidak perlu membuat akun di website.'
               : 'Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.'}
           </p>
