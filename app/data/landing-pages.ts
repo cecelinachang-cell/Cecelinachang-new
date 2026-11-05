@@ -1,3 +1,4 @@
+import type { PreviewVideo } from '@/components/landing/SelfHostedPreview';
 // Copy for the social-traffic landing pages at /lp/[slug]. One entry per
 // course; adding a course's landing page is a data change, no code change.
 //
@@ -43,6 +44,8 @@ export interface LandingCopy {
   ctaLabel: string;
   /** YouTube id of the course preview shown in the hero; falls back to the course image. */
   previewVideoId?: string;
+  /** Self-hosted vertical video for the hero. Wins over previewVideoId. */
+  previewVideo?: PreviewVideo;
   /** Short facts shown under the hero video; the live student count is appended. */
   proofPoints: string[];
   /**
@@ -111,7 +114,12 @@ export const landingPages: Record<string, LandingCopy> = {
       'Ini kelas video, bukan cuma resep tulisan. E-book resep dan konsultasi dengan Cece sudah termasuk.',
       'Bisa untuk keluarga. Ada murid yang berhasil di percobaan pertama, ada yang sekarang jualan baksonya sendiri.',
     ],
-    previewVideoId: 's80iBe2H6n8',
+    // The YouTube preview (s80iBe2H6n8) was removed by the uploader on YouTube; self-hosted since 5 Nov 2026.
+    previewVideo: {
+      src: '/videos/bakso-kenapa-ikut-kelas.mp4',
+      poster: '/videos/bakso-kenapa-ikut-kelas.jpg',
+      label: 'Tonton: kenapa belajar bakso dengan Cece',
+    },
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
     heroNext:
       'Bayar lewat QRIS, e-wallet, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu, tanpa menunggu admin.',

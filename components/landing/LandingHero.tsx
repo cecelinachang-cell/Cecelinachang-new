@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Marginalia } from '@/components/Marginalia';
 import { PayNowCta } from './PayNowCta';
 import { YouTubePreview } from './YouTubePreview';
+import { SelfHostedPreview, type PreviewVideo } from './SelfHostedPreview';
 import { WhatsAppAsk } from './WhatsAppAsk';
 import { showStudents } from '@/lib/course-stats';
 
@@ -13,6 +14,7 @@ interface LandingHeroProps {
   imageUrl: string;
   courseTitle: string;
   videoId?: string;
+  video?: PreviewVideo;
   courseSlug: string;
   price: string;
   /** What the class includes, repeated under the first button. */
@@ -29,7 +31,7 @@ const apronStripes = {
     'repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,0.08) 14px 16px)',
 };
 
-export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
+export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, video, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
   const proof = showStudents(students) ? [...proofPoints, `${students.toLocaleString('id-ID')} murid`] : proofPoints;
 
   return (
@@ -45,7 +47,9 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
             </Marginalia>
           )}
           <div className="mt-5">
-            {videoId ? (
+            {video ? (
+              <SelfHostedPreview video={video} title={`Cuplikan ${courseTitle}`} courseSlug={courseSlug} />
+            ) : videoId ? (
               <YouTubePreview videoId={videoId} title={`Cuplikan ${courseTitle}`} courseSlug={courseSlug} />
             ) : (
               <div className="relative aspect-video overflow-hidden rounded-2xl shadow-[0_18px_40px_-16px_rgba(34,26,23,0.55)]">

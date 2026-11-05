@@ -101,6 +101,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         imageUrl={course.imageUrl}
         courseTitle={course.title}
         videoId={copy.previewVideoId}
+        video={copy.previewVideo}
         courseSlug={course.slug}
         price={course.price}
         included={copy.offerIncludes}
