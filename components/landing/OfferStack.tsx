@@ -1,6 +1,6 @@
 import { Check, MessageCircle } from 'lucide-react';
 import { Marginalia } from '@/components/Marginalia';
-import { QuizCta } from './QuizCta';
+import { PayNowCta } from './PayNowCta';
 import { WhatsAppAsk } from './WhatsAppAsk';
 
 interface OfferStackProps {
@@ -36,7 +36,7 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
             </Marginalia>
             <p className="font-display text-4xl font-extrabold tracking-[-0.02em]">{price}</p>
           </div>
-          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full" />
+          <PayNowCta courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="w-full" />
           <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="mt-3 w-full" />
           <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-kecap/70">
             <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-seledri" aria-hidden="true" />

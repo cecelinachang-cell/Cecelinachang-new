@@ -1,17 +1,17 @@
-import { QuizCta } from './QuizCta';
+import type { ReactNode } from 'react';
 
 interface RootCauseSectionProps {
   title: string;
   intro: string;
   causes: { title: string; body: string }[];
   line: string;
-  ctaLabel: string;
-  ctaHref?: '#cek' | '#daftar';
+  /** The button under the closing line (the landing page passes its pay button). */
+  cta: ReactNode;
 }
 
 // The causes follow the order bakso is made in (grind, knead, boil), so the
 // numbers are a real sequence.
-export function RootCauseSection({ title, intro, causes, line, ctaLabel, ctaHref = '#daftar' }: RootCauseSectionProps) {
+export function RootCauseSection({ title, intro, causes, line, cta }: RootCauseSectionProps) {
   return (
     <section className="bg-white px-4 py-14 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-3xl">
@@ -31,7 +31,7 @@ export function RootCauseSection({ title, intro, causes, line, ctaLabel, ctaHref
           ))}
         </ol>
         <p className="mt-10 rounded-2xl bg-mie/25 px-5 py-5 font-display text-xl font-bold leading-snug sm:text-2xl">{line}</p>
-        <QuizCta href={ctaHref} label={ctaLabel} className="mt-8 w-full sm:w-auto" />
+        {cta}
       </div>
     </section>
   );

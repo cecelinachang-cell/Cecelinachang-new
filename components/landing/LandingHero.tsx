@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Marginalia } from '@/components/Marginalia';
-import { QuizCta } from './QuizCta';
+import { PayNowCta } from './PayNowCta';
 import { YouTubePreview } from './YouTubePreview';
 import { WhatsAppAsk } from './WhatsAppAsk';
 
@@ -64,7 +64,7 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
         <div className="mx-auto max-w-3xl">
           {/* The buy button sits directly under the bowl. In TikTok and
               Instagram as little as ~560px shows, and this has to fit. */}
-          <QuizCta href="#daftar" label={`Daftar kelasnya · ${price}`} className="w-full sm:w-auto" />
+          <PayNowCta courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="w-full sm:w-auto" />
           <WhatsAppAsk
             courseSlug={courseSlug}
             courseTitle={courseTitle}
