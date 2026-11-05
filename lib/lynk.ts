@@ -30,3 +30,21 @@ export function lynkCheckoutUrl(
   const params = new URLSearchParams({ utm_source: 'website', utm_medium: medium, utm_campaign: courseSlug });
   return `https://lynk.id/cecelinachang/${id}/checkout?${params}`;
 }
+
+/**
+ * Keeps an ad's tracking on the way to Lynk. If the visitor arrived with
+ * utm_* tags (an ad), those replace the website tags so Lynk orders show which
+ * ad sold. fbclid is passed through so the Meta pixel on Lynk can match the
+ * purchase to the ad click.
+ */
+export function withAdTags(url: string, incomingSearch = ''): string {
+  const incoming = new URLSearchParams(incomingSearch);
+  const out = new URL(url);
+  if (incoming.get('utm_source')) {
+    for (const key of [...out.searchParams.keys()]) if (key.startsWith('utm_')) out.searchParams.delete(key);
+    for (const [k, v] of incoming) if (k.startsWith('utm_')) out.searchParams.set(k, v);
+  }
+  const fbclid = incoming.get('fbclid');
+  if (fbclid) out.searchParams.set('fbclid', fbclid);
+  return out.toString();
+}

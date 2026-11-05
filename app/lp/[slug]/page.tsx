@@ -18,7 +18,7 @@ import { CommitmentQuiz } from '@/components/landing/CommitmentQuiz';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { StickyQuizBar } from '@/components/landing/StickyQuizBar';
-import { QuizCta } from '@/components/landing/QuizCta';
+import { PayNowCta } from '@/components/landing/PayNowCta';
 import { WhatsAppAsk } from '@/components/landing/WhatsAppAsk';
 import { StudentProof } from '@/components/landing/StudentProof';
 import { QuizQuote } from '@/components/landing/QuizQuote';
@@ -148,8 +148,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         intro={copy.rootCauseIntro}
         causes={copy.rootCauses}
         line={copy.rootCauseLine}
-        ctaLabel={`Daftar kelasnya · ${course.price}`}
-        ctaHref="#daftar"
+        cta={<PayNowCta courseSlug={course.slug} courseTitle={course.title} price={course.price} className="mt-8 w-full sm:w-auto" />}
       />
       <FactoryStorySection title={copy.story.title} paragraphs={copy.story.paragraphs} note={copy.story.note} />
       <TransformationSection
@@ -168,12 +167,12 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <LandingFaq items={faq} />
       <div className="px-4 pb-14 sm:px-6">
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row">
-          <QuizCta href="#daftar" label={`Daftar kelasnya · ${course.price}`} className="w-full sm:w-auto" />
+          <PayNowCta courseSlug={course.slug} courseTitle={course.title} price={course.price} className="w-full sm:w-auto" />
           <WhatsAppAsk courseSlug={course.slug} courseTitle={course.title} price={course.price} className="w-full sm:w-auto" />
         </div>
       </div>
       <LandingFooter />
-      <StickyQuizBar label="Daftar sekarang" price={course.price} courseSlug={course.slug} courseTitle={course.title} />
+      <StickyQuizBar price={course.price} courseSlug={course.slug} courseTitle={course.title} />
     </div>
   );
 }

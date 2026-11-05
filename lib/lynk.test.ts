@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { courses } from '@/app/data/courses';
-import { lynkCheckoutUrl } from './lynk';
+import { lynkCheckoutUrl, withAdTags } from './lynk';
 
 describe('lynkCheckoutUrl', () => {
   it('builds a tagged checkout URL for a course on Lynk', () => {
@@ -23,5 +23,25 @@ describe('lynkCheckoutUrl', () => {
     for (const course of courses) {
       expect(lynkCheckoutUrl(course.slug), course.slug).not.toBeNull();
     }
+  });
+});
+
+describe('withAdTags', () => {
+  const base = 'https://lynk.id/cecelinachang/yrjo962jjj6j/checkout?utm_source=website&utm_medium=landing_page&utm_campaign=bakso-sapi-premium';
+
+  it('keeps the website tags for visitors without ad tags', () => {
+    expect(withAdTags(base, '')).toBe(base);
+  });
+
+  it('replaces the website tags with the ad tags', () => {
+    const url = new URL(withAdTags(base, '?utm_source=meta&utm_campaign=bakso&utm_content=123'));
+    expect(url.searchParams.get('utm_source')).toBe('meta');
+    expect(url.searchParams.get('utm_campaign')).toBe('bakso');
+    expect(url.searchParams.get('utm_content')).toBe('123');
+    expect(url.searchParams.has('utm_medium')).toBe(false);
+  });
+
+  it('passes fbclid through', () => {
+    expect(new URL(withAdTags(base, '?fbclid=abc')).searchParams.get('fbclid')).toBe('abc');
   });
 });

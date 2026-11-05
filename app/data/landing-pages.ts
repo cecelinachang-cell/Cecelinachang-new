@@ -114,7 +114,7 @@ export const landingPages: Record<string, LandingCopy> = {
     previewVideoId: 's80iBe2H6n8',
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
     heroNext:
-      'Isi nama, email, dan WhatsApp. Chat terbuka sendiri. Link video masuk ke email setelah transfer.',
+      'Bayar lewat QRIS, e-wallet, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu, tanpa menunggu admin.',
 
     painTitle: 'Kalau kamu pernah ngalamin ini…',
     pains: [
@@ -274,7 +274,7 @@ export const landingPages: Record<string, LandingCopy> = {
         question: 'Ini cuma e-book?',
         nearQuiz: true,
         answer:
-          'Bukan. Kamu dapat video kelas, e-book resep, dan bisa tanya Cece langsung. Link videonya dikirim ke email setelah transfer.',
+          'Bukan. Kamu dapat video kelas, e-book resep, dan bisa tanya Cece langsung. Akses videonya langsung masuk ke Gmail kamu setelah bayar.',
       },
       {
         question: 'Alat apa yang dibutuhkan?',
@@ -285,7 +285,7 @@ export const landingPages: Record<string, LandingCopy> = {
         question: 'Bagaimana cara akses kelasnya?',
         nearQuiz: true,
         answer:
-          'Setelah daftar dan transfer lewat WhatsApp, Cece kirim link videonya lewat Google Drive ke email kamu (paling lancar pakai Gmail). Aksesnya seumur hidup, bisa ditonton ulang kapan saja.',
+          'Setelah bayar (QRIS, e-wallet, atau Virtual Account), akses folder kelas di Google Drive langsung masuk ke Gmail yang kamu isi. Aksesnya seumur hidup, bisa ditonton ulang kapan saja.',
       },
     ],
   },
