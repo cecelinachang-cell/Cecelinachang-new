@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react';
+import { showStudents } from '@/lib/course-stats';
 
 interface TransformationSectionProps {
   beforeAfter: { before: string; after: string }[];
@@ -43,9 +44,11 @@ export function TransformationSection({ beforeAfter, benefits, benefitsNote, stu
           </ul>
 
           <div className="mt-14 border-l-4 border-sambal pl-5">
-            <p className="mb-3 font-display text-2xl font-extrabold leading-tight">
-              {students.toLocaleString('id-ID')} murid sudah belajar dari Cece
-            </p>
+            {showStudents(students) && (
+              <p className="mb-3 font-display text-2xl font-extrabold leading-tight">
+                {students.toLocaleString('id-ID')} murid sudah belajar dari Cece
+              </p>
+            )}
             <div className="space-y-2 text-lg leading-relaxed text-kecap/80">
               {studentResults.map((r) => (
                 <p key={r}>{r}</p>

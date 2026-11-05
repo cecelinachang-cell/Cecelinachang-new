@@ -9,6 +9,7 @@ import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { shopeeLink, waLink } from '@/lib/links';
 import { lynkCheckoutUrl } from '@/lib/lynk';
+import { showStudents } from '@/lib/course-stats';
 
 interface Course {
   slug: string;
@@ -50,9 +51,11 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
             Hemat {Math.round((1 - Number(course.price.replace(/\D/g, '')) / Number(course.originalPrice.replace(/\D/g, ''))) * 100)}%
           </div>
         )}
-        <div className="text-charcoal-brown/50 text-xs">
-          Sudah {course.students.toLocaleString('id-ID')} murid bergabung
-        </div>
+        {showStudents(course.students) && (
+          <div className="text-charcoal-brown/50 text-xs">
+            Sudah {course.students.toLocaleString('id-ID')} murid bergabung
+          </div>
+        )}
       </div>
 
       {!compact && (

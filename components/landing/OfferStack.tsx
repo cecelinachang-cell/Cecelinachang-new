@@ -2,6 +2,7 @@ import { Check, MessageCircle } from 'lucide-react';
 import { Marginalia } from '@/components/Marginalia';
 import { PayNowCta } from './PayNowCta';
 import { WhatsAppAsk } from './WhatsAppAsk';
+import { showStudents } from '@/lib/course-stats';
 
 interface OfferStackProps {
   courseTitle: string;
@@ -31,9 +32,11 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
           </ul>
           <div className="mb-6 border-t border-dashed border-steel-line pt-5">
             <p className="mb-1 text-kecap/70">{valueLine}</p>
-            <Marginalia rotate={-1} className="mb-2 text-rust-ink">
-              {students.toLocaleString('id-ID')} murid sudah belajar
-            </Marginalia>
+            {showStudents(students) && (
+              <Marginalia rotate={-1} className="mb-2 text-rust-ink">
+                {students.toLocaleString('id-ID')} murid sudah belajar
+              </Marginalia>
+            )}
             <p className="font-display text-4xl font-extrabold tracking-[-0.02em]">{price}</p>
           </div>
           <PayNowCta courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="w-full" />

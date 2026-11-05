@@ -3,6 +3,7 @@ import { Marginalia } from '@/components/Marginalia';
 import { PayNowCta } from './PayNowCta';
 import { YouTubePreview } from './YouTubePreview';
 import { WhatsAppAsk } from './WhatsAppAsk';
+import { showStudents } from '@/lib/course-stats';
 
 interface LandingHeroProps {
   hook: string;
@@ -29,7 +30,7 @@ const apronStripes = {
 };
 
 export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
-  const proof = [...proofPoints, `${students.toLocaleString('id-ID')} murid`];
+  const proof = showStudents(students) ? [...proofPoints, `${students.toLocaleString('id-ID')} murid`] : proofPoints;
 
   return (
     <section id="lp-hero">
@@ -38,9 +39,11 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
           <h1 className="max-w-[20rem] font-display text-[2.05rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-balance sm:max-w-[34rem] sm:text-5xl sm:leading-[1.08]">
             {hook}
           </h1>
-          <Marginalia rotate={-2} className="mt-2 text-mie">
-            {students.toLocaleString('id-ID')} murid sudah belajar
-          </Marginalia>
+          {showStudents(students) && (
+            <Marginalia rotate={-2} className="mt-2 text-mie">
+              {students.toLocaleString('id-ID')} murid sudah belajar
+            </Marginalia>
+          )}
           <div className="mt-5">
             {videoId ? (
               <YouTubePreview videoId={videoId} title={`Cuplikan ${courseTitle}`} courseSlug={courseSlug} />

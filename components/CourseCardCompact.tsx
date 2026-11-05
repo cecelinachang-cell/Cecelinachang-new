@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { shopeeLink } from "@/lib/links";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
+import { showStudents } from '@/lib/course-stats';
 
 interface Course {
   id: string;
@@ -72,7 +73,7 @@ export default function CourseCardCompact({
             <ChefHat className="w-3.5 h-3.5 mr-1.5" />
             Langsung praktik di rumah
           </div>
-          {featured && typeof course.students === "number" && (
+          {featured && showStudents(course.students) && (
             <div className="flex items-center">
               <Users className="w-3.5 h-3.5 mr-1.5" />
               {course.students.toLocaleString("id-ID")} murid udah gabung
