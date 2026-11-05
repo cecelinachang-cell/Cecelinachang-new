@@ -7,7 +7,7 @@ import { CoursePricingPanel } from '@/components/CoursePricingPanel';
 import { MobileCourseBar } from '@/components/MobileCourseBar';
 import { CourseVideoHero } from '@/components/CourseVideoHero';
 import { ViewContentPing } from '@/components/ViewContentPing';
-import { TestimonialCarousel } from '@/components/TestimonialCarousel';
+import { TestimonialWall } from '@/components/TestimonialWall';
 import ProductCard from '@/components/ProductCard';
 import { courseProducts } from '@/app/data/course-products';
 import { products } from '@/app/data/products';
@@ -142,7 +142,7 @@ export default async function KursusDetailPage({ params }: { params: Promise<{ s
           {/* Testimoni */}
           <section>
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-4 sm:mb-6">Kata Murid Cece</h2>
-            <TestimonialCarousel />
+            <TestimonialWall courseSlug={course.slug} bare />
           </section>
 
           {/* Alat yang digunakan */}
