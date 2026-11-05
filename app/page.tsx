@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, CheckCircle2 } from "lucide-react";
-import { TestimonialCarousel } from "@/components/TestimonialCarousel";
+import { TestimonialWall } from "@/components/TestimonialWall";
 import { Marginalia } from "@/components/Marginalia";
 import { Button } from "@/components/ui/Button";
 import { Tape } from "@/components/ui/Tape";
@@ -151,7 +151,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <TestimonialCarousel />
+      <TestimonialWall studentsLabel={studentsLabel} />
 
       {/* Other courses */}
       {otherCourses.length > 0 && (
