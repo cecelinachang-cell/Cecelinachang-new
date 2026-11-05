@@ -57,7 +57,7 @@ export function SelfHostedPreview({ video, title, courseSlug }: { video: Preview
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 720px"
-          className="object-cover object-[50%_30%]"
+          className="object-cover object-[50%_45%]"
         />
         <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0" aria-hidden="true" />
         <span className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sambal text-white shadow-lg ring-4 ring-white/80 transition-transform duration-200 group-hover:scale-105 group-focus-visible:ring-mie motion-reduce:transition-none">
