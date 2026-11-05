@@ -9,15 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { waLink } from '@/lib/links';
 import { trackConversion } from '@/lib/analytics';
-import { totalStudents } from '@/lib/course-stats';
+import { STUDENTS_TOTAL } from '@/lib/course-stats';
 import { courses as fallbackCourses } from '@/app/data/courses';
 
 export default function TentangPage() {
   const [aboutImage, setAboutImage] = useState<string>('/images/lina-avatar.jpeg');
-  // Same figure the homepage shows (lib/courses.ts's totalStudents), not a
-  // separately hardcoded number -- the two pages previously drifted
-  // ("10.000+" on the homepage vs "2000+" here for the same audience).
-  const [studentsLabel, setStudentsLabel] = useState(() => totalStudents(fallbackCourses as any).toLocaleString('id-ID'));
+  // Same counted figure as the homepage (lib/course-stats.ts STUDENTS_TOTAL).
+  const [studentsLabel, setStudentsLabel] = useState(() => STUDENTS_TOTAL.toLocaleString('id-ID'));
 
   useEffect(() => {
     // About photo and student count, from a cached server route (app/api/site/about).

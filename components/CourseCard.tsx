@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { showStudents } from '@/lib/course-stats';
 
 interface Course {
   id: string;
@@ -93,10 +94,12 @@ export default function CourseCard({ course }: { course: Course }) {
           </p>
 
           <div className="flex flex-wrap gap-4 text-sm text-charcoal-brown/60 mb-8">
-            <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
-              <Users className="w-4 h-4 mr-2 text-terracotta" />
-              {course.students} Murid
-            </div>
+            {showStudents(course.students) && (
+              <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
+                <Users className="w-4 h-4 mr-2 text-terracotta" />
+                {course.students.toLocaleString('id-ID')} Murid
+              </div>
+            )}
             <div className="flex items-center bg-butter/25 px-3 py-1.5 rounded-full text-terracotta">
               <ChefHat className="w-4 h-4 mr-2 text-terracotta" />
               Langsung praktik di rumah

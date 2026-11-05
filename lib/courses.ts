@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { CACHE_SECONDS, TAGS, dbQuery, isDbConfigured } from '@/lib/db';
+import { withCountedStudents } from '@/lib/course-stats';
 
 export interface Course {
   id: string;
@@ -36,7 +37,7 @@ export const getAllCourses = unstable_cache(
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return fallbackCourses as unknown as Course[];
     }
-    return data as Course[];
+    return (data as Course[]).map(withCountedStudents);
   },
   ['all-courses'],
   { revalidate: CACHE_SECONDS, tags: [TAGS.courses] },
@@ -59,7 +60,7 @@ export const getCourseBySlug = cache(unstable_cache(
       }
       const { data, error } = await dbQuery<Course>((sql) => sql`select * from courses where slug = ${slug} limit 1`);
       if (error) console.error('Error fetching course detail:', error.message);
-      if (data?.[0]) return data[0];
+      if (data?.[0]) return withCountedStudents(data[0]);
       const { courses: fallbackCourses } = await import('@/app/data/courses');
       return (fallbackCourses.find((c: any) => c.slug === slug) as unknown as Course) || null;
     } catch (err: any) {
@@ -77,4 +78,4 @@ export const getCourseBySlug = cache(unstable_cache(
 // import these two directly from '@/lib/course-stats' instead, to avoid
 // pulling this file's unstable_cache/database imports into the client
 // bundle -- see the comment there.
-export { pickFeatured, totalStudents } from './course-stats';
+export { pickFeatured, STUDENTS_TOTAL, showStudents } from './course-stats';

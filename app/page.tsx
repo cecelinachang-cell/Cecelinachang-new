@@ -14,7 +14,7 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { CourseScroller } from "@/components/home/CourseScroller";
 import { AskCeceButton } from "@/components/home/AskCeceButton";
 import { HomeStickyCta } from "@/components/home/HomeStickyCta";
-import { getAllCourses, pickFeatured, totalStudents } from "@/lib/courses";
+import { getAllCourses, pickFeatured, STUDENTS_TOTAL } from "@/lib/courses";
 import { getSiteAssets } from "@/lib/settings";
 import { ClassBundles } from "@/components/ClassBundles";
 import { buildClassBundles } from "@/lib/bundles";
@@ -35,7 +35,7 @@ export default async function Home() {
 
   const featured = pickFeatured(courses);
   const otherCourses = courses.filter((c) => c.id !== featured?.id);
-  const studentsLabel = totalStudents(courses).toLocaleString("id-ID");
+  const studentsLabel = STUDENTS_TOTAL.toLocaleString("id-ID");
 
   // Nothing to sell yet -- bail to a minimal shell rather than crash on an
   // undefined featured course.

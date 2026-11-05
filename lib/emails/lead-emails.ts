@@ -20,7 +20,7 @@ export function buildWelcomeEmail(courseTitle: string) {
       <h1 style="font-size: 22px; margin: 0 0 16px;">Terima kasih sudah tertarik, ya!</h1>
       <p>Data Anda untuk <strong>${courseTitle}</strong> sudah kami terima. Cece akan proses pendaftaran begitu Anda kirim chat WhatsApp yang otomatis terbuka tadi.</p>
       <p style="background: #FBF6EE; border-left: 3px solid #C4622D; padding: 10px 16px; margin: 20px 0; font-size: 14px;">
-        Cece sudah mengelola pabrik bakso sejak <strong>1998</strong>, dan sudah membantu <strong>4.500+ murid</strong> di seluruh Indonesia bikin bakso sekelas industri dari dapur rumah sendiri.
+        Cece sudah mengelola pabrik bakso sejak <strong>1998</strong>, dan sudah membantu <strong>450+ murid online</strong> di seluruh Indonesia bikin bakso sekelas industri dari dapur rumah sendiri.
       </p>
       <p>Sambil menunggu, ini satu rahasia dapur yang paling sering ditanyakan murid Cece:</p>
       <div style="background: #FBF6EE; border: 1px solid #E8B86D55; border-radius: 12px; padding: 20px; margin: 20px 0;">
