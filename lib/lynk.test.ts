@@ -44,4 +44,14 @@ describe('withAdTags', () => {
   it('passes fbclid through', () => {
     expect(new URL(withAdTags(base, '?fbclid=abc')).searchParams.get('fbclid')).toBe('abc');
   });
+
+  it('puts the Meta click ID in utm_id, which Lynk keeps', () => {
+    const url = new URL(withAdTags(base, '?utm_source=meta&utm_id=120250774433620687&fbclid=abc&fbc=fb.1.1794000000000.abc'));
+    expect(url.searchParams.get('utm_id')).toBe('fb.1.1794000000000.abc');
+    expect(url.searchParams.has('fbc')).toBe(false);
+  });
+
+  it('leaves utm_id alone when there is no click ID', () => {
+    expect(new URL(withAdTags(base, '?utm_source=meta&utm_id=123')).searchParams.get('utm_id')).toBe('123');
+  });
 });
