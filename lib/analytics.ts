@@ -1,4 +1,4 @@
-import { trackPixelEvent, type PixelEvent } from '@/lib/pixels';
+import { trackPixelCustom, trackPixelEvent, type PixelEvent } from '@/lib/pixels';
 
 export type ConversionType =
   | 'lead_form_open'
@@ -37,10 +37,18 @@ const PIXEL_EVENT_MAP: Partial<Record<ConversionType, PixelEvent>> = {
   shopee_open: 'AddToCart',
 };
 
+// Meta custom events that show where landing-page visitors drop off. Custom
+// events never feed ad optimisation; they only appear in Events Manager.
+const PIXEL_CUSTOM_MAP: Partial<Record<ConversionType, string>> = {
+  video_play: 'LP_VideoPlay',
+};
+
 // Fires the ad pixels only. Conversions used to be written to the database
 // too; that stopped with the move to Neon's free plan (a write per click would
 // keep the database awake all day). The Meta/TikTok pixels still get them.
 export function trackConversion(type: ConversionType, courseSlug?: string, extra?: ConversionExtra) {
+  const custom = PIXEL_CUSTOM_MAP[type];
+  if (custom) trackPixelCustom(custom, { contentId: extra?.contentId ?? courseSlug });
   const pixelEvent = PIXEL_EVENT_MAP[type];
   if (!pixelEvent) return;
   trackPixelEvent(pixelEvent, {

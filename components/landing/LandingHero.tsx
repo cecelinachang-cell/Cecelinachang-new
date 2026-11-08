@@ -21,6 +21,10 @@ interface LandingHeroProps {
   included: string[];
   /** What happens after Daftar. */
   nextStep: string;
+  /** Numbered join steps; shown instead of nextStep when set. */
+  steps?: string[];
+  /** Help line under the steps. */
+  stepsHelp?: string;
   quote?: { text: string; source: string };
 }
 
@@ -31,7 +35,7 @@ const apronStripes = {
     'repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,0.08) 14px 16px)',
 };
 
-export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, video, courseSlug, price, included, nextStep, quote }: LandingHeroProps) {
+export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, video, courseSlug, price, included, nextStep, steps, stepsHelp, quote }: LandingHeroProps) {
   const proof = showStudents(students) ? [...proofPoints, `${students.toLocaleString('id-ID')} murid`] : proofPoints;
 
   return (
@@ -79,7 +83,27 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
             className="mt-3 w-full border-0 bg-transparent px-1 text-base text-seledri underline decoration-seledri/40 underline-offset-4 sm:w-auto"
           />
           <p className="mt-5 max-w-[42ch] text-base leading-relaxed text-kecap/80">{included.join('. ')}.</p>
-          <p className="mt-2 max-w-[42ch] text-base leading-relaxed text-kecap/70">{nextStep}</p>
+          {steps?.length ? (
+            <div className="mt-5 max-w-[42ch]">
+              <p className="font-display text-lg font-extrabold text-kecap">Cara daftar</p>
+              <ol className="mt-2 space-y-2">
+                {steps.map((step, i) => (
+                  <li key={step} className="flex gap-3 text-[1.0625rem] leading-snug text-kecap">
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sambal text-sm font-bold text-white"
+                      aria-hidden="true"
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+              {stepsHelp && <p className="mt-3 text-base leading-relaxed text-kecap/70">{stepsHelp}</p>}
+            </div>
+          ) : (
+            <p className="mt-2 max-w-[42ch] text-base leading-relaxed text-kecap/70">{nextStep}</p>
+          )}
           <p className="mt-6 max-w-[38ch] font-display text-2xl font-extrabold leading-snug tracking-[-0.02em] sm:text-3xl">{subhook}</p>
           {quote && (
             <figure className="mt-4">
