@@ -1,20 +1,16 @@
 "use client";
 
-import { useSyncExternalStore } from 'react';
 import { CheckCircle2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Marginalia } from '@/components/Marginalia';
 import { trackConversion } from '@/lib/analytics';
 import { bundleCheckoutUrl, formatRupiah, type ClassBundleView } from '@/lib/bundles';
-
-// Nothing to subscribe to: the query string is read once per visit.
-const subscribeNever = () => () => {};
-const readSearch = () => window.location.search;
+import { useAdSearch } from '@/lib/useAdSearch';
 
 /** The class bundles at their normal price (lib/bundles.ts). No countdown, no sale. */
 export function ClassBundles({ bundles, contained = true }: { bundles: ClassBundleView[]; contained?: boolean }) {
   // Server render and hydration use the plain links; the browser then adds any ad tags.
-  const search = useSyncExternalStore(subscribeNever, readSearch, () => '');
+  const search = useAdSearch();
 
   return (
     <section

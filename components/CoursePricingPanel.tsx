@@ -8,7 +8,8 @@ import LeadFormModal from '@/components/LeadFormModal';
 import { trackConversion } from '@/lib/analytics';
 import { parseIdr } from '@/lib/pixels';
 import { shopeeLink, waLink } from '@/lib/links';
-import { lynkCheckoutUrl } from '@/lib/lynk';
+import { lynkCheckoutUrl, withAdTags } from '@/lib/lynk';
+import { useAdSearch } from '@/lib/useAdSearch';
 import { showStudents } from '@/lib/course-stats';
 
 interface Course {
@@ -27,8 +28,11 @@ interface CoursePricingPanelProps {
 
 export function CoursePricingPanel({ course, compact = false }: CoursePricingPanelProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
-  // Online payment is the course's Lynk checkout (lib/lynk.ts).
-  const lynkUrl = lynkCheckoutUrl(course.slug);
+  // Online payment is the course's Lynk checkout (lib/lynk.ts). A visitor who
+  // came from an ad keeps its tags here too (lib/adTags).
+  const adSearch = useAdSearch();
+  const baseUrl = lynkCheckoutUrl(course.slug);
+  const lynkUrl = baseUrl ? withAdTags(baseUrl, adSearch) : null;
   const canPayOnline = Boolean(lynkUrl);
   const trackCheckout = () =>
     trackConversion('checkout_open', course.slug, {

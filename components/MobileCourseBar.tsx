@@ -6,7 +6,8 @@ import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { trackConversion } from "@/lib/analytics";
 import { parseIdr } from "@/lib/pixels";
 import { shopeeLink } from "@/lib/links";
-import { lynkCheckoutUrl } from "@/lib/lynk";
+import { lynkCheckoutUrl, withAdTags } from "@/lib/lynk";
+import { useAdSearch } from "@/lib/useAdSearch";
 
 interface Course {
   slug: string;
@@ -18,7 +19,10 @@ interface Course {
 
 export function MobileCourseBar({ course }: { course: Course }) {
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const lynkUrl = lynkCheckoutUrl(course.slug);
+  const adSearch = useAdSearch();
+  const baseUrl = lynkCheckoutUrl(course.slug);
+  // A visitor who came from an ad keeps its tags here too (lib/adTags).
+  const lynkUrl = baseUrl ? withAdTags(baseUrl, adSearch) : null;
 
   return (
     <>

@@ -1,16 +1,12 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { Lock } from "lucide-react";
 import { trackConversion } from "@/lib/analytics";
 import { lynkCheckoutUrl, withAdTags } from "@/lib/lynk";
 import { parseIdr } from "@/lib/pixels";
+import { useAdSearch } from "@/lib/useAdSearch";
 import { cn } from "@/lib/utils";
 import { QuizCta } from "./QuizCta";
-
-// Nothing to subscribe to: the query string is read once per visit.
-const subscribeNever = () => () => {};
-const readSearch = () => window.location.search;
 
 interface PayNowCtaProps {
   courseSlug: string;
@@ -31,7 +27,7 @@ interface PayNowCtaProps {
  */
 export function PayNowCta({ courseSlug, courseTitle, price, label, className, variant = "primary", tabIndex }: PayNowCtaProps) {
   // Server render and hydration use the plain URL; the browser then adds the ad tags.
-  const search = useSyncExternalStore(subscribeNever, readSearch, () => "");
+  const search = useAdSearch();
   const base = lynkCheckoutUrl(courseSlug, "landing_page");
   const text = label ?? `Bayar Sekarang · ${price}`;
 

@@ -8,8 +8,9 @@ import { buildWhatsAppUrl, flushPendingLeads, submitLead } from "@/lib/submitLea
 import { buildQuizLead, offersOffline, quizPains } from "@/lib/quizLead";
 import { isValidIndonesianPhone, suggestEmailFix } from "@/lib/leadValidation";
 import { NEXT_SCHEDULE_LABEL, offlineScheduleLabel } from "@/lib/offlineClass";
-import { lynkCheckoutUrl } from "@/lib/lynk";
+import { lynkCheckoutUrl, withAdTags } from "@/lib/lynk";
 import { parseIdr } from "@/lib/pixels";
+import { useAdSearch } from "@/lib/useAdSearch";
 
 interface CommitmentQuizProps {
   courseSlug: string;
@@ -69,7 +70,9 @@ export function CommitmentQuiz({
   const isOffline = offerOffline && classChoice === "offline";
   // After the form, online buyers can pay on Lynk right away instead of waiting
   // for an admin reply. The lead (and the ads' Lead event) is recorded either way.
-  const payUrl = isOffline ? null : lynkCheckoutUrl(courseSlug, "landing_page");
+  const adSearch = useAdSearch();
+  const lynkBase = isOffline ? null : lynkCheckoutUrl(courseSlug, "landing_page");
+  const payUrl = lynkBase ? withAdTags(lynkBase, adSearch) : null;
 
   useEffect(() => {
     flushPendingLeads();

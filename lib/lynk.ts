@@ -34,8 +34,11 @@ export function lynkCheckoutUrl(
 /**
  * Keeps an ad's tracking on the way to Lynk. If the visitor arrived with
  * utm_* tags (an ad), those replace the website tags so Lynk orders show which
- * ad sold. fbclid is passed through so the Meta pixel on Lynk can match the
- * purchase to the ad click.
+ * ad sold. fbclid is passed through for the Meta pixel on Lynk.
+ *
+ * Lynk's webhook keeps utm_* but drops fbclid, so the Meta click ID (`fbc`,
+ * from lib/adTags) rides in utm_id. The Apps Script webhook sends it to Meta
+ * with the Purchase. utm_id held the campaign ID, which utm_campaign repeats.
  */
 export function withAdTags(url: string, incomingSearch = ''): string {
   const incoming = new URLSearchParams(incomingSearch);
@@ -46,5 +49,7 @@ export function withAdTags(url: string, incomingSearch = ''): string {
   }
   const fbclid = incoming.get('fbclid');
   if (fbclid) out.searchParams.set('fbclid', fbclid);
+  const fbc = incoming.get('fbc');
+  if (fbc) out.searchParams.set('utm_id', fbc);
   return out.toString();
 }
