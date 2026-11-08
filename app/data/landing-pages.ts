@@ -53,6 +53,19 @@ export interface LandingCopy {
    * only the steps the form and FAQ already promise.
    */
   heroNext: string;
+  /**
+   * Numbered "cara daftar" steps under the first button. Replaces heroNext
+   * when set: most buyers are 45+ and the Gmail step was easy to miss.
+   */
+  heroSteps?: string[];
+  /** One help line under the steps. */
+  heroStepsHelp?: string;
+  /**
+   * Headline that matches the ad the visitor came from. If utm_content (the
+   * ad name) contains `match`, middleware.ts serves /lp/[slug]/v/[key] with
+   * this hook. Same rule as everything here: confirmed facts only.
+   */
+  adVariants?: { key: string; match: string; hook: string; subhook?: string }[];
   /** Syllabus heading, the "materi yang didapatkan" block. */
   materiTitle: string;
   whyTitle: string;
@@ -123,6 +136,27 @@ export const landingPages: Record<string, LandingCopy> = {
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
     heroNext:
       'Bayar lewat QRIS, e-wallet, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu, tanpa menunggu admin.',
+    heroSteps: [
+      'Klik "Bayar Sekarang", bayar pakai QRIS, e-wallet, atau Virtual Account.',
+      'Tulis alamat Gmail kamu di formulir pembayaran.',
+      'Link kelas langsung masuk ke Gmail kamu. Tonton kapan saja, akses seumur hidup.',
+    ],
+    heroStepsHelp: 'Belum punya Gmail atau bingung caranya? Klik "Tanya Cece", admin bantu.',
+    // Ad names in Meta: "A-reel-kenyal", "B-pabrik-18th" (Nov 2026 sales campaign).
+    adVariants: [
+      {
+        key: 'pabrik',
+        match: 'pabrik',
+        hook: 'Resep bakso pabrik 18 tahun, sekarang bisa kamu bikin di rumah.',
+        subhook:
+          'Teknik yang dulu cuma dipakai di dapur pabrik, sekarang Cece ajarin pakai alat rumahan. Nggak harus jago dulu.',
+      },
+      {
+        key: 'kenyal',
+        match: 'kenyal',
+        hook: 'Bakso kenyal ala pabrik, dari dapur rumahmu sendiri.',
+      },
+    ],
 
     painTitle: 'Kalau kamu pernah ngalamin ini…',
     pains: [

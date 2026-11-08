@@ -91,3 +91,19 @@ export function trackPixelEvent(event: PixelEvent, params: PixelParams = {}): vo
     // Analytics must never break the page.
   }
 }
+
+/**
+ * Meta custom event (fbq trackCustom), for funnel diagnostics such as scroll
+ * depth. Meta only: TikTok has no matching report. Never throws.
+ */
+export function trackPixelCustom(name: string, params: { contentId?: string } = {}): void {
+  try {
+    if (typeof window === 'undefined') return;
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[pixel custom]', name, params);
+    }
+    window.fbq?.('trackCustom', name, params.contentId ? { content_ids: [params.contentId] } : {});
+  } catch {
+    // Analytics must never break the page.
+  }
+}
