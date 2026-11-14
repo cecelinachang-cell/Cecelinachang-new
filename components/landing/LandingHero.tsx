@@ -99,7 +99,7 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
                   </li>
                 ))}
               </ol>
-              {stepsHelp && <p className="mt-3 text-base leading-relaxed text-kecap/70">{stepsHelp}</p>}
+              {stepsHelp && <p className="mt-3 text-lg leading-relaxed text-kecap/85">{stepsHelp}</p>}
             </div>
           ) : (
             <p className="mt-2 max-w-[42ch] text-base leading-relaxed text-kecap/70">{nextStep}</p>
@@ -110,7 +110,7 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
               <Marginalia rotate={-1} className="text-rust-ink">
                 “{quote.text}”
               </Marginalia>
-              <figcaption className="mt-1 text-sm text-steel">{quote.source}</figcaption>
+              <figcaption className="mt-1 text-base text-kecap/75">{quote.source}</figcaption>
             </figure>
           )}
           <ul className="mt-6 flex flex-wrap gap-2 text-sm font-semibold text-kecap">

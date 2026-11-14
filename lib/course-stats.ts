@@ -11,24 +11,24 @@ export function pickFeatured(courses: Course[]): Course | undefined {
 
 /**
  * Real number of online students (unique people), shown on the homepage and
- * /tentang. Counted 5 Nov 2026 from the viewer lists of the 8 class folders in
- * Cece's Google Drive: 743 people, rounded down. The earlier figure (10.024,
+ * /tentang. Counted 13 Nov 2026 from the viewer lists of the 8 class folders in
+ * Cece's Google Drive: 754 people, rounded down (5 Nov: 743). The earlier figure (10.024,
  * the sum of per-class counts) was an estimate, not a count. Update by hand
  * when the Drive lists grow; never add per-class numbers together (people
  * who bought two classes would count twice).
  */
-export const STUDENTS_TOTAL = 740;
+export const STUDENTS_TOTAL = 750;
 
 /** Per-class counts under this are not shown: a small true number reads worse than none. */
 export const MIN_SHOWN_STUDENTS = 50;
 
 /**
- * Counted students per class (same Drive count, 5 Nov 2026). These override
+ * Counted students per class (Drive count; Bakso recounted 13 Nov 2026, the rest 5 Nov). These override
  * the `students` column in the database, which held estimates; the admin
  * form's student field no longer changes what visitors see.
  */
 export const COUNTED_STUDENTS: Record<string, number> = {
-  'bakso-sapi-premium': 457,
+  'bakso-sapi-premium': 469,
   'otak-otak': 195,
   'lapis-legit': 116,
   'go-hiong-roll': 47,

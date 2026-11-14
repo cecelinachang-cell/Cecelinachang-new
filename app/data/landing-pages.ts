@@ -60,6 +60,10 @@ export interface LandingCopy {
   heroSteps?: string[];
   /** One help line under the steps. */
   heroStepsHelp?: string;
+  /** Split-test arm B only (lib/lpSplit.ts): who teaches it, one line under the headline. */
+  heroTrustLine?: string;
+  /** Split-test arm B only: a short verbatim student quote under the first button. */
+  heroTestimonial?: { text: string; source: string };
   /**
    * Headline that matches the ad the visitor came from. If utm_content (the
    * ad name) contains `match`, middleware.ts serves /lp/[slug]/v/[key] with
@@ -136,14 +140,32 @@ export const landingPages: Record<string, LandingCopy> = {
     proofPoints: ['18 tahun punya pabrik bakso', 'Puluhan ton per bulan'],
     heroNext:
       'Bayar lewat QRIS, e-wallet, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu, tanpa menunggu admin.',
+    // Lynk adds its payment fee after the buyer picks a method (QRIS +Rp 3.493
+    // on 14 Nov 2026), so the total is named here before it surprises anyone.
     heroSteps: [
-      'Klik "Bayar Sekarang", bayar pakai QRIS, e-wallet, atau Virtual Account.',
-      'Tulis alamat Gmail kamu di formulir pembayaran.',
-      'Link kelas langsung masuk ke Gmail kamu. Tonton kapan saja, akses seumur hidup.',
+      'Klik "Bayar Sekarang", lalu pilih cara bayar: QRIS, e-wallet, atau Virtual Account. Ada biaya admin kecil dari cara bayarnya, untuk QRIS sekitar Rp 3.500.',
+      'Tulis alamat Gmail kamu (yang belakangnya @gmail.com) di formulir pembayaran.',
+      'Link kelas langsung masuk ke Gmail kamu lewat Google Drive. Buka pakai Gmail yang sama, tonton kapan saja, akses seumur hidup.',
     ],
-    heroStepsHelp: 'Belum punya Gmail atau bingung caranya? Klik "Tanya Cece", admin bantu.',
-    // Ad names in Meta: "A-reel-kenyal", "B-pabrik-18th" (Nov 2026 sales campaign).
+    heroStepsHelp: 'Belum punya Gmail atau bingung caranya? Klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+    heroTrustLine: 'Diajarin langsung sama Cece, yang 18 tahun punya pabrik bakso (1998–2016).',
+    // Verbatim from wa-ayam-cucu.jpg (shown in full further down the page).
+    heroTestimonial: {
+      text: 'Pertama kali coba gagal, kemarin coba lagi… Mantap banget… Begitu angkat langsung habis sama cucu.',
+      source: 'Murid kelas bakso, lewat WhatsApp',
+    },
+    // Ad names in Meta: "A-reel-kenyal", "B-pabrik-18th", "F1-ibu-kenyal" (Nov 2026
+    // sales campaign). First match wins, so "ibu" comes before "kenyal": the
+    // F1 ad is the Facebook-only one for women 40-65 and its text promises
+    // "diajarin pelan-pelan" and a video you can rewatch.
     adVariants: [
+      {
+        key: 'ibu',
+        match: 'ibu',
+        hook: 'Resep bakso pabrik 18 tahun, diajarin pelan-pelan sampai kenyal.',
+        subhook:
+          'Kelasnya video, ditonton di rumah, diulang-ulang juga boleh. Buat keluarga, buat cucu, atau buat jualan juga bisa.',
+      },
       {
         key: 'pabrik',
         match: 'pabrik',
@@ -317,6 +339,17 @@ export const landingPages: Record<string, LandingCopy> = {
         nearQuiz: true,
         answer:
           'Bukan. Kamu dapat video kelas, e-book resep, dan bisa tanya Cece langsung. Akses videonya langsung masuk ke Gmail kamu setelah bayar.',
+      },
+      {
+        question: 'Saya nggak punya Gmail, gimana?',
+        nearQuiz: true,
+        answer:
+          'Kelasnya ada di Google Drive, jadi perlu alamat Gmail (yang belakangnya @gmail.com). HP Android biasanya sudah punya Gmail. Kalau bingung, klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+      },
+      {
+        question: 'Sudah bayar tapi kelasnya belum masuk?',
+        answer:
+          'Cek dulu folder Spam atau Promosi di Gmail kamu, dan pastikan kamu buka pakai Gmail yang sama dengan yang ditulis waktu bayar. Kalau masih belum ada, klik "Tanya Cece" dan kirim bukti bayarnya, nanti dicek.',
       },
       {
         question: 'Alat apa yang dibutuhkan?',

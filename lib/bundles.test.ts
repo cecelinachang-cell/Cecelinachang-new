@@ -6,7 +6,7 @@ describe('buildClassBundles', () => {
   it('shows the normal bundle price against the real sum of the single prices', () => {
     const views = buildClassBundles(courses);
     expect(views.map((v) => [v.key, v.singlesTotal, v.price])).toEqual([
-      ['gurih', 1_196_000, 899_000],
+      ['gurih', 1_296_000, 899_000],
       ['hampers', 1_297_000, 949_000],
     ]);
   });

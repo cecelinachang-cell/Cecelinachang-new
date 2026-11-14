@@ -10,6 +10,10 @@ describe('matchAdVariant', () => {
     expect(matchAdVariant(bakso, 'A-reel-kenyal')).toBe('kenyal');
   });
 
+  it('sends the Facebook 40-65 ad to the "ibu" headline, not "kenyal"', () => {
+    expect(matchAdVariant(bakso, 'F1-ibu-kenyal')).toBe('ibu');
+  });
+
   it('ignores case', () => {
     expect(matchAdVariant(bakso, 'C-PABRIK-baru')).toBe('pabrik');
   });
