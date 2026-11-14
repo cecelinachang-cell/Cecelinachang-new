@@ -5,9 +5,9 @@ interface StudentProofProps {
 }
 
 /**
- * Real WhatsApp screenshots from students. On phones they sit in a swipeable
- * row with the next one peeking in, so the text in each screenshot stays
- * large enough to read.
+ * Real WhatsApp screenshots from students, stacked one under another on
+ * phones. They used to sit in a sideways swipe row, but most buyers are 45+
+ * and a swipe behind a small grey "geser" hint hid the strongest messages.
  */
 export function StudentProof({ testimonials }: StudentProofProps) {
   if (testimonials.length === 0) return null;
@@ -24,25 +24,22 @@ export function StudentProof({ testimonials }: StudentProofProps) {
           </p>
         </div>
       </div>
-      <ul className="hide-scrollbar mx-auto flex max-w-3xl snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-6">
+      <ul className="mx-auto grid max-w-3xl gap-5 px-4 sm:grid-cols-2 sm:px-6">
         {testimonials.map((t) => (
-          <li key={t.src} className="w-[78%] shrink-0 snap-start sm:w-auto">
+          <li key={t.src} className="mx-auto w-full max-w-sm sm:max-w-none">
             <figure className="overflow-hidden rounded-2xl border border-steel-line bg-[#EFE7DC] shadow-[0_12px_28px_-18px_rgba(34,26,23,0.5)]">
               <Image
                 src={t.src}
                 alt={t.alt}
                 width={t.width}
                 height={t.height}
-                sizes="(max-width: 640px) 78vw, 360px"
+                sizes="(max-width: 640px) 92vw, 360px"
                 className="h-auto w-full"
               />
             </figure>
           </li>
         ))}
       </ul>
-      {testimonials.length > 1 && (
-        <p className="mt-3 px-4 text-center text-sm text-steel sm:hidden">Geser untuk lihat pesan lainnya</p>
-      )}
     </section>
   );
 }

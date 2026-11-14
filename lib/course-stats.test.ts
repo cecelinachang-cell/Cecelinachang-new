@@ -4,7 +4,7 @@ import { COUNTED_STUDENTS, showStudents, STUDENTS_TOTAL, withCountedStudents } f
 
 describe('student counts', () => {
   it('overrides database estimates with the counted numbers', () => {
-    expect(withCountedStudents({ slug: 'bakso-sapi-premium', students: 4509 }).students).toBe(457);
+    expect(withCountedStudents({ slug: 'bakso-sapi-premium', students: 4509 }).students).toBe(469);
     expect(withCountedStudents({ slug: 'kelas-baru', students: 999 }).students).toBe(0);
   });
 

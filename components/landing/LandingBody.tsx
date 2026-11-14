@@ -5,6 +5,9 @@ import { products } from '@/app/data/products';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
 import { LandingHero } from '@/components/landing/LandingHero';
+import { LandingHeroB } from '@/components/landing/LandingHeroB';
+import { LpArmTracker } from '@/components/landing/LpArmTracker';
+import { isSplitActive, type LpArm } from '@/lib/lpSplit';
 import { MateriSection } from '@/components/landing/MateriSection';
 import { PainSection } from '@/components/landing/PainSection';
 import { RootCauseSection } from '@/components/landing/RootCauseSection';
@@ -27,8 +30,10 @@ import { ScrollDepthPing } from '@/components/landing/ScrollDepthPing';
 /**
  * The whole /lp/[slug] page. `variantKey` picks the ad-matched headline
  * (copy.adVariants); middleware.ts sends ad traffic to /lp/[slug]/v/[key].
+ * `arm` is the first-screen split test (lib/lpSplit.ts): only the hero
+ * differs between A and B. Pages in the test default to A.
  */
-export async function LandingBody({ slug, variantKey }: { slug: string; variantKey?: string }) {
+export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: string; variantKey?: string; arm?: LpArm }) {
   const course = await getCourseBySlug(slug);
   const copy = getLandingCopy(slug);
 
@@ -40,6 +45,7 @@ export async function LandingBody({ slug, variantKey }: { slug: string; variantK
   if (variantKey && !variant) {
     notFound();
   }
+  const arm: LpArm | undefined = armProp ?? (isSplitActive(slug) ? 'a' : undefined);
   const hook = variant?.hook ?? copy.hook;
   const subhook = variant?.subhook ?? copy.subhook;
 
@@ -64,6 +70,25 @@ export async function LandingBody({ slug, variantKey }: { slug: string; variantK
         value={parseIdr(course.price)}
       />
       <ScrollDepthPing contentId={course.slug} />
+      {arm && <LpArmTracker arm={arm} contentId={course.slug} />}
+      {arm === 'b' ? (
+        <LandingHeroB
+          hook={hook}
+          subhook={subhook}
+          trustLine={copy.heroTrustLine}
+          students={course.students}
+          courseTitle={course.title}
+          videoId={copy.previewVideoId}
+          video={copy.previewVideo}
+          courseSlug={course.slug}
+          price={course.price}
+          included={copy.offerIncludes}
+          testimonial={copy.heroTestimonial}
+          nextStep={copy.heroNext}
+          steps={copy.heroSteps}
+          stepsHelp={copy.heroStepsHelp}
+        />
+      ) : (
       <LandingHero
         hook={hook}
         subhook={subhook}
@@ -81,6 +106,7 @@ export async function LandingBody({ slug, variantKey }: { slug: string; variantK
         stepsHelp={copy.heroStepsHelp}
         quote={copy.quizQuote}
       />
+      )}
       <MateriSection
         title={copy.materiTitle}
         items={course.benefits || []}

@@ -2,18 +2,39 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ADMIN_COOKIE, verifySessionToken } from '@/lib/adminSession';
 import { landingPages } from '@/app/data/landing-pages';
 import { matchAdVariant } from '@/lib/adVariant';
+import { LP_SPLIT_COOKIE, LP_SPLIT_MAX_AGE, armPath, chooseArm, isSplitActive } from '@/lib/lpSplit';
 
-// Ad-matched landing pages: a visitor from the "pabrik" ad gets the "pabrik"
-// headline (copy.adVariants). Rewrite, not redirect: the address bar and the
-// ad tags stay on /lp/[slug]. Anything else under /lp passes straight through.
+// Landing pages. Two things pick the page a visitor sees, both by rewrite so
+// the address bar and the ad tags stay on /lp/[slug]:
+// 1. Ad-matched headline: a visitor from the "pabrik" ad gets the "pabrik"
+//    headline (copy.adVariants, matched on utm_content = the ad name).
+// 2. The first-screen split test (lib/lpSplit.ts): arm A or B, kept in a
+//    cookie so a returning visitor sees the same version.
+// Anything else under /lp passes straight through.
 function landingRewrite(request: NextRequest): NextResponse {
   const m = /^\/lp\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
-  const copy = m ? landingPages[m[1]] : undefined;
-  const key = copy ? matchAdVariant(copy.adVariants, request.nextUrl.searchParams.get('utm_content')) : null;
-  if (!m || !key) return NextResponse.next();
-  const url = request.nextUrl.clone();
-  url.pathname = `/lp/${m[1]}/v/${key}`;
-  return NextResponse.rewrite(url);
+  const slug = m?.[1];
+  const copy = slug ? landingPages[slug] : undefined;
+  if (!slug || !copy) return NextResponse.next();
+
+  const key = matchAdVariant(copy.adVariants, request.nextUrl.searchParams.get('utm_content'));
+  const split = isSplitActive(slug)
+    ? chooseArm(request.nextUrl.searchParams.get('lp'), request.cookies.get(LP_SPLIT_COOKIE)?.value)
+    : null;
+
+  const target = armPath(slug, split?.arm ?? 'a', key);
+  let response: NextResponse;
+  if (target === request.nextUrl.pathname.replace(/\/$/, '')) {
+    response = NextResponse.next();
+  } else {
+    const url = request.nextUrl.clone();
+    url.pathname = target;
+    response = NextResponse.rewrite(url);
+  }
+  if (split?.fresh) {
+    response.cookies.set(LP_SPLIT_COOKIE, split.arm, { maxAge: LP_SPLIT_MAX_AGE, path: '/', sameSite: 'lax' });
+  }
+  return response;
 }
 
 // Server-side gate for the admin area. The /admin layout only redirects in

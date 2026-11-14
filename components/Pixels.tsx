@@ -16,7 +16,7 @@ export function Pixels() {
   const lastPathRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!pixelsEnabled) return;
+    if (!pixelsEnabled || pathname?.startsWith('/admin')) return;
     // Skip the initial mount — the pixel scripts' own init call already
     // fires the first PageView once they finish loading.
     if (lastPathRef.current === null) {
@@ -34,7 +34,9 @@ export function Pixels() {
     }
   }, [pathname]);
 
-  if (!pixelsEnabled) return null;
+  // Admin pages are the owner, not a visitor: they were showing up as
+  // PageViews in Events Manager. Skipped on a first load into /admin.
+  if (!pixelsEnabled || pathname?.startsWith('/admin')) return null;
 
   return (
     <>
