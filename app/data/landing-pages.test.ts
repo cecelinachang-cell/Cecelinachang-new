@@ -1,19 +1,22 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
-import { landingPages } from "./landing-pages";
+import { isShortLanding, landingPages, type LandingCopy } from "./landing-pages";
 import { courses } from "./courses";
 import { products } from "./products";
+import { STUDENT_TESTIMONIALS } from "./student-testimonials";
 
 describe("landingPages", () => {
-  const entries = Object.entries(landingPages);
+  const all = Object.entries(landingPages);
+  // The long page (quiz, equipment, story); short pages are checked below.
+  const entries = all.filter((e): e is [string, LandingCopy] => !isShortLanding(e[1]));
 
   it("has at least one landing page", () => {
     expect(entries.length).toBeGreaterThan(0);
   });
 
   it("points every testimonial at an image in public/, with a transcript as alt text", () => {
-    for (const [, copy] of entries) {
+    for (const [, copy] of all) {
       for (const t of copy.testimonials) {
         expect(existsSync(join(process.cwd(), "public", t.src)), t.src).toBe(true);
         expect(t.alt.length).toBeGreaterThan(20);
@@ -47,6 +50,42 @@ describe("landingPages", () => {
     expect(fitQuestions).toBe(copy.offlineClass ? 1 : 0);
     if (copy.offlineClass?.schedule) {
       expect(Number.isNaN(new Date(copy.offlineClass.schedule.startsAt).getTime())).toBe(false);
+    }
+  });
+});
+
+describe("short landing pages", () => {
+  const short = Object.entries(landingPages).filter(([, copy]) => isShortLanding(copy));
+
+  it("lapis-legit uses the short page", () => {
+    expect(isShortLanding(landingPages["lapis-legit"])).toBe(true);
+    expect(isShortLanding(landingPages["bakso-sapi-premium"])).toBe(false);
+  });
+
+  it.each(short)("%s points at a real course", (slug) => {
+    expect(courses.some((c) => c.slug === slug)).toBe(true);
+  });
+
+  it.each(short)("%s only shows its own course's students, from the curated list", (slug, copy) => {
+    for (const t of copy.testimonials) {
+      const curated = STUDENT_TESTIMONIALS.find((s) => s.image === t.src);
+      expect(curated?.courseSlug, t.src).toBe(slug);
+    }
+  });
+
+  it.each(short)("%s has a self-hosted video small enough for a phone, with a poster", (_slug, copy) => {
+    if (!copy.previewVideo) return;
+    const video = join(process.cwd(), "public", copy.previewVideo.src);
+    expect(existsSync(video)).toBe(true);
+    expect(statSync(video).size).toBeLessThan(6 * 1024 * 1024);
+    expect(existsSync(join(process.cwd(), "public", copy.previewVideo.poster))).toBe(true);
+  });
+
+  // No made-up value stacks or urgency, and the refund line stays in the FAQ.
+  it.each(short)("%s has no invented value, urgency or refund line in the copy", (_slug, copy) => {
+    const text = JSON.stringify(copy).toLowerCase();
+    for (const banned of ["senilai", "hari ini saja", "terbatas", "baru saja mendaftar", "refund", "anti gagal"]) {
+      expect(text, banned).not.toContain(banned);
     }
   });
 });
