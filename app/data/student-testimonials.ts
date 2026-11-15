@@ -39,6 +39,26 @@ export const STUDENT_TESTIMONIALS: StudentTestimonial[] = [
     courseLabel: 'Kelas Lapis Legit 3 Generasi',
   },
   {
+    // From Cece's Instagram highlight "Lapis legit". The photo and the two
+    // messages are from the same chat; Instagram's music sticker is cropped out.
+    image: '/images/testimonials/lapis-legit/wa-berhasil-sekali-coba.jpg',
+    width: 400,
+    height: 772,
+    quote: 'Berhasil Ce, sekali coba. Terimakasih Ce ilmunya.',
+    courseSlug: 'lapis-legit',
+    courseLabel: 'Kelas Lapis Legit 3 Generasi',
+  },
+  {
+    // From Cece's Instagram highlight "Lapis legit" (chat of 19 Dec 2025).
+    // One message hidden under Instagram's music sticker is left out.
+    image: '/images/testimonials/lapis-legit/wa-tidak-kecewa-lapis-gulung.jpg',
+    width: 517,
+    height: 571,
+    quote: 'Cece Lina, hasil lapis legit ikut kelas. Tidak kecewa ikut kelas Cece Lina. Sisa adonan bikin lapis gulung.',
+    courseSlug: 'lapis-legit',
+    courseLabel: 'Kelas Lapis Legit 3 Generasi',
+  },
+  {
     image: '/images/uploads/testimonials/new/1789798949882-hli05v0j8x.webp',
     width: 502,
     height: 965,
