@@ -426,8 +426,7 @@ export const landingPages: Record<string, AnyLandingCopy> = {
   // course record (Rp 699.000, was really sold at 799.000, 62-minute video,
   // lifetime access, the 4 benefits, "resep warisan keluarga … 3 generasi"),
   // what's included on the course page, and Cece's own words in her lapis
-  // videos. Everything marked [CEK] still needs Cece's answer before the ads
-  // send traffic here.
+  // videos, plus her answers on the tool list (15 Nov 2026).
   'lapis-legit': {
     layout: 'short',
     hook: 'Lapis legit moist dan rapi, dari resep keluarga 3 generasi.',
@@ -535,29 +534,31 @@ export const landingPages: Record<string, AnyLandingCopy> = {
       'Bukan cuma resep tulisan: ada video, e-book resep (PDF), sertifikat digital, dan konsultasi langsung dengan Cece.',
     ],
 
-    // Cece's real tool list isn't known yet: every [CEK] needs her answer.
+    // Tool answers from Cece (15 Nov 2026): electric oven, tin size is in the
+    // class video, mixer needed, small tools can be substituted, she
+    // recommends the oven and mixers from her store (optional).
     tools: {
       title: 'Alat yang perlu disiapkan',
       intro: 'Lapis legit dipanggang selapis demi selapis di oven, jadi oven wajib ada.',
       items: [
         {
           name: 'Oven',
-          note: '[CEK] Oven listrik atau gas? Harus bisa api atas dan bawah? (Lapisan terakhir pakai api atas-bawah.)',
+          note: 'Pakai oven listrik. Untuk lapisan terakhir, Cece pakai api atas dan bawah.',
         },
         {
           name: 'Loyang',
-          note: 'Untuk pemula, Cece sarankan loyang bulat. [CEK] Ukurannya berapa cm?',
+          note: 'Untuk pemula, Cece sarankan loyang bulat. Ukurannya dijelaskan di video kelas.',
         },
         {
-          name: '[CEK] Mixer',
-          note: '[CEK] Perlu mixer? Mixer tangan cukup, atau harus mixer berdiri?',
+          name: 'Mixer',
+          note: 'Perlu mixer untuk mengocok adonan.',
         },
         {
-          name: '[CEK] Alat lain',
-          note: '[CEK] Misalnya penekan lapis, kuas, timbangan: mana yang wajib, mana yang boleh pakai alat seadanya?',
+          name: 'Alat kecil lainnya',
+          note: 'Penekan lapis, kuas, dan alat kecil lain tidak harus beli khusus. Bisa diganti dengan yang sudah ada di dapur.',
         },
       ],
-      note: '[CEK] Ada alat yang Cece rekomendasikan dari toko CeceLinaChang? Kalau ada, ditulis sebagai pilihan, bukan syarat.',
+      note: 'Cece merekomendasikan oven dan mixer dari CeceLinaChang Store. Ini pilihan saja, bukan syarat ikut kelas.',
     },
 
     offerIncludes: [
@@ -586,7 +587,7 @@ export const landingPages: Record<string, AnyLandingCopy> = {
       {
         question: 'Alat apa yang dibutuhkan?',
         answer:
-          'Oven dan loyang (untuk pemula, loyang bulat). [CEK] Alat lainnya menyusul, lihat daftar "Alat yang perlu disiapkan" di atas.',
+          'Oven listrik, loyang (untuk pemula, loyang bulat), dan mixer. Penekan lapis, kuas, dan alat kecil lain bisa pakai yang sudah ada di dapur. Daftarnya ada di bagian "Alat yang perlu disiapkan" di atas.',
       },
       {
         question: 'Ini cuma e-book?',

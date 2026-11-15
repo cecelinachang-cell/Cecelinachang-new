@@ -62,6 +62,10 @@ describe("short landing pages", () => {
     expect(isShortLanding(landingPages["bakso-sapi-premium"])).toBe(false);
   });
 
+  it.each(short)("%s has no [CEK] placeholders left", (_slug, copy) => {
+    expect(JSON.stringify(copy)).not.toContain("[CEK]");
+  });
+
   it.each(short)("%s points at a real course", (slug) => {
     expect(courses.some((c) => c.slug === slug)).toBe(true);
   });
