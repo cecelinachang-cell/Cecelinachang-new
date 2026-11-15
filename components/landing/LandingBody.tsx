@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getCourseBySlug } from '@/lib/courses';
-import { getLandingCopy } from '@/app/data/landing-pages';
+import { getLandingCopy, isShortLanding } from '@/app/data/landing-pages';
 import { products } from '@/app/data/products';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
@@ -26,6 +26,7 @@ import { QuizQuote } from '@/components/landing/QuizQuote';
 import { quizIntroText } from '@/lib/quizCopy';
 import { ViewContentPing } from '@/components/ViewContentPing';
 import { ScrollDepthPing } from '@/components/landing/ScrollDepthPing';
+import { ShortLandingBody } from '@/components/landing/ShortLandingBody';
 
 /**
  * The whole /lp/[slug] page. `variantKey` picks the ad-matched headline
@@ -48,6 +49,12 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
   const arm: LpArm | undefined = armProp ?? (isSplitActive(slug) ? 'a' : undefined);
   const hook = variant?.hook ?? copy.hook;
   const subhook = variant?.subhook ?? copy.subhook;
+
+  // A short, photo-led page (copy.layout === 'short'). Everything below is
+  // the long page and stays exactly as it was.
+  if (isShortLanding(copy)) {
+    return <ShortLandingBody course={course} copy={copy} hook={hook} subhook={subhook} />;
+  }
 
   const recommended = products.find((p) => p.id === copy.equipment.recommendedProductId);
   const nearQuizFaq = copy.faq.filter((item) => item.nearQuiz);

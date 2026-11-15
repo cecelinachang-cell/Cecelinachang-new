@@ -117,7 +117,64 @@ export interface LandingCopy {
   faq: { question: string; answer: string; nearQuiz?: boolean }[];
 }
 
-export const landingPages: Record<string, LandingCopy> = {
+/**
+ * A shorter, photo-led page (components/landing/ShortLandingBody.tsx): hero,
+ * student photos, Cece's tips, what you learn, tools, price, FAQ. No quiz,
+ * no long story. For courses where the long page's sections (pains, factory
+ * story, before/after) would need facts nobody has confirmed yet.
+ *
+ * Text that still needs the owner's answer is written as "[CEK] …" and
+ * shown highlighted on the page, so it can't slip through unnoticed.
+ */
+export interface ShortLandingCopy
+  extends Pick<
+    LandingCopy,
+    | 'hook'
+    | 'subhook'
+    | 'previewVideoId'
+    | 'previewVideo'
+    | 'proofPoints'
+    | 'heroNext'
+    | 'heroSteps'
+    | 'heroStepsHelp'
+    | 'adVariants'
+    | 'testimonials'
+    | 'offerIncludes'
+    | 'offerRiskLine'
+    | 'faq'
+  > {
+  layout: 'short';
+  /** A short verbatim student quote under the hero's subhook. */
+  heroQuote?: { text: string; source: string };
+  /** Heading and one line above the student photos. */
+  proofTitle: string;
+  proofIntro: string;
+  /** Short tips in Cece's own words (from her videos), numbered. */
+  tips: {
+    title: string;
+    intro: string;
+    items: { title: string; body: string }[];
+    /** Something Cece says, shown handwritten under the tips. */
+    quote?: string;
+  };
+  materiTitle: string;
+  whyTitle: string;
+  why: string[];
+  tools: {
+    title: string;
+    intro: string;
+    items: { name: string; note: string }[];
+    note?: string;
+  };
+}
+
+export type AnyLandingCopy = LandingCopy | ShortLandingCopy;
+
+export function isShortLanding(copy: AnyLandingCopy): copy is ShortLandingCopy {
+  return (copy as ShortLandingCopy).layout === 'short';
+}
+
+export const landingPages: Record<string, AnyLandingCopy> = {
   'bakso-sapi-premium': {
     hook: 'Bakso bikinanmu keras kayak karet, pecah waktu direbus, atau malah rasa tepung?',
     subhook:
@@ -364,8 +421,188 @@ export const landingPages: Record<string, LandingCopy> = {
       },
     ],
   },
+
+  // Short, photo-led page for the Lapis Legit ads (Nov 2026). Facts: the
+  // course record (Rp 699.000, was really sold at 799.000, 62-minute video,
+  // lifetime access, the 4 benefits, "resep warisan keluarga … 3 generasi"),
+  // what's included on the course page, and Cece's own words in her lapis
+  // videos, plus her answers on the tool list (15 Nov 2026).
+  'lapis-legit': {
+    layout: 'short',
+    hook: 'Lapis legit moist dan rapi, dari resep keluarga 3 generasi.',
+    subhook:
+      'Bahannya mahal, jadi sayang kalau gagal. Belajar langsung dari Cece, yang sudah berkali-kali bikin lapis legit.',
+    // Web copy of the "A-kering" ad cut (2026-11-15-lapis-A-kering.mp4), 720x1280.
+    previewVideo: {
+      src: '/videos/lapis-kenapa-kering.mp4',
+      poster: '/videos/lapis-kenapa-kering.jpg',
+      label: 'Tonton: kenapa lapis legit bisa kering',
+    },
+    proofPoints: ['Resep keluarga 3 generasi', 'Video 62 menit', 'Akses seumur hidup'],
+    heroNext:
+      'Bayar lewat QRIS, GoPay, ShopeePay, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu lewat Google Drive.',
+    // Same steps as Bakso. No fee amount here: Lynk's fee was only checked
+    // on the Bakso price.
+    heroSteps: [
+      'Klik "Bayar Sekarang", lalu pilih cara bayar: QRIS, GoPay, ShopeePay, atau Virtual Account. Ada biaya admin kecil dari cara bayarnya.',
+      'Tulis alamat Gmail kamu (yang belakangnya @gmail.com) di formulir pembayaran.',
+      'Link kelas langsung masuk ke Gmail kamu lewat Google Drive. Buka pakai Gmail yang sama, tonton kapan saja, akses seumur hidup.',
+    ],
+    heroStepsHelp: 'Belum punya Gmail atau bingung caranya? Klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+    // Verbatim from wa-berhasil-sekali-coba.jpg (shown in full below the hero).
+    heroQuote: { text: 'Berhasil Ce, sekali coba. Terimakasih Ce ilmunya.', source: 'Murid kelas lapis legit' },
+    // The three Nov 2026 ad cuts: "lapis-A-kering", "lapis-B-takut-gagal",
+    // "lapis-C-jangan-dipotong". Matches when the Meta ad name (utm_content)
+    // contains the word.
+    adVariants: [
+      {
+        key: 'kering',
+        match: 'kering',
+        hook: 'Lapis legit kamu selalu kering?',
+        subhook:
+          'Biasanya karena satu hal kecil setelah keluar oven. Cece tunjukkan caranya di kelas video, dari resep keluarga 3 generasi.',
+      },
+      {
+        key: 'takut',
+        match: 'takut',
+        hook: 'Takut bikin lapis legit karena bahannya mahal, kalau gagal rugi?',
+        subhook:
+          'Belajar dari Cece, yang sudah berkali-kali bikin lapis legit dari resep keluarga 3 generasi. Kelasnya video, bisa diulang kapan saja.',
+      },
+      {
+        key: 'potong',
+        match: 'potong',
+        hook: 'Lapis legit yang baru matang jangan langsung dipotong.',
+        subhook: 'Satu dari hal-hal kecil yang Cece tunjukkan di kelas lapis legit, dari resep keluarga 3 generasi.',
+      },
+    ],
+
+    proofTitle: 'Hasil lapis legit murid',
+    proofIntro: 'Foto dan pesan asli dari murid, dikirim ke Cece setelah mereka coba resepnya.',
+    testimonials: [
+      {
+        src: '/images/testimonials/lapis-legit/wa-berhasil-sekali-coba.jpg',
+        width: 400,
+        height: 772,
+        alt: 'Foto dua potong lapis legit buatan murid di atas piring merah. Pesan: "Berhasil ce sekali coba" dan "Terimakasih ce ilmunya".',
+      },
+      {
+        src: '/images/uploads/testimonials/new/1789798950857-ok800akdep.webp',
+        width: 753,
+        height: 906,
+        alt: 'Foto lapis legit buatan murid yang sudah dipotong, lapisannya tipis dan rapi. Tulisan: "Cece terima kasih resep nya.. saya baru cuba semalam... terbaik resep nya".',
+      },
+      {
+        src: '/images/testimonials/lapis-legit/wa-tidak-kecewa-lapis-gulung.jpg',
+        width: 517,
+        height: 571,
+        alt: 'Pesan WhatsApp dari murid: "Cece lina hasil lapis legit ikt kls." dan "Tdk kecewa ikt kls cece lina", dengan foto lapis gulung, lalu "Sisa adonan bikin lapis gulung" dengan foto irisan lapis gulung.',
+      },
+    ],
+
+    // Cece's own words from her lapis videos (tip, tips, howto, slice clips).
+    tips: {
+      title: 'Tips kecil dari dapur Cece',
+      intro: 'Beberapa hal yang Cece tunjukkan di videonya. Kelihatannya sepele, tapi menentukan hasilnya.',
+      items: [
+        {
+          title: 'Keluar oven, jangan langsung dibuka',
+          body: 'Lapis jadi kering kalau setelah dioven langsung dibuka dan nggak dibalik. Kalau dibalik, batter-nya turun, jadi satu loyang moist.',
+        },
+        {
+          title: 'Baru matang, jangan langsung dipotong',
+          body: 'Diamkan dulu. Cece biarkan semalaman, baru besok paginya dibalik.',
+        },
+        {
+          title: 'Lapisan terakhir pakai api atas-bawah',
+          body: 'Untuk lapisan paling atas, oven pakai api atas dan bawah sekaligus.',
+        },
+        {
+          title: 'Pemula, mulai dari loyang bulat',
+          body: 'Kata Cece, loyang bulat lebih cepat dikerjakan daripada loyang kotak.',
+        },
+      ],
+      quote: 'bikinnya 2 jam, makannya 5 menit :)',
+    },
+
+    materiTitle: 'Yang kamu pelajari di kelas',
+    whyTitle: 'Kenapa belajar dari Cece',
+    why: [
+      'Resep warisan keluarga, sudah turun-temurun 3 generasi.',
+      'Bahan lapis legit mahal. Daripada coba-coba sendiri, belajar dari yang sudah berkali-kali bikin.',
+      'Video 62 menit, ditonton kapan saja dan boleh diulang. Nggak harus standby di jam tertentu.',
+      'Bukan cuma resep tulisan: ada video, e-book resep (PDF), sertifikat digital, dan konsultasi langsung dengan Cece.',
+    ],
+
+    // Tool answers from Cece (15 Nov 2026): electric oven, tin size is in the
+    // class video, mixer needed, small tools can be substituted, she
+    // recommends the oven and mixers from her store (optional).
+    tools: {
+      title: 'Alat yang perlu disiapkan',
+      intro: 'Lapis legit dipanggang selapis demi selapis di oven, jadi oven wajib ada.',
+      items: [
+        {
+          name: 'Oven',
+          note: 'Pakai oven listrik. Untuk lapisan terakhir, Cece pakai api atas dan bawah.',
+        },
+        {
+          name: 'Loyang',
+          note: 'Untuk pemula, Cece sarankan loyang bulat. Ukurannya dijelaskan di video kelas.',
+        },
+        {
+          name: 'Mixer',
+          note: 'Perlu mixer untuk mengocok adonan.',
+        },
+        {
+          name: 'Alat kecil lainnya',
+          note: 'Penekan lapis, kuas, dan alat kecil lain tidak harus beli khusus. Bisa diganti dengan yang sudah ada di dapur.',
+        },
+      ],
+      note: 'Cece merekomendasikan oven dan mixer dari CeceLinaChang Store. Ini pilihan saja, bukan syarat ikut kelas.',
+    },
+
+    offerIncludes: [
+      'Video 62 menit, akses seumur hidup',
+      'Konsultasi langsung dengan Cece',
+      'E-book resep (PDF)',
+      'Sertifikat digital',
+    ],
+    offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
+
+    faq: [
+      {
+        question: 'Saya pemula, bisa ikut?',
+        answer:
+          'Bisa. Saran Cece untuk pemula: mulai pakai loyang bulat, karena lebih cepat dikerjakan. Kalau ada yang bingung, kamu bisa konsultasi langsung dengan Cece.',
+      },
+      {
+        question: 'Harus standby di jam tertentu?',
+        answer: 'Tidak. Videonya 62 menit dan bisa ditonton kapan saja, diulang kapan saja. Aksesnya seumur hidup.',
+      },
+      {
+        question: 'Bagaimana cara akses kelasnya?',
+        answer:
+          'Setelah bayar (QRIS, GoPay, ShopeePay, atau Virtual Account), akses folder kelas di Google Drive langsung masuk ke Gmail yang kamu isi waktu bayar. Jadi perlu alamat Gmail (yang belakangnya @gmail.com). HP Android biasanya sudah punya Gmail. Kalau bingung, klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+      },
+      {
+        question: 'Alat apa yang dibutuhkan?',
+        answer:
+          'Oven listrik, loyang (untuk pemula, loyang bulat), dan mixer. Penekan lapis, kuas, dan alat kecil lain bisa pakai yang sudah ada di dapur. Daftarnya ada di bagian "Alat yang perlu disiapkan" di atas.',
+      },
+      {
+        question: 'Ini cuma e-book?',
+        answer:
+          'Bukan. Kamu dapat video kelas 62 menit, e-book resep (PDF), sertifikat digital, dan bisa konsultasi langsung dengan Cece.',
+      },
+      {
+        question: 'Sudah bayar tapi kelasnya belum masuk?',
+        answer:
+          'Cek dulu folder Spam atau Promosi di Gmail kamu, dan pastikan kamu buka pakai Gmail yang sama dengan yang ditulis waktu bayar. Kalau masih belum ada, klik "Tanya Cece" dan kirim bukti bayarnya, nanti dicek.',
+      },
+    ],
+  },
 };
 
-export function getLandingCopy(slug: string): LandingCopy | null {
+export function getLandingCopy(slug: string): AnyLandingCopy | null {
   return landingPages[slug] ?? null;
 }
