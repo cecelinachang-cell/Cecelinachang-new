@@ -6,8 +6,8 @@ import { PayNowCta } from "./PayNowCta";
 
 /**
  * Mobile-only bar with the pay button (straight to the Lynk checkout). It stays hidden while the hero (which
- * has its own CTA) or the quiz is on screen, so it never doubles up a button
- * or covers the form's submit button.
+ * has its own CTA), the quiz, or a section marked data-sticky-hide is on
+ * screen, so it never doubles up a button or covers the form's submit button.
  */
 interface StickyQuizBarProps {
   price: string;
@@ -16,27 +16,31 @@ interface StickyQuizBarProps {
 }
 
 export function StickyQuizBar({ price, courseSlug, courseTitle }: StickyQuizBarProps) {
-  const [heroVisible, setHeroVisible] = useState(true);
-  const [quizVisible, setQuizVisible] = useState(false);
-  const hidden = heroVisible || quizVisible;
+  // Starts hidden: the hero is always on the page and starts in view.
+  const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
     // Same pattern as MobileCourseBar: lifts floating buttons above the bar.
     document.body.classList.add("has-sticky-cta");
-    const hero = document.getElementById("lp-hero");
-    const quiz = document.getElementById("cek");
+    // The hero, the quiz, and anything marked data-sticky-hide (a section
+    // with its own pay button, e.g. the last one on the plain page).
+    const targets = [
+      document.getElementById("lp-hero"),
+      document.getElementById("cek"),
+      ...document.querySelectorAll("[data-sticky-hide]"),
+    ].filter((el): el is Element => el !== null);
+    const inView = new Set<Element>();
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.target === hero) setHeroVisible(entry.isIntersecting);
-          if (entry.target === quiz) setQuizVisible(entry.isIntersecting);
+          if (entry.isIntersecting) inView.add(entry.target);
+          else inView.delete(entry.target);
         }
+        setHidden(inView.size > 0);
       },
       { threshold: 0.1 },
     );
-    // The hero is always on the page; it starts in view, hence the true default.
-    if (hero) observer.observe(hero);
-    if (quiz) observer.observe(quiz);
+    for (const target of targets) observer.observe(target);
     return () => {
       document.body.classList.remove("has-sticky-cta");
       observer.disconnect();

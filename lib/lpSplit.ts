@@ -16,7 +16,15 @@
  * and tags the Lynk link with utm_term=lp-a/lp-b. Read the result with
  * docs/lp-split-test.md. Pure, so the edge middleware and tests share it.
  */
-export type LpArm = 'a' | 'b';
+export type LpArm = 'a' | 'b' | 'c';
+
+/**
+ * Arms a new visitor can be dealt. 'c' (the plain page for women 40-60,
+ * components/landing/PlainLandingBody.tsx) is preview-only: it is reached
+ * with `?lp=c` and never by the coin flip, so the A/B test is untouched
+ * until the owner decides to put C into it.
+ */
+export const LP_DEALT_ARMS: readonly LpArm[] = ['a', 'b'];
 
 export const LP_SPLIT_COOKIE = 'lp_ab';
 export const LP_SPLIT_MAX_AGE = 60 * 60 * 24 * 30;
@@ -30,11 +38,11 @@ export function isSplitActive(slug: string): boolean {
 
 function asArm(value: string | null | undefined): LpArm | null {
   const v = value?.trim().toLowerCase();
-  return v === 'a' || v === 'b' ? v : null;
+  return v === 'a' || v === 'b' || v === 'c' ? v : null;
 }
 
 /**
- * The visitor's arm: `?lp=a|b` (for checking a version by hand) wins, then
+ * The visitor's arm: `?lp=a|b|c` (for checking a version by hand) wins, then
  * the cookie from an earlier visit, then a coin flip. `fresh` says whether
  * the cookie needs to be (re)written.
  */
@@ -47,11 +55,12 @@ export function chooseArm(
   if (forced) return { arm: forced, fresh: forced !== asArm(cookie) };
   const saved = asArm(cookie);
   if (saved) return { arm: saved, fresh: false };
-  return { arm: random() < 0.5 ? 'a' : 'b', fresh: true };
+  const dealt = LP_DEALT_ARMS[Math.min(LP_DEALT_ARMS.length - 1, Math.floor(random() * LP_DEALT_ARMS.length))];
+  return { arm: dealt, fresh: true };
 }
 
 /** Internal path that renders this arm (+ the ad-matched headline, if any). */
 export function armPath(slug: string, arm: LpArm, variantKey: string | null): string {
-  const base = arm === 'b' ? `/lp/${slug}/b` : `/lp/${slug}`;
+  const base = arm === 'a' ? `/lp/${slug}` : `/lp/${slug}/${arm}`;
   return variantKey ? `${base}/v/${variantKey}` : base;
 }

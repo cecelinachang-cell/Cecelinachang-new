@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getCourseBySlug } from '@/lib/courses';
-import { getLandingCopy, isShortLanding } from '@/app/data/landing-pages';
+import { getLandingCopy, hasPlainPage, isShortLanding } from '@/app/data/landing-pages';
 import { products } from '@/app/data/products';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
@@ -27,12 +27,14 @@ import { quizIntroText } from '@/lib/quizCopy';
 import { ViewContentPing } from '@/components/ViewContentPing';
 import { ScrollDepthPing } from '@/components/landing/ScrollDepthPing';
 import { ShortLandingBody } from '@/components/landing/ShortLandingBody';
+import { PlainLandingBody } from '@/components/landing/PlainLandingBody';
 
 /**
  * The whole /lp/[slug] page. `variantKey` picks the ad-matched headline
  * (copy.adVariants); middleware.ts sends ad traffic to /lp/[slug]/v/[key].
  * `arm` is the first-screen split test (lib/lpSplit.ts): only the hero
- * differs between A and B. Pages in the test default to A.
+ * differs between A and B. Pages in the test default to A. Arm C is the
+ * plain page (PlainLandingBody), shown only on request.
  */
 export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: string; variantKey?: string; arm?: LpArm }) {
   const course = await getCourseBySlug(slug);
@@ -49,6 +51,13 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
   const arm: LpArm | undefined = armProp ?? (isSplitActive(slug) ? 'a' : undefined);
   const hook = variant?.hook ?? copy.hook;
   const subhook = variant?.subhook ?? copy.subhook;
+
+  // Arm C: the plain page for women 40-60 (preview-only, `?lp=c`). A whole
+  // page of its own, not just a different hero.
+  if (arm === 'c') {
+    if (!hasPlainPage(copy)) notFound();
+    return <PlainLandingBody course={course} copy={copy} hook={hook} />;
+  }
 
   // A short, photo-led page (copy.layout === 'short'). Everything below is
   // the long page and stays exactly as it was.

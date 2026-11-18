@@ -22,6 +22,10 @@ export function CookieNotice() {
   const [ready, setReady] = useState(false);
   const [pastFirstScreen, setPastFirstScreen] = useState(false);
   const [quizInView, setQuizInView] = useState(false);
+  // The plain landing page (components/landing/PlainLandingBody.tsx) marks
+  // itself with data-lp-plain. Its readers are 40-60 on a phone, and the
+  // two-row card hid a third of the screen, so there the notice is one row.
+  const [compact, setCompact] = useState(false);
   const pathname = usePathname();
   // On an ad landing page the first screen is the pitch and its button; the
   // card landed right on top of that button. There it waits until the
@@ -39,7 +43,10 @@ export function CookieNotice() {
       queueMicrotask(() => setDismissed(true));
       return;
     }
-    queueMicrotask(() => setReady(true));
+    queueMicrotask(() => {
+      setCompact(Boolean(document.querySelector('[data-lp-plain]')));
+      setReady(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -80,6 +87,31 @@ export function CookieNotice() {
   }
 
   if (!visible) return null;
+
+  if (compact) {
+    return (
+      <div
+        className="fixed inset-x-3 z-[55] mx-auto flex max-w-md items-center gap-3 rounded-xl border border-steel-line bg-white py-2 pl-4 pr-2 shadow-[0_10px_24px_-12px_rgba(34,26,23,0.5)]"
+        style={{ bottom: 'var(--cookie-offset, 0.75rem)' }}
+        role="region"
+        aria-label="Pemberitahuan cookie"
+      >
+        <p className="flex-1 text-sm leading-snug text-kecap">
+          Website ini pakai cookie untuk analitik dan iklan.{' '}
+          <Link href="/kebijakan-privasi" className="font-semibold underline underline-offset-2">
+            Kebijakan Privasi
+          </Link>
+        </p>
+        <button
+          type="button"
+          onClick={dismiss}
+          className="tap-target shrink-0 rounded-lg bg-kecap px-4 text-base font-bold text-white active:bg-kecap/85"
+        >
+          Oke
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

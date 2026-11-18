@@ -50,3 +50,21 @@ In Meta Events Manager, open pixel `CeceLinaChang.com`, then Overview, and look 
 2. **Don't change** price, ads, budgets or the page during the test.
 3. **Stop early** only if, after ~250 views each, one version's checkout rate is under half the other's.
 4. **Afterwards:** make the winner the only hero, and remove the slug from `LP_SPLIT_SLUGS`. With the set empty, everyone sees A.
+
+## Version C: the plain page (preview only, added 18 Nov 2026)
+
+`components/landing/PlainLandingBody.tsx`. A whole page, not just a first screen, written for women 40-60 on a phone.
+
+Why: the Meta pixel for 14-18 Nov showed about 1 visitor in 3 scrolling past the first quarter of the page, 7% playing the video, A and B tied (6 checkouts from 184 views against 6 from 156), and about 3 in 4 of the people who tap "Bayar Sekarang" leaving the Lynk form without sending it.
+
+What is different from A and B:
+
+- The first screen says what the class is, the price, the button, one student's words, then "Cara daftar": what the Lynk form asks for (name, email, WhatsApp number, Gmail address), the payment choices, and how the class arrives.
+- About a third of the length. No quiz, pain list, root-cause, factory story, before/after or equipment sections.
+- Body text is 18px or larger. No handwriting font. FAQ answers are shown open, with no tap needed.
+- The video sits lower, under "Kenalan dulu sama Cece".
+- The cookie notice is one row on this page (`components/CookieNotice.tsx`).
+
+Nobody is dealt this version. See it with `/lp/bakso-sapi-premium?lp=c` (this also sets your cookie to C; `?lp=a` or `?lp=b` switches back). It reports `LP_View_C` and `LP_Checkout_C`, and tags the Lynk link `utm_term=lp-c`.
+
+To put C into the test in place of B, change `LP_DEALT_ARMS` in `lib/lpSplit.ts` to `['a', 'c']`. Visitors who already hold a B cookie keep seeing B until it expires, so count B separately from that day.

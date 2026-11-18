@@ -18,7 +18,15 @@ describe('chooseArm', () => {
   });
 
   it('ignores junk values', () => {
-    expect(chooseArm('c', 'x', () => 0.9)).toEqual({ arm: 'b', fresh: true });
+    expect(chooseArm('z', 'x', () => 0.9)).toEqual({ arm: 'b', fresh: true });
+  });
+
+  it('shows the plain page C only when asked for, never by the coin flip', () => {
+    expect(chooseArm('c', null)).toEqual({ arm: 'c', fresh: true });
+    expect(chooseArm(null, 'c', () => 0.1)).toEqual({ arm: 'c', fresh: false });
+    for (const r of [0, 0.25, 0.49, 0.5, 0.75, 0.999999]) {
+      expect(['a', 'b']).toContain(chooseArm(null, null, () => r).arm);
+    }
   });
 });
 
@@ -28,6 +36,8 @@ describe('armPath', () => {
     expect(armPath('bakso-sapi-premium', 'a', 'ibu')).toBe('/lp/bakso-sapi-premium/v/ibu');
     expect(armPath('bakso-sapi-premium', 'b', null)).toBe('/lp/bakso-sapi-premium/b');
     expect(armPath('bakso-sapi-premium', 'b', 'kenyal')).toBe('/lp/bakso-sapi-premium/b/v/kenyal');
+    expect(armPath('bakso-sapi-premium', 'c', null)).toBe('/lp/bakso-sapi-premium/c');
+    expect(armPath('bakso-sapi-premium', 'c', 'ibu')).toBe('/lp/bakso-sapi-premium/c/v/ibu');
   });
 });
 
