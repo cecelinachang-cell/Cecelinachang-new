@@ -12,6 +12,8 @@ interface WhatsAppAskProps {
   price: string;
   /** "button" is the full-width hero button; "icon" the square one in the sticky bar. */
   variant?: "button" | "icon";
+  /** Button text; "Tanya Cece" unless a page needs to say more. */
+  label?: string;
   className?: string;
   tabIndex?: number;
 }
@@ -26,7 +28,7 @@ export function askMessage(courseTitle: string, price: string): string {
  * in-app browsers hand it to WhatsApp natively; the tap is tracked on the way
  * out and reaches Meta as Contact, the event the next campaign optimises on.
  */
-export function WhatsAppAsk({ courseSlug, courseTitle, price, variant = "button", className, tabIndex }: WhatsAppAskProps) {
+export function WhatsAppAsk({ courseSlug, courseTitle, price, variant = "button", label = "Tanya Cece", className, tabIndex }: WhatsAppAskProps) {
   function track() {
     trackConversion("whatsapp_direct", courseSlug, {
       contentName: courseTitle,
@@ -68,7 +70,7 @@ export function WhatsAppAsk({ courseSlug, courseTitle, price, variant = "button"
       )}
     >
       <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-      Tanya Cece
+      {label}
     </a>
   );
 }

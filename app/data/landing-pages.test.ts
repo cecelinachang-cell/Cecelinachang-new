@@ -1,7 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
-import { isShortLanding, landingPages, type LandingCopy } from "./landing-pages";
+import { hasPlainPage, isShortLanding, landingPages, type LandingCopy } from "./landing-pages";
 import { courses } from "./courses";
 import { products } from "./products";
 import { STUDENT_TESTIMONIALS } from "./student-testimonials";
@@ -91,5 +91,21 @@ describe("short landing pages", () => {
     for (const banned of ["senilai", "hari ini saja", "terbatas", "baru saja mendaftar", "refund", "anti gagal"]) {
       expect(text, banned).not.toContain(banned);
     }
+  });
+});
+
+describe("plain landing pages (arm C)", () => {
+  const plain = Object.entries(landingPages).filter(([, copy]) => hasPlainPage(copy));
+
+  it("exists for the Bakso page", () => {
+    expect(plain.map(([slug]) => slug)).toContain("bakso-sapi-premium");
+  });
+
+  it.each(plain)("%s only lists FAQ questions that exist, and has three steps", (_slug, copy) => {
+    if (!hasPlainPage(copy)) throw new Error("unreachable");
+    const questions = copy.faq.map((item) => item.question);
+    for (const q of copy.plain.faqQuestions) expect(questions).toContain(q);
+    expect(copy.plain.steps).toHaveLength(3);
+    expect(JSON.stringify(copy.plain)).not.toContain("[CEK]");
   });
 });

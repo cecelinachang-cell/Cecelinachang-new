@@ -115,6 +115,26 @@ export interface LandingCopy {
   quizQuote?: { text: string; source: string };
   /** nearQuiz: also shown right above the quiz, where the last doubts come up. */
   faq: { question: string; answer: string; nearQuiz?: boolean }[];
+  /** The plain page for women 40-60 (arm C, `?lp=c`). Leave unset for no plain page. */
+  plain?: PlainCopy;
+}
+
+/**
+ * Copy for the plain page (components/landing/PlainLandingBody.tsx): one
+ * short screen that says what the class is, what it costs and what happens
+ * after the button, in large plain text. Same rule as the rest of this file:
+ * every line repeats a fact already confirmed elsewhere on the page or on
+ * the Lynk checkout form.
+ */
+export interface PlainCopy {
+  /** What the class is, in one or two short sentences under the headline. */
+  what: string;
+  /** Shown right after the price, e.g. "Sekali bayar. Akses seumur hidup." */
+  priceNote: string;
+  /** What happens after "Bayar Sekarang", in the order the buyer meets it. */
+  steps: string[];
+  /** Questions from `faq`, by their exact text, in the order to show them. */
+  faqQuestions: string[];
 }
 
 /**
@@ -174,6 +194,11 @@ export function isShortLanding(copy: AnyLandingCopy): copy is ShortLandingCopy {
   return (copy as ShortLandingCopy).layout === 'short';
 }
 
+/** True when the page has a plain version (arm C). Short pages never do. */
+export function hasPlainPage(copy: AnyLandingCopy | null | undefined): copy is LandingCopy & { plain: PlainCopy } {
+  return Boolean(copy && !isShortLanding(copy) && copy.plain);
+}
+
 export const landingPages: Record<string, AnyLandingCopy> = {
   'bakso-sapi-premium': {
     hook: 'Bakso bikinanmu keras kayak karet, pecah waktu direbus, atau malah rasa tepung?',
@@ -210,6 +235,26 @@ export const landingPages: Record<string, AnyLandingCopy> = {
     heroTestimonial: {
       text: 'Pertama kali coba gagal, kemarin coba lagi… Mantap banget… Begitu angkat langsung habis sama cucu.',
       source: 'Murid kelas bakso, lewat WhatsApp',
+    },
+    // The plain page (arm C, ?lp=c), for women 40-60 coming from a video ad.
+    // "40 menit", "diulang", "seumur hidup" and "buat cucu / jualan" are the
+    // facts above; the steps follow the Lynk form as it was on 18 Nov 2026
+    // (email, name, phone, then the Gmail question, then the payment method).
+    plain: {
+      what: 'Kelas video 40 menit. Ditonton di HP dari rumah, boleh diulang-ulang. Buat keluarga, buat cucu, atau buat jualan juga bisa.',
+      priceNote: 'Sekali bayar. Akses seumur hidup.',
+      steps: [
+        'Klik "Bayar Sekarang". Isi nama, email, dan nomor WhatsApp, lalu tulis alamat Gmail kamu (yang belakangnya @gmail.com).',
+        'Pilih cara bayar: QRIS, e-wallet, atau transfer bank (Virtual Account). Ada biaya admin kecil dari cara bayarnya, untuk QRIS sekitar Rp 3.500.',
+        'Kelas langsung masuk ke Gmail kamu lewat Google Drive. Buka pakai Gmail yang sama, tonton kapan saja.',
+      ],
+      faqQuestions: [
+        'Saya pemula, bisa ikut?',
+        'Alat apa yang dibutuhkan?',
+        'Saya nggak punya Gmail, gimana?',
+        'Harus standby di jam tertentu?',
+        'Sudah bayar tapi kelasnya belum masuk?',
+      ],
     },
     // Ad names in Meta: "A-reel-kenyal", "B-pabrik-18th", "F1-ibu-kenyal" (Nov 2026
     // sales campaign). First match wins, so "ibu" comes before "kenyal": the
