@@ -34,7 +34,7 @@ import { PlainLandingBody } from '@/components/landing/PlainLandingBody';
  * (copy.adVariants); middleware.ts sends ad traffic to /lp/[slug]/v/[key].
  * `arm` is the first-screen split test (lib/lpSplit.ts): only the hero
  * differs between A and B. Pages in the test default to A. Arm C is the
- * plain page (PlainLandingBody), shown only on request.
+ * plain page (PlainLandingBody), a whole page of its own.
  */
 export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: string; variantKey?: string; arm?: LpArm }) {
   const course = await getCourseBySlug(slug);
@@ -52,7 +52,7 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
   const hook = variant?.hook ?? copy.hook;
   const subhook = variant?.subhook ?? copy.subhook;
 
-  // Arm C: the plain page for women 40-60 (preview-only, `?lp=c`). A whole
+  // Arm C: the plain page for women 40-60. A whole
   // page of its own, not just a different hero.
   if (arm === 'c') {
     if (!hasPlainPage(copy)) notFound();

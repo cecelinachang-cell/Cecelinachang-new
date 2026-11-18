@@ -34,7 +34,7 @@ interface PlainLandingBodyProps {
 }
 
 /**
- * Arm C of /lp/[slug] (lib/lpSplit.ts), shown only with `?lp=c`: the whole
+ * Arm C of the /lp/[slug] split test (lib/lpSplit.ts): the whole
  * page rewritten for women 40-60 on a phone, who have just watched Cece's
  * video ad.
  *

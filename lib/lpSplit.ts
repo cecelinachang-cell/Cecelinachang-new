@@ -1,30 +1,33 @@
 /**
- * 50/50 split test of the landing page's first screen (Nov 2026).
+ * 50/50 split test of the landing page (Nov 2026).
  *
  * Arm A is the current hero (headline, video, then the buy button). Arm B
  * puts who teaches it, the buy button, a student quote and what's included
  * on the first screen and moves the video below (components/landing/
- * LandingHeroB.tsx). Everything below the hero is the same in both arms.
+ * LandingHeroB.tsx); below the hero A and B are the same. Arm C is a whole
+ * page of its own, the plain page for women 40-60 (PlainLandingBody.tsx).
+ * 14-18 Nov the test was A against B; from 18 Nov it is A against C.
  *
  * Why: Meta showed ~95% of landing-page visitors leave without tapping
  * "Bayar Sekarang" and ~80% never scroll a quarter of the page, so the
  * first screen is where the sale is won or lost.
  *
  * middleware.ts puts each visitor in an arm once (cookie, 30 days) and
- * rewrites to /lp/[slug]/b for arm B; the address bar never changes. Each
- * arm reports its own Meta custom events, LP_View_A/B and LP_Checkout_A/B,
- * and tags the Lynk link with utm_term=lp-a/lp-b. Read the result with
+ * rewrites to /lp/[slug]/b or /c; the address bar never changes. Each arm
+ * reports its own Meta custom events, LP_View_A/B/C and LP_Checkout_A/B/C,
+ * and tags the Lynk link with utm_term=lp-a/lp-b/lp-c. Read the result with
  * docs/lp-split-test.md. Pure, so the edge middleware and tests share it.
  */
 export type LpArm = 'a' | 'b' | 'c';
 
 /**
- * Arms a new visitor can be dealt. 'c' (the plain page for women 40-60,
- * components/landing/PlainLandingBody.tsx) is preview-only: it is reached
- * with `?lp=c` and never by the coin flip, so the A/B test is untouched
- * until the owner decides to put C into it.
+ * Arms a new visitor can be dealt, in equal shares. Since 18 Nov 2026 the
+ * test is A against C: C is the plain page for women 40-60
+ * (components/landing/PlainLandingBody.tsx). B (LandingHeroB) was tied with
+ * A after five days and is no longer dealt; visitors who already hold a B
+ * cookie keep seeing B until it expires, and `?lp=b` still shows it.
  */
-export const LP_DEALT_ARMS: readonly LpArm[] = ['a', 'b'];
+export const LP_DEALT_ARMS: readonly LpArm[] = ['a', 'c'];
 
 export const LP_SPLIT_COOKIE = 'lp_ab';
 export const LP_SPLIT_MAX_AGE = 60 * 60 * 24 * 30;

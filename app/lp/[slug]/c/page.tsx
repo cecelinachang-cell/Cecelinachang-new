@@ -2,9 +2,9 @@ import { getLandingCopy, hasPlainPage, landingPages } from '@/app/data/landing-p
 import { LandingBody } from '@/components/landing/LandingBody';
 import { isSplitActive } from '@/lib/lpSplit';
 
-// The plain page for women 40-60 (components/landing/PlainLandingBody.tsx).
-// Preview-only: middleware.ts rewrites /lp/[slug]?lp=c here, and nobody is
-// dealt this version by the split test (lib/lpSplit.ts, LP_DEALT_ARMS).
+// Arm C of the split test (lib/lpSplit.ts): the plain page for women 40-60
+// (components/landing/PlainLandingBody.tsx). Visitors never see this URL:
+// middleware.ts rewrites /lp/[slug] here for the half dealt C.
 export { generateMetadata } from '../page';
 
 export const revalidate = 60;

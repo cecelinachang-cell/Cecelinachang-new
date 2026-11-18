@@ -3,7 +3,7 @@ import { LandingBody } from '@/components/landing/LandingBody';
 import { isSplitActive } from '@/lib/lpSplit';
 
 // The plain page (arm C) with the ad-matched headline (copy.adVariants).
-// Visitors never see this URL: middleware.ts rewrites /lp/[slug]?lp=c here.
+// Visitors never see this URL: middleware.ts rewrites /lp/[slug] here.
 export { generateMetadata } from '../../../page';
 
 export const revalidate = 60;

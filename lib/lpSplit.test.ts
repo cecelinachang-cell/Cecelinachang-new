@@ -4,7 +4,7 @@ import { armPath, chooseArm, isSplitActive } from './lpSplit';
 describe('chooseArm', () => {
   it('splits new visitors by the coin flip and saves the arm', () => {
     expect(chooseArm(null, null, () => 0.2)).toEqual({ arm: 'a', fresh: true });
-    expect(chooseArm(null, null, () => 0.7)).toEqual({ arm: 'b', fresh: true });
+    expect(chooseArm(null, null, () => 0.7)).toEqual({ arm: 'c', fresh: true });
   });
 
   it('keeps a returning visitor in the same arm', () => {
@@ -18,15 +18,21 @@ describe('chooseArm', () => {
   });
 
   it('ignores junk values', () => {
-    expect(chooseArm('z', 'x', () => 0.9)).toEqual({ arm: 'b', fresh: true });
+    expect(chooseArm('z', 'x', () => 0.9)).toEqual({ arm: 'c', fresh: true });
   });
 
-  it('shows the plain page C only when asked for, never by the coin flip', () => {
-    expect(chooseArm('c', null)).toEqual({ arm: 'c', fresh: true });
-    expect(chooseArm(null, 'c', () => 0.1)).toEqual({ arm: 'c', fresh: false });
+  it('deals new visitors A or the plain page C, never B', () => {
     for (const r of [0, 0.25, 0.49, 0.5, 0.75, 0.999999]) {
-      expect(['a', 'b']).toContain(chooseArm(null, null, () => r).arm);
+      expect(['a', 'c']).toContain(chooseArm(null, null, () => r).arm);
     }
+    expect(chooseArm(null, null, () => 0.49).arm).toBe('a');
+    expect(chooseArm(null, null, () => 0.5).arm).toBe('c');
+  });
+
+  it('still shows B to visitors who hold a B cookie or ask for it', () => {
+    expect(chooseArm(null, 'b', () => 0.9)).toEqual({ arm: 'b', fresh: false });
+    expect(chooseArm('b', 'c')).toEqual({ arm: 'b', fresh: true });
+    expect(chooseArm('c', null)).toEqual({ arm: 'c', fresh: true });
   });
 });
 
