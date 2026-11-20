@@ -11,6 +11,7 @@ import { shopeeLink, waLink } from '@/lib/links';
 import { lynkCheckoutUrl, withAdTags } from '@/lib/lynk';
 import { useAdSearch } from '@/lib/useAdSearch';
 import { showStudents } from '@/lib/course-stats';
+import { activeBonus, getLandingCopy, isShortLanding } from '@/app/data/landing-pages';
 
 interface Course {
   slug: string;
@@ -34,6 +35,12 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
   const baseUrl = lynkCheckoutUrl(course.slug);
   const lynkUrl = baseUrl ? withAdTags(baseUrl, adSearch) : null;
   const canPayOnline = Boolean(lynkUrl);
+  // A guarantee or dated bonus set in the course's landing copy shows here too,
+  // so /kursus and /lp never contradict each other.
+  const landing = getLandingCopy(course.slug);
+  const longLanding = landing && !isShortLanding(landing) ? landing : null;
+  const guarantee = longLanding?.guarantee;
+  const bonus = activeBonus(longLanding?.bonus);
   const trackCheckout = () =>
     trackConversion('checkout_open', course.slug, {
       contentName: course.title,
@@ -140,9 +147,20 @@ export function CoursePricingPanel({ course, compact = false }: CoursePricingPan
               ? 'Bayar via QRIS, GoPay, ShopeePay, atau Virtual Account. Tidak perlu membuat akun di website.'
               : 'Pembayaran aman via transfer bank. Tidak perlu membuat akun di website.'}
           </p>
-          <p className="text-xs text-charcoal-brown/50 text-center mt-2">
-            {POLICIES.COURSE_REFUND_SHORT}
-          </p>
+          {bonus && (
+            <p className="text-sm text-charcoal-brown text-center mt-3">
+              <strong>{bonus.title}</strong>. {bonus.body}
+            </p>
+          )}
+          {guarantee ? (
+            <p className="text-sm text-charcoal-brown text-center mt-2">
+              <strong>{guarantee.title}:</strong> {guarantee.body}
+            </p>
+          ) : (
+            <p className="text-xs text-charcoal-brown/50 text-center mt-2">
+              {POLICIES.COURSE_REFUND_SHORT}
+            </p>
+          )}
           <a
             href={waLink(`Halo Cece, aku mau tanya soal ${course.title}`)}
             target="_blank"

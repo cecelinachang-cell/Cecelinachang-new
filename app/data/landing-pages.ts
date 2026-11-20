@@ -117,6 +117,34 @@ export interface LandingCopy {
   faq: { question: string; answer: string; nearQuiz?: boolean }[];
   /** The plain page for women 40-60 (arm C, `?lp=c`). Leave unset for no plain page. */
   plain?: PlainCopy;
+  /**
+   * A money-back guarantee the owner approved for this class. When set, it
+   * is shown next to the price and replaces the "no refund" FAQ answer.
+   */
+  guarantee?: CourseGuarantee;
+  /** A bonus class with a real end date. Hidden automatically after `endsAt`. */
+  bonus?: CourseBonus;
+}
+
+export interface CourseGuarantee {
+  title: string;
+  /** The full terms, in the buyer's words. Also the answer to the refund question. */
+  body: string;
+  /** One line for the first screen. */
+  short: string;
+}
+
+export interface CourseBonus {
+  title: string;
+  body: string;
+  /** ISO time with offset. The bonus disappears from the page after this. */
+  endsAt: string;
+}
+
+/** The bonus, or null once its end date has passed. */
+export function activeBonus(bonus: CourseBonus | undefined, now: Date = new Date()): CourseBonus | null {
+  if (!bonus) return null;
+  return now.getTime() <= new Date(bonus.endsAt).getTime() ? bonus : null;
 }
 
 /**
@@ -241,7 +269,7 @@ export const landingPages: Record<string, AnyLandingCopy> = {
     // facts above; the steps follow the Lynk form as it was on 18 Nov 2026
     // (email, name, phone, then the Gmail question, then the payment method).
     plain: {
-      what: 'Kelas video 40 menit. Ditonton di HP dari rumah, boleh diulang-ulang. Buat keluarga, buat cucu, atau buat jualan juga bisa.',
+      what: 'Kelas video 40 menit, 3 resep: bakso sapi, bakso urat, dan tahu bakso. Ditonton di HP dari rumah, boleh diulang-ulang. Buat keluarga, buat cucu, atau buat jualan juga bisa.',
       priceNote: 'Sekali bayar. Akses seumur hidup.',
       steps: [
         'Klik "Bayar Sekarang". Isi nama, email, dan nomor WhatsApp, lalu tulis alamat Gmail kamu (yang belakangnya @gmail.com).',
@@ -249,10 +277,13 @@ export const landingPages: Record<string, AnyLandingCopy> = {
         'Kelas langsung masuk ke Gmail kamu lewat Google Drive. Buka pakai Gmail yang sama, tonton kapan saja.',
       ],
       faqQuestions: [
+        'Kalau baksonya gagal gimana?',
+        'Resep apa aja yang diajarin?',
         'Saya pemula, bisa ikut?',
+        'Berapa lama bikinnya?',
+        'Diajarin bikin kuahnya juga?',
         'Alat apa yang dibutuhkan?',
         'Saya nggak punya Gmail, gimana?',
-        'Harus standby di jam tertentu?',
         'Sudah bayar tapi kelasnya belum masuk?',
       ],
     },
@@ -342,14 +373,35 @@ export const landingPages: Record<string, AnyLandingCopy> = {
       recommendedProductId: 'food-processor-dcopper',
     },
 
+    // The bigger offer Cece approved on 19 Nov 2026 (CLC-System/bakso-offer-dec-2026.md),
+    // put live early on 20 Nov at the same Rp 499.000. Facts from Cece: the
+    // video teaches 3 recipes (bakso sapi, bakso urat, tahu bakso); the
+    // large-print recipe card is in the class Drive folder since 19 Nov; she
+    // checks students' photos and helps with Gmail/Drive herself; live Q&A
+    // Sunday 19.00 WIB every 2 weeks from 13 Dec 2026.
     offerIncludes: [
-      'Video 40 menit, akses seumur hidup',
-      'Konsultasi langsung dengan Cece',
-      'E-book resep (PDF)',
+      '3 resep dalam 1 kelas: bakso sapi, bakso urat, dan tahu bakso',
+      'Video 40 menit, ditonton di HP, akses seumur hidup',
+      'E-book resep dan kartu resep huruf besar, tinggal cetak',
+      'Klinik Bakso: kirim foto baksomu ke WhatsApp Cece, nanti Cece kasih tahu salahnya di mana',
+      'Tanya jawab live bareng Cece tiap 2 minggu, Minggu jam 19.00 WIB',
+      'Dibantu Cece sendiri kalau bingung buka kelasnya di Gmail atau Google Drive',
       'Sertifikat digital',
     ],
-    offerValueLine: 'Teknik dari 18 tahun produksi, dipadatkan jadi 40 menit.',
-    offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
+    offerValueLine: 'Teknik dari 18 tahun produksi, dipadatkan jadi 40 menit. Dari mulai sampai bakso matang paling lama 3 jam.',
+    offerRiskLine: 'Bingung setelah beli? Chat Cece di WhatsApp, konsultasi sudah termasuk.',
+    guarantee: {
+      title: 'Garansi Bakso Kenyal',
+      body: 'Praktikkan resepnya minimal 2 kali dalam 30 hari setelah beli, lalu kirim foto baksonya ke WhatsApp Cece. Cece bantu cek salahnya di mana. Kalau sudah dibantu dan baksonya masih belum kenyal, uang kelasnya Cece kembalikan penuh.',
+      short: 'Sudah dibantu Cece tapi baksonya masih belum kenyal? Uang kelasnya dikembalikan penuh.',
+    },
+    // Real deadline: the Go Hiong folder is only shared with Bakso orders paid
+    // by this time. Go Hiong Roll is sold on its own at Rp 199.000.
+    bonus: {
+      title: 'Bonus: Kelas Go Hiong Roll',
+      body: 'Untuk yang daftar sampai 14 Desember 2026. Kelas ini biasanya dijual sendiri Rp\u00a0199.000. Dikirim ke Gmail yang sama dengan kelas baksonya.',
+      endsAt: '2026-12-14T23:59:59+07:00',
+    },
 
     quizIntro:
       'Jawab {count} pertanyaan singkat, lalu isi nama, email & WhatsApp. Kurang dari 1 menit. Harga kelasnya {price}, akses seumur hidup.',
@@ -424,6 +476,26 @@ export const landingPages: Record<string, AnyLandingCopy> = {
     },
 
     faq: [
+      {
+        question: 'Kalau baksonya gagal gimana?',
+        nearQuiz: true,
+        answer:
+          'Kirim fotonya ke WhatsApp Cece, nanti Cece kasih tahu salahnya di mana. Kalau sudah praktik 2 kali dalam 30 hari dan sudah dibantu tapi baksonya masih belum kenyal, uang kelasnya Cece kembalikan penuh.',
+      },
+      {
+        question: 'Resep apa aja yang diajarin?',
+        nearQuiz: true,
+        answer: 'Tiga: bakso sapi, bakso urat, dan tahu bakso. Semuanya ada di video yang sama.',
+      },
+      {
+        question: 'Berapa lama bikinnya?',
+        answer: 'Dari mulai sampai bakso matang paling lama 3 jam.',
+      },
+      {
+        question: 'Diajarin bikin kuahnya juga?',
+        answer:
+          'Kelasnya fokus ke baksonya, kuahnya tidak diajarkan. Air sisa rebusan baksonya bisa dipakai jadi kuah.',
+      },
       {
         question: 'Saya pemula, bisa ikut?',
         nearQuiz: true,
