@@ -36,10 +36,19 @@ describe('PlainLandingBody (arm C)', () => {
     expect(html).toContain('@gmail.com');
   });
 
-  it('shows the FAQ answers without a tap, and the refund answer', () => {
+  it('shows the FAQ answers without a tap, and the guarantee instead of "no refund"', () => {
     expect(html).not.toContain('<details');
     expect(html).toContain('Saya pemula, bisa ikut?');
-    expect(html).toContain('dana tidak dapat dikembalikan');
+    expect(html).not.toContain('dana tidak dapat dikembalikan');
+    expect(html).toContain('Garansi Bakso Kenyal');
+    expect(html).toContain('uang kelasnya Cece kembalikan penuh');
+  });
+
+  it('puts the guarantee on the first screen, before the student quotes', () => {
+    const guarantee = html.indexOf('Garansi Bakso Kenyal');
+    const proof = html.indexOf('Kata murid yang sudah praktek');
+    expect(guarantee).toBeGreaterThan(-1);
+    expect(guarantee).toBeLessThan(proof);
   });
 
   it('leaves out the quiz and the long-page sections', () => {

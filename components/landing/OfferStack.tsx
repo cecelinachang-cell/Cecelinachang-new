@@ -3,6 +3,8 @@ import { Marginalia } from '@/components/Marginalia';
 import { PayNowCta } from './PayNowCta';
 import { WhatsAppAsk } from './WhatsAppAsk';
 import { showStudents } from '@/lib/course-stats';
+import type { CourseBonus, CourseGuarantee } from '@/app/data/landing-pages';
+import { BonusBox, GuaranteeBox } from './OfferExtras';
 
 interface OfferStackProps {
   courseTitle: string;
@@ -12,9 +14,12 @@ interface OfferStackProps {
   riskLine: string;
   students: number;
   courseSlug: string;
+  guarantee?: CourseGuarantee;
+  /** Already filtered by activeBonus. */
+  bonus?: CourseBonus | null;
 }
 
-export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, students, courseSlug }: OfferStackProps) {
+export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, students, courseSlug, guarantee, bonus }: OfferStackProps) {
   return (
     <section className="px-4 py-14 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-xl overflow-hidden rounded-3xl border border-steel-line bg-white shadow-[0_24px_48px_-28px_rgba(34,26,23,0.45)]">
@@ -30,6 +35,7 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
               </li>
             ))}
           </ul>
+          {bonus && <BonusBox bonus={bonus} className="mb-7" />}
           <div className="mb-6 border-t border-dashed border-steel-line pt-5">
             <p className="mb-1 text-kecap/70">{valueLine}</p>
             {showStudents(students) && (
@@ -41,6 +47,7 @@ export function OfferStack({ courseTitle, price, includes, valueLine, riskLine, 
           </div>
           <PayNowCta courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="w-full" />
           <WhatsAppAsk courseSlug={courseSlug} courseTitle={courseTitle} price={price} className="mt-3 w-full" />
+          {guarantee && <GuaranteeBox guarantee={guarantee} className="mt-6" />}
           <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-kecap/70">
             <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-seledri" aria-hidden="true" />
             <span>{riskLine}</span>

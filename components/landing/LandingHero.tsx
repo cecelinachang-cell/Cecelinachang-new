@@ -1,4 +1,6 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
+import { Check } from 'lucide-react';
 import { Marginalia } from '@/components/Marginalia';
 import { PayNowCta } from './PayNowCta';
 import { YouTubePreview } from './YouTubePreview';
@@ -26,6 +28,8 @@ interface LandingHeroProps {
   /** Help line under the steps. */
   stepsHelp?: string;
   quote?: { text: string; source: string };
+  /** Bonus and guarantee lines, right under the buttons. */
+  offerLines?: ReactNode;
 }
 
 // Red pinstripe band: the striped apron Cece wears in her videos.
@@ -35,7 +39,7 @@ const apronStripes = {
     'repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,0.08) 14px 16px)',
 };
 
-export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, video, courseSlug, price, included, nextStep, steps, stepsHelp, quote }: LandingHeroProps) {
+export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, courseTitle, videoId, video, courseSlug, price, included, nextStep, steps, stepsHelp, quote, offerLines }: LandingHeroProps) {
   const proof = showStudents(students) ? [...proofPoints, `${students.toLocaleString('id-ID')} murid`] : proofPoints;
 
   return (
@@ -82,7 +86,20 @@ export function LandingHero({ hook, subhook, proofPoints, students, imageUrl, co
             price={price}
             className="mt-3 w-full border-0 bg-transparent px-1 text-base text-seledri underline decoration-seledri/40 underline-offset-4 sm:w-auto"
           />
-          <p className="mt-5 max-w-[42ch] text-base leading-relaxed text-kecap/80">{included.join('. ')}.</p>
+          {offerLines}
+          {included.length > 4 ? (
+            // A longer offer reads better as a list than as one run-on sentence.
+            <ul className="mt-5 max-w-[42ch] space-y-1.5">
+              {included.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-base leading-snug text-kecap/85">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-seledri" strokeWidth={3} aria-hidden="true" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-5 max-w-[42ch] text-base leading-relaxed text-kecap/80">{included.join('. ')}.</p>
+          )}
           {steps?.length ? (
             <div className="mt-5 max-w-[42ch]">
               <p className="font-display text-lg font-extrabold text-kecap">Cara daftar</p>
