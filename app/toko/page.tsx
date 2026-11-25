@@ -37,8 +37,8 @@ export default async function TokoPage() {
           alat yang beneran aku pakai sendiri, bukan sekedar endorse
         </Marginalia>
         <p className="text-base sm:text-lg text-charcoal-brown/70 max-w-2xl mx-auto">
-          Alat yang saya pakai sendiri di setiap video, biar hasil baking Anda
-          anti gagal juga. Tokonya di Kota Tangerang. Bisa lihat unitnya, atau kami kirim.
+          Alat yang saya pakai sendiri di setiap video, jadi Anda yang belajar masak &amp; baking
+          dari nol bisa pakai alat yang sama. Tokonya di Kota Tangerang. Bisa lihat unitnya, atau kami kirim.
         </p>
         <p className="text-sm text-charcoal-brown/70 max-w-2xl mx-auto mt-4">
           <Link href="/toko/oven" className="text-terracotta font-medium hover:text-rust-ink">Toko oven</Link>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MessageCircle, Mail, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import Faq from '@/components/Faq';
 import { STORE } from '@/lib/localStore';
+import { CONTACT_EMAIL } from '@/lib/links';
 
 export default function KontakPage() {
   const [name, setName] = useState('');
@@ -70,7 +71,7 @@ export default function KontakPage() {
                 </div>
                 <div>
                   <div className="font-bold text-charcoal-brown mb-1">Email</div>
-                  <a href="mailto:halo@cecelinachang.com" className="text-charcoal-brown/70 hover:text-terracotta transition-colors">halo@cecelinachang.com</a>
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-charcoal-brown/70 hover:text-terracotta transition-colors">{CONTACT_EMAIL}</a>
                 </div>
               </div>
               <div className="flex items-start">

@@ -133,8 +133,8 @@ export default function TentangPage() {
               <div className="w-16 h-16 bg-butter/30 rounded-full flex items-center justify-center text-terracotta mb-4 hover:scale-110 transition-transform">
                 <Heart className="w-8 h-8" />
               </div>
-              <Marginalia rotate={-2} className="text-4xl mb-1">50rb+</Marginalia>
-              <div className="text-charcoal-brown/70">Pengikut Setia</div>
+              <Marginalia rotate={-2} className="text-4xl mb-1">90rb+</Marginalia>
+              <div className="text-charcoal-brown/70">Pengikut Instagram</div>
             </motion.div>
           </div>
 

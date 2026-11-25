@@ -393,7 +393,7 @@ export const landingPages: Record<string, AnyLandingCopy> = {
     guarantee: {
       title: 'Garansi Bakso Kenyal',
       body: 'Praktikkan resepnya minimal 2 kali dalam 30 hari setelah beli, lalu kirim foto baksonya ke WhatsApp Cece. Cece bantu cek salahnya di mana. Kalau sudah dibantu dan baksonya masih belum kenyal, uang kelasnya Cece kembalikan penuh.',
-      short: 'Sudah dibantu Cece tapi baksonya masih belum kenyal? Uang kelasnya dikembalikan penuh.',
+      short: 'Praktik 2 kali dalam 30 hari, sudah dibantu Cece tapi baksonya belum kenyal? Uang kelas kembali penuh.',
     },
     // Real deadline: the Go Hiong folder is only shared with Bakso orders paid
     // by this time. Go Hiong Roll is sold on its own at Rp 199.000.

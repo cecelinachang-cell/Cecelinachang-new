@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Instagram, Youtube, ShoppingBag } from 'lucide-react';
-import { SHOPEE_SHOP_URL, waLink } from '@/lib/links';
+import { Facebook, Instagram, Youtube, ShoppingBag } from 'lucide-react';
+import { FACEBOOK_URL, SHOPEE_SHOP_URL, waLink } from '@/lib/links';
 import { STORE } from '@/lib/localStore';
 
 export function Footer() {
@@ -23,6 +23,10 @@ export function Footer() {
               <a href="https://instagram.com/cecelinachang" target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center text-butter/90 hover:text-cream transition-colors">
                 <Instagram className="w-6 h-6" />
                 <span className="sr-only">Instagram</span>
+              </a>
+              <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center text-butter/90 hover:text-cream transition-colors">
+                <Facebook className="w-6 h-6" />
+                <span className="sr-only">Facebook</span>
               </a>
               <a href="https://tiktok.com/@lina_chang2" target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center text-butter/90 hover:text-cream transition-colors">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -62,13 +66,16 @@ export function Footer() {
         </div>
 
         <div className="border-t border-cream/20 mt-8 pt-6 sm:mt-12 sm:pt-8 text-center text-butter/70 text-sm">
-          <p>&copy; {new Date().getFullYear()} Cece Lina Chang. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Cece Lina Chang. Hak cipta dilindungi.</p>
           <p className="mt-2 space-x-3">
             <Link href="/kebijakan-privasi" className="hover:text-cream transition-colors underline underline-offset-2">
               Kebijakan Privasi
             </Link>
             <Link href="/syarat-ketentuan" className="hover:text-cream transition-colors underline underline-offset-2">
               Syarat &amp; Ketentuan
+            </Link>
+            <Link href="/syarat-ketentuan#refund" className="hover:text-cream transition-colors underline underline-offset-2">
+              Kebijakan Refund
             </Link>
           </p>
         </div>

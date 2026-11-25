@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { pageSocialMetadata } from '@/lib/seo';
+import { CONTACT_EMAIL } from '@/lib/links';
+import { STORE } from '@/lib/localStore';
 
 const TITLE = 'Kebijakan Privasi | Cece Lina Chang';
 const DESCRIPTION =
@@ -18,9 +20,18 @@ export default function KebijakanPrivasiPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
       <h1 className="font-serif text-3xl sm:text-4xl font-bold text-rust-ink mb-2">Kebijakan Privasi</h1>
-      <p className="text-sm text-charcoal-brown/50 mb-10">Terakhir diperbarui: September 2026</p>
+      <p className="text-sm text-charcoal-brown/50 mb-10">Terakhir diperbarui: November 2026</p>
 
       <div className="space-y-8 text-charcoal-brown/80 leading-relaxed">
+        <section>
+          <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Siapa kami</h2>
+          <p>
+            Website ini dikelola oleh {STORE.brand} / {STORE.name}, {STORE.addressLine}. WhatsApp{' '}
+            {STORE.phoneDisplay}, email{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-terracotta font-semibold hover:text-rust-ink">{CONTACT_EMAIL}</a>.
+          </p>
+        </section>
+
         <section>
           <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Data apa yang kami simpan</h2>
           <p>
@@ -34,6 +45,15 @@ export default function KebijakanPrivasiPage() {
             jadi kode acak di browser kamu (SHA-256), lalu kode itu saja yang dikirim ke TikTok dan Meta.
             Gunanya supaya mereka bisa mencocokkan pendaftaranmu dengan iklan yang kamu lihat, jadi iklan
             kami lebih tepat sasaran. Email dan nomor aslinya nggak pernah kami kirim ke mereka.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Pembayaran kelas</h2>
+          <p>
+            Diproses oleh Lynk (lynk.id). Nama, email, nomor WhatsApp, dan alamat Gmail yang kamu isi di
+            sana diterima Lynk dan kami; Gmail dipakai untuk membagikan folder kelas di Google Drive. Data
+            pembelian (nilai pembelian dan kode klik iklan) dikirim ke Meta untuk mengukur iklan.
           </p>
         </section>
 
@@ -60,6 +80,13 @@ export default function KebijakanPrivasiPage() {
             Kamu bisa menghapus atau memblokir cookie kapan saja lewat pengaturan browser. Ini bisa
             membuat beberapa bagian website (misalnya rekomendasi iklan yang relevan) jadi kurang akurat,
             tapi nggak menghalangi kamu untuk melihat kelas atau produk di sini.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Hak kamu</h2>
+          <p>
+            Kamu bisa minta salinan, perbaikan, atau penghapusan datamu lewat WhatsApp atau email.
           </p>
         </section>
 

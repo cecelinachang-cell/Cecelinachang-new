@@ -42,7 +42,7 @@ export default async function Home() {
   if (!featured) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
-        <h1 className="font-serif text-3xl font-bold text-rust-ink mb-4">Belajar Masak & Baking Anti Gagal</h1>
+        <h1 className="font-serif text-3xl font-bold text-rust-ink mb-4">Belajar Masak & Baking dari Nol</h1>
         <p className="text-charcoal-brown/70">Kelas online sedang disiapkan. Silakan kembali lagi nanti.</p>
       </div>
     );
@@ -115,7 +115,7 @@ export default async function Home() {
             <div className="text-xs sm:text-sm text-charcoal-brown/60">kelas online</div>
           </div>
           <div>
-            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">16 thn</div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-rust-ink">18 thn</div>
             <div className="text-xs sm:text-sm text-charcoal-brown/60">pengalaman pabrik bakso</div>
           </div>
         </div>

@@ -7,7 +7,7 @@ export const POLICIES = {
     'Garansi resmi distributor 1 tahun untuk seluruh produk Signora.',
   PRODUCT_WARRANTY_SHORT: 'Garansi Resmi 1 Tahun',
   COURSE_REFUND:
-    'Karena kelas online adalah produk digital, dana tidak dapat dikembalikan setelah link akses video dikirimkan.',
+    'Kelas online adalah produk digital, jadi dana tidak dapat dikembalikan setelah link akses video dikirim, kecuali untuk kelas yang mencantumkan garansi di halamannya. Syarat garansi ada di halaman Syarat & Ketentuan.',
   COURSE_REFUND_SHORT:
-    'Kelas digital: tidak ada refund setelah link akses dikirim.',
+    'Kelas digital: tidak ada refund setelah link akses dikirim, kecuali kelas bergaransi.',
 } as const;

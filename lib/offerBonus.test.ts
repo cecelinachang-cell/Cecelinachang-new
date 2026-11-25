@@ -19,3 +19,11 @@ describe('Bakso bonus class', () => {
     expect(JSON.stringify(copy)).not.toMatch(/senilai/i);
   });
 });
+
+describe('Bakso guarantee', () => {
+  it('states the conditions on the first-screen line too', () => {
+    expect(copy.guarantee?.short).toBe(
+      'Praktik 2 kali dalam 30 hari, sudah dibantu Cece tapi baksonya belum kenyal? Uang kelas kembali penuh.',
+    );
+  });
+});

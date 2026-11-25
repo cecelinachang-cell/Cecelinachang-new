@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { pageSocialMetadata } from '@/lib/seo';
 import { POLICIES } from '@/lib/policies';
+import { CONTACT_EMAIL } from '@/lib/links';
+import { STORE } from '@/lib/localStore';
+import { getLandingCopy, isShortLanding } from '@/app/data/landing-pages';
 
 const TITLE = 'Syarat & Ketentuan | Cece Lina Chang';
 const DESCRIPTION =
@@ -15,29 +18,43 @@ export const metadata: Metadata = {
   ...pageSocialMetadata(TITLE, DESCRIPTION, '/syarat-ketentuan'),
 };
 
+// The guarantee text lives on the Bakso landing copy; render it from there so
+// the terms and the sales page can't drift apart.
+function baksoGuarantee() {
+  const copy = getLandingCopy('bakso-sapi-premium');
+  if (!copy || isShortLanding(copy)) return null;
+  return copy.guarantee ?? null;
+}
+
 export default function SyaratKetentuanPage() {
+  const guarantee = baksoGuarantee();
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-24">
       <h1 className="font-serif text-3xl sm:text-4xl font-bold text-rust-ink mb-2">Syarat &amp; Ketentuan</h1>
-      <p className="text-sm text-charcoal-brown/50 mb-10">Terakhir diperbarui: September 2026</p>
+      <p className="text-sm text-charcoal-brown/50 mb-10">Terakhir diperbarui: November 2026</p>
 
       <div className="space-y-8 text-charcoal-brown/80 leading-relaxed">
         <section>
           <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Layanan yang kami jual</h2>
           <p>
-            Website ini menjual dua jenis produk: kelas baking online (produk digital) dan alat baking
+            Website ini menjual dua jenis produk: kelas masak &amp; baking online (produk digital) dan alat baking
             fisik dari Signora. Dengan memesan lewat website ini atau WhatsApp, kamu setuju dengan
             ketentuan di halaman ini.
+          </p>
+          <p className="mt-3">
+            Penjual: {STORE.brand} / {STORE.name}, {STORE.addressLine}. WhatsApp {STORE.phoneDisplay},
+            email{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-terracotta font-semibold hover:text-rust-ink">{CONTACT_EMAIL}</a>.
           </p>
         </section>
 
         <section>
           <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Pemesanan &amp; pembayaran</h2>
           <p>
-            Pemesanan diproses lewat WhatsApp setelah kamu mengisi form atau chat admin. Pembayaran
-            dilakukan via transfer bank; info rekening tujuan diberikan setelah pesananmu dikonfirmasi
-            di WhatsApp — kami tidak meminta detail rekening di awal chat. Akses kelas atau pengiriman
-            barang diproses setelah pembayaran diterima dan dikonfirmasi.
+            Kelas online dibayar lewat halaman pembayaran Lynk (lynk.id) dengan QRIS, e-wallet, atau
+            Virtual Account. Biaya admin dari metode bayar tampil di halaman pembayaran. Setelah
+            pembayaran berhasil, akses folder kelas di Google Drive dikirim otomatis ke alamat Gmail
+            yang kamu isi. Alat masak dipesan lewat WhatsApp (transfer bank) atau Shopee.
           </p>
         </section>
 
@@ -56,9 +73,20 @@ export default function SyaratKetentuanPage() {
           <p className="mt-3">{POLICIES.PRODUCT_WARRANTY}</p>
         </section>
 
-        <section>
+        <section id="refund" className="scroll-mt-24">
           <h2 className="font-serif text-xl font-bold text-rust-ink mb-2">Kelas digital &amp; refund</h2>
           <p>{POLICIES.COURSE_REFUND}</p>
+          {guarantee && (
+            <>
+              <h3 className="font-semibold text-rust-ink mt-4 mb-1">{guarantee.title}</h3>
+              <p>{guarantee.body}</p>
+              <p className="mt-3">
+                Dana dikembalikan lewat transfer bank ke rekening pembeli paling lambat 7 hari kerja
+                setelah disetujui. Setelah dana dikembalikan, akses kelas dan bonusnya dicabut. Garansi
+                ini hanya berlaku untuk Kelas Bakso Sapi Premium.
+              </p>
+            </>
+          )}
         </section>
 
         <section>
