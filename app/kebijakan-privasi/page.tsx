@@ -37,11 +37,12 @@ export default function KebijakanPrivasiPage() {
           <p>
             Saat kamu mengisi form pendaftaran kelas, form kontak, atau chat dengan admin lewat WhatsApp,
             kami menyimpan nama, nomor WhatsApp, email, dan pesan yang kamu kirim. Data ini dipakai untuk
-            menghubungimu balik soal kelas, pesanan, atau pertanyaanmu — tidak dijual atau dibagikan ke
-            pihak lain di luar itu.
+            menghubungimu balik soal kelas, pesanan, atau pertanyaanmu. Data ini tidak dijual, dan hanya
+            dibagikan sejauh yang dijelaskan di halaman ini: pembayaran lewat Lynk, berbagi folder kelas
+            lewat Google Drive, dan pengukuran iklan.
           </p>
           <p className="mt-3">
-            Satu pengecualian: waktu kamu menekan tombol daftar, email dan nomor WhatsApp-mu diubah dulu
+            Untuk pengukuran iklan: waktu kamu menekan tombol daftar, email dan nomor WhatsApp-mu diubah dulu
             jadi kode acak di browser kamu (SHA-256), lalu kode itu saja yang dikirim ke TikTok dan Meta.
             Gunanya supaya mereka bisa mencocokkan pendaftaranmu dengan iklan yang kamu lihat, jadi iklan
             kami lebih tepat sasaran. Email dan nomor aslinya nggak pernah kami kirim ke mereka.
