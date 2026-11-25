@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { CONTACT_EMAIL } from '@/lib/links';
 
 // The constructor throws without a key, and route modules are evaluated at
 // build time, so a Preview deploy (key is Production-only) failed to build.
@@ -13,5 +14,5 @@ export const isResendConfigured = (): boolean => {
 
 export const FROM_ADDRESS = 'Cece Lina Chang <hello@cecelinachang.com>';
 
-// Replies go to the Zoho mailbox, not the send-only Resend address.
-export const REPLY_TO_ADDRESS = 'halo@cecelinachang.com';
+// Replies go to Cece's Gmail, not the send-only Resend address.
+export const REPLY_TO_ADDRESS = CONTACT_EMAIL;

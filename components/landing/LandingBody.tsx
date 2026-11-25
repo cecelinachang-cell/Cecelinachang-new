@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getCourseBySlug } from '@/lib/courses';
-import { getLandingCopy, hasPlainPage, isShortLanding } from '@/app/data/landing-pages';
+import { activeBonus, getLandingCopy, hasPlainPage, isShortLanding } from '@/app/data/landing-pages';
+import { OfferShortLines } from '@/components/landing/OfferExtras';
 import { products } from '@/app/data/products';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
@@ -69,8 +70,9 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
   const nearQuizFaq = copy.faq.filter((item) => item.nearQuiz);
   const faq = [
     ...copy.faq.filter((item) => !item.nearQuiz),
-    { question: 'Kalau sudah bayar, bisa refund?', answer: POLICIES.COURSE_REFUND },
+    { question: 'Kalau sudah bayar, bisa refund?', answer: copy.guarantee?.body ?? POLICIES.COURSE_REFUND },
   ];
+  const bonus = activeBonus(copy.bonus);
 
   return (
     <div>
@@ -121,6 +123,7 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
         steps={copy.heroSteps}
         stepsHelp={copy.heroStepsHelp}
         quote={copy.quizQuote}
+        offerLines={<OfferShortLines guarantee={copy.guarantee} bonus={bonus} className="mt-5 max-w-[42ch]" />}
       />
       )}
       <MateriSection
@@ -146,6 +149,8 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
         riskLine={copy.offerRiskLine}
         students={course.students}
         courseSlug={course.slug}
+        guarantee={copy.guarantee}
+        bonus={bonus}
       />
       {copy.quizQuote && <QuizQuote text={copy.quizQuote.text} source={copy.quizQuote.source} />}
       <LandingFaq items={nearQuizFaq} title="Masih ragu?" className="pb-14 sm:pb-20" />

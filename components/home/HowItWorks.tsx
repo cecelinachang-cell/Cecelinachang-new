@@ -1,9 +1,9 @@
 import { POLICIES } from '@/lib/policies';
 
 const STEPS = [
-  'Klik tombol, isi email & nomor WA kamu.',
-  'Transfer, lalu kirim bukti ke aku di WhatsApp.',
-  'Link video langsung aku kirim. Akses seumur hidup, bisa diulang kapan aja.',
+  'Klik "Bayar Sekarang", pilih QRIS, e-wallet, atau Virtual Account.',
+  'Tulis alamat Gmail kamu di formulir pembayaran.',
+  'Link kelas langsung masuk ke Gmail kamu lewat Google Drive. Akses seumur hidup.',
 ];
 
 export function HowItWorks() {

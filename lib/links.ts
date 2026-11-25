@@ -1,5 +1,11 @@
 export const WHATSAPP_NUMBER = '6281284250718';
 
+/** The contact email shown to visitors and used as Reply-To on our emails. */
+export const CONTACT_EMAIL = 'cecelinachang@gmail.com';
+
+/** The Facebook Page "Cece Lina Chang" (no vanity URL yet). */
+export const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61593280396044';
+
 /** Canonical host. The apex 308s to www, so every absolute URL we emit must be www. */
 export const SITE_URL = 'https://www.cecelinachang.com';
 

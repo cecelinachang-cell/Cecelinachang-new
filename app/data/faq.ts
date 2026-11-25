@@ -21,12 +21,12 @@ export const faqs: FaqItem[] = [
   },
   {
     q: 'Bagaimana cara ikut kelas online?',
-    a: 'Pilih kelas yang Anda inginkan di halaman Kursus, klik "Daftar", dan admin kami akan membantu proses pendaftaran via WhatsApp. Setelah itu Anda akan mendapat link akses video.',
+    a: 'Pilih kelas di halaman Kursus, klik "Bayar Sekarang", lalu bayar lewat QRIS, e-wallet, atau Virtual Account. Akses kelas langsung masuk ke Gmail yang kamu isi, lewat Google Drive.',
     category: 'course',
   },
   {
     q: 'Di mana saya bisa mendapat resepnya?',
-    a: 'Resep yang saya ajarkan ada di dalam kelas, lengkap dengan video. Website ini tidak punya katalog resep terpisah. Pilih kelas di halaman Kursus, lalu admin membantu pendaftaran lewat WhatsApp.',
+    a: 'Resep yang saya ajarkan ada di dalam kelas, lengkap dengan video. Website ini tidak punya katalog resep terpisah. Pilih kelas di halaman Kursus.',
     category: 'general',
   },
   {
@@ -36,7 +36,7 @@ export const faqs: FaqItem[] = [
   },
   {
     q: 'Bagaimana cara mengakses video kelasnya?',
-    a: 'Setelah pembayaran, Anda akan diberikan link khusus dan password untuk menonton video kapan saja melalui HP atau laptop.',
+    a: 'Setelah bayar, folder kelas di Google Drive dibagikan ke Gmail yang kamu isi waktu bayar. Buka pakai Gmail yang sama, di HP atau laptop, kapan saja.',
     category: 'course',
   },
   {
@@ -66,7 +66,7 @@ export const faqs: FaqItem[] = [
   },
   {
     q: 'Metode pembayaran apa saja yang tersedia?',
-    a: 'Untuk pemesanan via WhatsApp, pembayaran dilakukan via transfer bank dan dikonfirmasi langsung oleh admin. Jika Anda membeli lewat Shopee, gunakan metode pembayaran apa pun yang tersedia di Shopee.',
+    a: 'Kelas online: QRIS, e-wallet, atau Virtual Account lewat halaman pembayaran Lynk. Alat masak: transfer bank lewat WhatsApp admin, atau metode apa pun di Shopee.',
     category: 'general',
   },
 ];

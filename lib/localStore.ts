@@ -18,6 +18,8 @@ export const STORE = {
   postalCode: '15117',
   country: 'ID',
   street: 'Jl. Pulau Dewa I No.26, RT.005/RW.002, Klp. Indah, Kec. Tangerang',
+  /** Short form for one-line footers. */
+  streetShort: 'Jl. Pulau Dewa I No.26',
   addressLine: 'Jl. Pulau Dewa I No.26, RT.005/RW.002, Klp. Indah, Kec. Tangerang, Kota Tangerang, Banten 15117',
   phoneDisplay: '0812-8425-0718',
   telephone: `+${WHATSAPP_NUMBER}`,

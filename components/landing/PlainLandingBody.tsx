@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import type { Course } from '@/lib/courses';
-import type { LandingCopy, PlainCopy } from '@/app/data/landing-pages';
+import { activeBonus, type LandingCopy, type PlainCopy } from '@/app/data/landing-pages';
+import { BonusBox, GuaranteeBox, OfferShortLines } from './OfferExtras';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
 import { showStudents } from '@/lib/course-stats';
@@ -53,8 +54,9 @@ export function PlainLandingBody({ course, copy, hook }: PlainLandingBodyProps) 
   const cta = { courseSlug: course.slug, courseTitle: course.title, price: course.price };
   const faq = [
     ...plain.faqQuestions.flatMap((q) => copy.faq.filter((item) => item.question === q)),
-    { question: 'Kalau sudah bayar, bisa refund?', answer: POLICIES.COURSE_REFUND },
+    { question: 'Kalau sudah bayar, bisa refund?', answer: copy.guarantee?.body ?? POLICIES.COURSE_REFUND },
   ];
+  const bonus = activeBonus(copy.bonus);
   const benefits = course.benefits ?? [];
 
   return (
@@ -89,6 +91,7 @@ export function PlainLandingBody({ course, copy, hook }: PlainLandingBodyProps) 
             </p>
             <PayNowCta {...cta} className="mt-4 min-h-16 w-full text-lg sm:w-auto sm:text-xl" />
             <WhatsAppAsk {...cta} label="Tanya Cece dulu lewat WhatsApp" className={`mt-3 ${waLink}`} />
+            <OfferShortLines guarantee={copy.guarantee} bonus={bonus} className="mt-5 max-w-[44ch]" />
 
             {copy.heroTestimonial && (
               <figure className="mt-7 border-y border-steel-line py-5">
@@ -129,6 +132,8 @@ export function PlainLandingBody({ course, copy, hook }: PlainLandingBodyProps) 
               </li>
             ))}
           </ul>
+          {bonus && <BonusBox bonus={bonus} size="lg" className="mt-6" />}
+          {copy.guarantee && <GuaranteeBox guarantee={copy.guarantee} size="lg" className="mt-4" />}
 
           {benefits.length > 0 && (
             <>

@@ -60,6 +60,10 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error('Error fetching metadata settings:', error?.message || error);
   }
 
+  // Meta domain verification. The code is set later as a Vercel env var (or
+  // verified by DNS TXT instead), so emit the tag only when it exists.
+  const fbDomainVerification = process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFICATION;
+
   return {
     metadataBase: new URL(SITE_URL),
     title,
@@ -104,6 +108,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [ogImage],
     },
+    ...(fbDomainVerification ? { other: { 'facebook-domain-verification': fbDomainVerification } } : {}),
   };
 }
 

@@ -5,7 +5,7 @@ import { pageSocialMetadata } from "@/lib/seo";
 // so it lives in this sibling layout instead.
 const TITLE = "Tentang Cece Lina Chang";
 const DESCRIPTION =
-  "Kenalan sama Cece Lina Chang -- 18 tahun mengelola pabrik bakso, sekarang berbagi resep dan kelas masak & baking anti gagal buat ibu-ibu di rumah.";
+  "Kenalan sama Cece Lina Chang -- 18 tahun mengelola pabrik bakso, sekarang berbagi resep dan kelas buat ibu-ibu di rumah yang mau belajar masak & baking dari nol.";
 
 export const metadata: Metadata = {
   title: TITLE,
