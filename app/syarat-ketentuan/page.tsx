@@ -4,6 +4,7 @@ import { POLICIES } from '@/lib/policies';
 import { CONTACT_EMAIL } from '@/lib/links';
 import { STORE } from '@/lib/localStore';
 import { getLandingCopy, isShortLanding } from '@/app/data/landing-pages';
+import { CLASS_BUNDLES } from '@/lib/bundles';
 
 const TITLE = 'Syarat & Ketentuan | Cece Lina Chang';
 const DESCRIPTION =
@@ -87,6 +88,20 @@ export default function SyaratKetentuanPage() {
               </p>
             </>
           )}
+          {/* Bundle guarantees come from lib/bundles.ts, the same text the bundle card links to. */}
+          {CLASS_BUNDLES.filter((bundle) => bundle.guarantee).map((bundle) => (
+            <div key={bundle.key}>
+              <h3 className="font-semibold text-rust-ink mt-6 mb-1">
+                {bundle.guarantee!.title} ({bundle.title})
+              </h3>
+              <p>{bundle.guarantee!.body}</p>
+              <p className="mt-3">
+                Dana dikembalikan lewat transfer bank ke rekening pembeli. Garansi ini hanya berlaku untuk
+                paket {bundle.title} ({bundle.courseSlugs.length} kelas), bukan untuk kelas yang dibeli satuan
+                atau paket lain.
+              </p>
+            </div>
+          ))}
         </section>
 
         <section>
