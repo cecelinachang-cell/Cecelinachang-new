@@ -214,6 +214,12 @@ export interface ShortLandingCopy
     items: { name: string; note: string }[];
     note?: string;
   };
+  /**
+   * A class bundle (lib/bundles.ts) that includes this course, offered in a
+   * box under the price card. Its price and "kalau beli satuan" total come
+   * from the live catalog, never from this file.
+   */
+  bundleKey?: 'gurih' | 'hampers';
 }
 
 export type AnyLandingCopy = LandingCopy | ShortLandingCopy;
@@ -710,6 +716,148 @@ export const landingPages: Record<string, AnyLandingCopy> = {
         question: 'Ini cuma e-book?',
         answer:
           'Bukan. Kamu dapat video kelas 62 menit, e-book resep (PDF), sertifikat digital, dan bisa konsultasi langsung dengan Cece.',
+      },
+      {
+        question: 'Sudah bayar tapi kelasnya belum masuk?',
+        answer:
+          'Cek dulu folder Spam atau Promosi di Gmail kamu, dan pastikan kamu buka pakai Gmail yang sama dengan yang ditulis waktu bayar. Kalau masih belum ada, klik "Tanya Cece" dan kirim bukti bayarnya, nanti dicek.',
+      },
+    ],
+  },
+  // Kelas Otak-Otak, short page (26 Nov 2026). Sources for every line:
+  // - Class facts (26 menit, price, students): app/data/courses.ts.
+  // - Recipe facts (ikan tenggiri, direbus, freezer ± 2 bulan, chopper,
+  //   spatula): the class e-book in the Otak-Otak Drive folder.
+  // - Tips and tool notes: Cece's own words in her otak-otak reels
+  //   (TikTok 7668640397417073940, 7642575702042168597, 7638562752071470356,
+  //   7506389422976322834, 7675172896242748693, 7683809543138118932).
+  // - What every class includes: components/CoursePricingPanel.tsx.
+  // No student photos yet for this class, so `testimonials` is empty and
+  // the photo section stays hidden.
+  'otak-otak': {
+    layout: 'short',
+    hook: 'Bikin otak-otak ikan tenggiri sendiri di rumah.',
+    subhook:
+      'Kamu tahu persis bahan yang dipakai. Belajar lewat video dari Cece: buat camilan keluarga, stok di freezer, atau dijual.',
+    // Web copy of the "otak-abaikan-bentuk" recut (source reel 31 Jul 2026),
+    // 720x1280, with the Instagram "Komen OTAK" label replaced.
+    previewVideo: {
+      src: '/videos/otak-yang-penting-rasanya.mp4',
+      poster: '/videos/otak-yang-penting-rasanya.jpg',
+      label: 'Tonton: otak-otak nggak rapi? Yang penting rasanya',
+    },
+    proofPoints: ['Pakai ikan tenggiri', 'Video 26 menit', 'Akses seumur hidup'],
+    heroNext:
+      'Bayar lewat QRIS, GoPay, ShopeePay, atau Virtual Account. Akses kelas langsung masuk ke Gmail kamu lewat Google Drive.',
+    // Same steps as Bakso and Lapis.
+    heroSteps: [
+      'Klik "Bayar Sekarang", lalu pilih cara bayar: QRIS, GoPay, ShopeePay, atau Virtual Account. Ada biaya admin kecil dari cara bayarnya.',
+      'Tulis alamat Gmail kamu (yang belakangnya @gmail.com) di formulir pembayaran.',
+      'Link kelas langsung masuk ke Gmail kamu lewat Google Drive. Buka pakai Gmail yang sama, tonton kapan saja, akses seumur hidup.',
+    ],
+    heroStepsHelp: 'Belum punya Gmail atau bingung caranya? Klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+
+    proofTitle: 'Hasil otak-otak murid',
+    proofIntro: 'Foto dan pesan asli dari murid, dikirim ke Cece setelah mereka coba resepnya.',
+    testimonials: [],
+
+    tips: {
+      title: 'Tips kecil dari dapur Cece',
+      intro: 'Beberapa hal yang Cece bilang di videonya. Kelihatannya sepele, tapi menentukan hasilnya.',
+      items: [
+        {
+          title: 'Nomor satu, adonannya harus halus',
+          body: 'Kata Cece, tekstur otak-otak yang benar itu halus, dan adonan yang menentukan hasilnya.',
+        },
+        {
+          title: 'Pemula, cetak bulat dulu',
+          body: 'Cetak panjang itu butuh jam terbang. Kata Cece, pemula jangan berkecil hati: cetak bulat dulu, lama-lama pasti bisa.',
+        },
+        {
+          title: 'Sudah matang kalau mengapung semua',
+          body: 'Waktu direbus, otak-otak yang sudah matang naik ke atas dan membesar.',
+        },
+        {
+          title: 'Digoreng, minyaknya harus merendam',
+          body: 'Otak-otak yang besar boleh dibelah dua dulu. Minyaknya jangan terlalu sedikit, lalu dibolak-balik.',
+        },
+      ],
+      quote: 'yang penting rasanya enak, abaikan bentuk',
+    },
+
+    materiTitle: 'Yang kamu pelajari di kelas',
+    whyTitle: 'Kenapa belajar dari Cece',
+    why: [
+      'Diajarin langsung sama Cece, yang 18 tahun punya pabrik bakso (1998–2016).',
+      'Resepnya pakai ikan tenggiri.',
+      'Bikin sendiri, jadi kamu tahu persis bahan yang dipakai.',
+      'Bisa disimpan di freezer, tahan kurang lebih 2 bulan. Cocok untuk stok atau dijual.',
+      'Video 26 menit, ditonton kapan saja dan boleh diulang. Nggak harus standby di jam tertentu.',
+      'Bukan cuma resep tulisan: ada video, e-book resep (PDF), sertifikat digital, dan konsultasi langsung dengan Cece.',
+    ],
+
+    tools: {
+      title: 'Alat yang perlu disiapkan',
+      intro: 'Yang paling penting: alat untuk menghaluskan ikan, supaya adonannya halus.',
+      items: [
+        {
+          name: 'Chopper atau food processor',
+          note: 'Untuk menghaluskan ikan, telur, bawang, dan bumbu. Cece sendiri pakai food processor Signora.',
+        },
+        {
+          name: 'Baskom dan spatula',
+          note: 'Tepungnya diaduk pakai spatula di baskom, tidak perlu pakai chopper.',
+        },
+        {
+          name: 'Panci atau wajan besar',
+          note: 'Untuk merebus otak-otak. Cece pakai wajan stainless.',
+        },
+        {
+          name: 'Alat cetak',
+          note: 'Cece mencetak pakai pisau makan yang dibalik. Spatula kecil juga bisa. Pemula boleh cetak bulat dulu.',
+        },
+      ],
+      note: 'Food processor yang Cece pakai ada di CeceLinaChang Store. Kalau ragu alat di rumah bisa dipakai atau tidak, klik "Tanya Cece" dulu.',
+    },
+
+    offerIncludes: [
+      'Video 26 menit, akses seumur hidup',
+      'Konsultasi langsung dengan Cece',
+      'E-book resep (PDF)',
+      'Sertifikat digital',
+    ],
+    offerRiskLine: 'Bingung setelah beli? Konsultasi langsung dengan Cece sudah termasuk.',
+    bundleKey: 'gurih',
+
+    faq: [
+      {
+        question: 'Saya pemula, bisa ikut?',
+        answer:
+          'Bisa. Kata Cece, pemula cetak bulat dulu. Cetak panjang butuh latihan, lama-lama pasti bisa. Kalau ada yang bingung, kamu bisa konsultasi langsung dengan Cece.',
+      },
+      {
+        question: 'Otak-otaknya seperti apa?',
+        answer:
+          'Otak-otak ikan tenggiri yang dicetak lalu direbus. Setelah itu bisa langsung digoreng, atau disimpan di freezer (tahan kurang lebih 2 bulan).',
+      },
+      {
+        question: 'Harus standby di jam tertentu?',
+        answer: 'Tidak. Videonya 26 menit dan bisa ditonton kapan saja, diulang kapan saja. Aksesnya seumur hidup.',
+      },
+      {
+        question: 'Bagaimana cara akses kelasnya?',
+        answer:
+          'Setelah bayar (QRIS, GoPay, ShopeePay, atau Virtual Account), akses folder kelas di Google Drive langsung masuk ke Gmail yang kamu isi waktu bayar. Jadi perlu alamat Gmail (yang belakangnya @gmail.com). HP Android biasanya sudah punya Gmail. Kalau bingung, klik "Tanya Cece", nanti dibantu lewat WhatsApp.',
+      },
+      {
+        question: 'Alat apa yang dibutuhkan?',
+        answer:
+          'Chopper atau food processor untuk menghaluskan ikan, baskom, spatula, dan panci atau wajan untuk merebus. Daftarnya ada di bagian "Alat yang perlu disiapkan" di atas.',
+      },
+      {
+        question: 'Ini cuma e-book?',
+        answer:
+          'Bukan. Kamu dapat video kelas 26 menit, e-book resep (PDF), sertifikat digital, dan bisa konsultasi langsung dengan Cece.',
       },
       {
         question: 'Sudah bayar tapi kelasnya belum masuk?',

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getCourseBySlug } from '@/lib/courses';
+import { getAllCourses, getCourseBySlug } from '@/lib/courses';
+import { buildClassBundles } from '@/lib/bundles';
 import { activeBonus, getLandingCopy, hasPlainPage, isShortLanding } from '@/app/data/landing-pages';
 import { OfferShortLines } from '@/components/landing/OfferExtras';
 import { products } from '@/app/data/products';
@@ -63,7 +64,13 @@ export async function LandingBody({ slug, variantKey, arm: armProp }: { slug: st
   // A short, photo-led page (copy.layout === 'short'). Everything below is
   // the long page and stays exactly as it was.
   if (isShortLanding(copy)) {
-    return <ShortLandingBody course={course} copy={copy} hook={hook} subhook={subhook} />;
+    // The bundle box only shows when the bundle really contains this class.
+    const bundle = copy.bundleKey
+      ? buildClassBundles(await getAllCourses()).find(
+          (b) => b.key === copy.bundleKey && b.classTitles.length > 1,
+        )
+      : undefined;
+    return <ShortLandingBody course={course} copy={copy} hook={hook} subhook={subhook} bundle={bundle} />;
   }
 
   const recommended = products.find((p) => p.id === copy.equipment.recommendedProductId);
