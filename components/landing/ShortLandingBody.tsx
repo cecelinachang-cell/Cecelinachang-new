@@ -3,11 +3,13 @@ import Image from 'next/image';
 import { Check, MessageCircle } from 'lucide-react';
 import type { Course } from '@/lib/courses';
 import type { ShortLandingCopy } from '@/app/data/landing-pages';
+import type { ClassBundleView } from '@/lib/bundles';
 import { POLICIES } from '@/lib/policies';
 import { parseIdr } from '@/lib/pixels';
 import { showStudents } from '@/lib/course-stats';
 import { Marginalia } from '@/components/Marginalia';
 import { ViewContentPing } from '@/components/ViewContentPing';
+import { BundleUpsell } from './BundleUpsell';
 import { LandingHero } from './LandingHero';
 import { LandingFaq } from './LandingFaq';
 import { LandingFooter } from './LandingFooter';
@@ -42,17 +44,20 @@ interface ShortLandingBodyProps {
   /** Already resolved for the ad the visitor came from (copy.adVariants). */
   hook: string;
   subhook: string;
+  /** The bundle named by copy.bundleKey, already built from the live catalog. */
+  bundle?: ClassBundleView;
 }
 
 /**
  * The short /lp/[slug] page (copy.layout === 'short'): price and button on
  * the first screen, student photos straight after, then Cece's tips, what's
- * in the class, the tools, the price card and a short FAQ. Same tracking as
+ * in the class, the tools, the price card, an optional bundle box and a short
+ * FAQ. Same tracking as
  * the long page: ViewContent, LP_Scroll*, InitiateCheckout on "Bayar
  * Sekarang" (with the ad's utm tags carried to Lynk) and Contact on "Tanya
  * Cece", all keyed on the course slug.
  */
-export function ShortLandingBody({ course, copy, hook, subhook }: ShortLandingBodyProps) {
+export function ShortLandingBody({ course, copy, hook, subhook, bundle }: ShortLandingBodyProps) {
   const cta = { courseSlug: course.slug, courseTitle: course.title, price: course.price };
   // Same refund answer the long page adds to its FAQ; never next to a buy button.
   const faq = [...copy.faq, { question: 'Kalau sudah bayar, bisa refund?', answer: POLICIES.COURSE_REFUND }];
@@ -226,6 +231,8 @@ export function ShortLandingBody({ course, copy, hook, subhook }: ShortLandingBo
           </div>
         </div>
       </section>
+
+      {bundle && <BundleUpsell bundle={bundle} courseTitle={course.title} />}
 
       <LandingFaq items={faq} className="pb-10 pt-4 sm:pb-14" />
       <div className="px-4 pb-14 sm:px-6">

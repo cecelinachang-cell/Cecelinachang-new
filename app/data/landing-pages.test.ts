@@ -5,6 +5,7 @@ import { hasPlainPage, isShortLanding, landingPages, type LandingCopy } from "./
 import { courses } from "./courses";
 import { products } from "./products";
 import { STUDENT_TESTIMONIALS } from "./student-testimonials";
+import { CLASS_BUNDLES } from "@/lib/bundles";
 
 describe("landingPages", () => {
   const all = Object.entries(landingPages);
@@ -83,6 +84,19 @@ describe("short landing pages", () => {
     expect(existsSync(video)).toBe(true);
     expect(statSync(video).size).toBeLessThan(6 * 1024 * 1024);
     expect(existsSync(join(process.cwd(), "public", copy.previewVideo.poster))).toBe(true);
+  });
+
+  it("otak-otak uses the short page and offers the bundle it belongs to", () => {
+    const copy = landingPages["otak-otak"];
+    expect(isShortLanding(copy)).toBe(true);
+    if (!isShortLanding(copy)) throw new Error("unreachable");
+    expect(copy.bundleKey).toBe("gurih");
+  });
+
+  it.each(short)("%s only offers a bundle that contains its own class", (slug, copy) => {
+    if (!isShortLanding(copy) || !copy.bundleKey) return;
+    const bundle = CLASS_BUNDLES.find((b) => b.key === copy.bundleKey);
+    expect(bundle?.courseSlugs).toContain(slug);
   });
 
   // No made-up value stacks or urgency, and the refund line stays in the FAQ.
