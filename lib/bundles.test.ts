@@ -8,7 +8,19 @@ describe('buildClassBundles', () => {
     expect(views.map((v) => [v.key, v.singlesTotal, v.price])).toEqual([
       ['gurih', 1_296_000, 899_000],
       ['hampers', 1_297_000, 949_000],
+      ['semua', 2_992_000, 1_800_000],
     ]);
+  });
+
+  it('states the bundle price in any bundle guarantee, and carries it to the card', () => {
+    const views = buildClassBundles(courses);
+    for (const b of CLASS_BUNDLES) {
+      if (!b.guarantee) continue;
+      // The refund amount is typed into the promise; it has to follow the price.
+      expect(b.guarantee.body, b.key).toContain(b.price.toLocaleString('id-ID'));
+      expect(views.find((v) => v.key === b.key)?.guarantee?.short).toBe(b.guarantee.short);
+    }
+    expect(CLASS_BUNDLES.find((b) => b.key === 'semua')?.guarantee).toBeDefined();
   });
 
   it('every bundle class exists in the catalog', () => {

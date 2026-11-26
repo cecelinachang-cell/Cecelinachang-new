@@ -10,13 +10,23 @@ import { withAdTags } from '@/lib/lynk';
  * never charged is illegal (UU Perlindungan Konsumen Pasal 9/10).
  * Lynk product prices must match these numbers.
  */
+/** A money-back promise the owner approved for one bundle. Same shape as a class guarantee. */
+export interface BundleGuarantee {
+  title: string;
+  /** The full terms. Also printed on the terms page, so the two can't drift apart. */
+  body: string;
+  /** One line for the bundle card. */
+  short: string;
+}
+
 export interface ClassBundle {
-  key: 'gurih' | 'hampers';
+  key: 'gurih' | 'hampers' | 'semua';
   title: string;
   pitch: string;
   courseSlugs: string[];
   price: number;
   lynkId: string;
+  guarantee?: BundleGuarantee;
 }
 
 export const CLASS_BUNDLES: ClassBundle[] = [
@@ -36,6 +46,31 @@ export const CLASS_BUNDLES: ClassBundle[] = [
     price: 949_000,
     lynkId: 'e8r4plr9me83',
   },
+  // Published on Lynk 26 Nov 2026 at this price. The guarantee was approved by
+  // the owner the same day and uses the Bakso guarantee's conditions; the
+  // wording matches the Lynk product description.
+  {
+    key: 'semua',
+    title: 'Semua Kelas Cece',
+    pitch: 'Ke-8 kelas online Cece dalam satu paket: kelas gurih dan kelas kue.',
+    courseSlugs: [
+      'bakso-sapi-premium',
+      'otak-otak',
+      'meat-pie',
+      'fu-kian',
+      'go-hiong-roll',
+      'ogura-softcake',
+      'mocha-pandan-sponge',
+      'lapis-legit',
+    ],
+    price: 1_800_000,
+    lynkId: 'lqknw2vl037n',
+    guarantee: {
+      title: 'Garansi 30 Hari',
+      body: 'Praktikkan salah satu resepnya minimal 2 kali dalam 30 hari setelah beli, lalu kirim fotonya ke WhatsApp Cece. Cece bantu cek salahnya di mana. Kalau sudah dibantu dan masih belum berhasil, uang paketnya Rp\u00a01.800.000 Cece kembalikan penuh dalam 7 hari kerja, lalu akses kelasnya ditutup.',
+      short: 'Garansi 30 Hari: sudah praktik 2 kali dan dibantu Cece tapi belum berhasil? Uang paket kembali penuh.',
+    },
+  },
 ];
 
 type CourseLike = { slug: string; title: string; price: string };
@@ -49,6 +84,7 @@ export interface ClassBundleView {
   /** Sum of the current single prices, or null if a class is missing (then no strike is shown). */
   singlesTotal: number | null;
   lynkId: string;
+  guarantee?: BundleGuarantee;
 }
 
 /** Bundles with their class names and the sum of the single prices, from the live catalog. */
@@ -66,6 +102,7 @@ export function buildClassBundles(courses: CourseLike[]): ClassBundleView[] {
       price: b.price,
       singlesTotal: Number.isFinite(sum) && sum > b.price ? sum : null,
       lynkId: b.lynkId,
+      guarantee: b.guarantee,
     };
   });
 }

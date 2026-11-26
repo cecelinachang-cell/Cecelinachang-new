@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Marginalia } from '@/components/Marginalia';
 import { trackConversion } from '@/lib/analytics';
@@ -26,7 +27,14 @@ export function ClassBundles({ bundles, contained = true }: { bundles: ClassBund
           </Marginalia>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
+        {/* Two bundles sit side by side; a third makes three columns on wide screens. */}
+        <div
+          className={
+            bundles.length > 2
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto'
+              : 'grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto'
+          }
+        >
           {bundles.map((b) => (
             <div key={b.key} className="flex flex-col bg-white rounded-2xl shadow-sm border border-butter/40 p-5 sm:p-6">
               <h3 className="font-serif text-xl sm:text-2xl font-bold text-rust-ink mb-1">{b.title}</h3>
@@ -49,6 +57,17 @@ export function ClassBundles({ bundles, contained = true }: { bundles: ClassBund
                   </div>
                 )}
                 <div className="font-serif text-3xl font-bold text-rust-ink mb-4">{formatRupiah(b.price)}</div>
+                {b.guarantee && (
+                  <p className="mb-4 flex items-start gap-2 text-sm leading-relaxed text-charcoal-brown/80">
+                    <ShieldCheck className="w-4 h-4 text-green-600 mt-0.5 shrink-0" aria-hidden="true" />
+                    <span>
+                      {b.guarantee.short}{' '}
+                      <Link href="/syarat-ketentuan#refund" className="underline underline-offset-2 text-rust-ink">
+                        Lihat syaratnya
+                      </Link>
+                    </span>
+                  </p>
+                )}
                 <Button
                   href={bundleCheckoutUrl(b.lynkId, b.key, search)}
                   external
